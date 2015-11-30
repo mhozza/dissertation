@@ -2,3 +2,4 @@ main.pdf
 .*.sw*
 buildtmp
 .ipynb_checkpoints
+*.log
