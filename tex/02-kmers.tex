@@ -2,12 +2,27 @@
 
 % intor o kmeroch a podobne
 
-\section{Algorithms}
+Counting of the \kmer (substring of length $k$) occurences is one of the key problem in many applications in Bioinformatics.
+It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence reeds analysis and genome size estimation.
 
-\subsection{Burrows Wheeler Transform}
+In NGS data, there are usually a lot of reads, containing a lot of errors implying a large amount of unique \kmers.
+This causes a high memory usage of naive approach to this problem.
+\todo{mozno nejaky priklad s cislami}
 
-\subsection{Bloom Filters}
+There are several existing tools addressing this issue for \kmer counting available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade of between speed, memory usage, disk usage, precision and random access capability.
 
-\subsection{Hashing}
+There are multiple approaches to the \kmer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
+\todo{strucne popisat niektore zo spomenutych DŠ}
+
+\section{Naive solution}
+
+Let us first briefly explain the naive solution, so we can extend and compare it to the methods used in previously mentioned tools.
+
+Suppose we want to count \kmers in sequence $S$.
+We create a hash table $T$, and then go through the sequence $S$.
+At each position $i$, we take the \kmer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item\footnote{Suppose we have some collision resolution algorithm.} in the table.
+
+We can then query the hash table for the number of occurrences of particular \kmer, or iterate through it to get all the counts.
+
 
 % cosi o pouziti a pod
