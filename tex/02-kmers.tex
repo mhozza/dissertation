@@ -24,5 +24,30 @@ At each position $i$, we take the \kmer $K_i$ corresponding to that  position, c
 
 We can then query the hash table for the number of occurrences of particular \kmer, or iterate through it to get all the counts.
 
+\section{Improvement with Enhanced Suffix Arrays}
+
+An \textit{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information -- in this case with \textit{lcp} (longes common prefix) information.
+In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing eficciency loss on cached processor architectures.
+Every algorithm using a suffix tree can be replaced with an equivalent
+algorithm (with same time complecity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
+
+We can represent Enhanced Suffix Array of string $S$ as two tables:
+\begin{enumerate}
+  \item \textit{suftab} -- array of integers in the range $0\dots n$, where $n = |S|$, specifiing the lexicographic ordering of the $n + 1$ suffixes of $S\$$.
+  \item \textit{lcptab} -- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
+\end{enumerate}
+
+We also need to introduce the concept of the \textit{lcp-intervals}.
+\begin{definition}
+An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $l$ if
+
+\begin{enumerate}
+\item $lcptab[i] < l$,
+\item $lcptab[k] \geq l$ for all $k$ with $i + 1 \leq k \leq j$,
+\item $lcptab[k] = l$ for at least one $k$ with $i + 1 \leq k \leq j$,
+\item $lcptab[j + 1] < l$.
+\end{enumerate}
+
+\end{definition}
 
 % cosi o pouziti a pod
