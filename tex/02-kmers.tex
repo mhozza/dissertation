@@ -1,15 +1,16 @@
+% chktex-file 1
 \chapter{K-mer counting}
 
 % intor o kmeroch a podobne
 
-Counting of the \kmer (substring of length $k$) occurences is one of the key problem in many applications in Bioinformatics.
+Counting of the \kmer(substring of length $k$) occurrences is one of the key problem in many applications in Bioinformatics.
 It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence reeds analysis and genome size estimation.
 
 In NGS data, there are usually a lot of reads, containing a lot of errors implying a large amount of unique \kmers.
 This causes a high memory usage of naive approach to this problem.
 \todo{mozno nejaky priklad s cislami}
 
-There are several existing tools addressing this issue for \kmer counting available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade of between speed, memory usage, disk usage, precision and random access capability.
+There are several existing tools addressing this issue for \kmer counting available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
 
 There are multiple approaches to the \kmer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
 \todo{strucne popisat niektore zo spomenutych DŠ}
@@ -26,28 +27,48 @@ We can then query the hash table for the number of occurrences of particular \km
 
 \section{Improvement with Enhanced Suffix Arrays}
 
-An \textit{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information -- in this case with \textit{lcp} (longes common prefix) information.
-In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing eficciency loss on cached processor architectures.
+An \textit{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \textit{lcp} (longes common prefix) information.
+In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
 Every algorithm using a suffix tree can be replaced with an equivalent
 algorithm (with same time complecity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
-  \item \textit{suftab} -- array of integers in the range $0\dots n$, where $n = |S|$, specifiing the lexicographic ordering of the $n + 1$ suffixes of $S\$$.
-  \item \textit{lcptab} -- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
+  \item \textit{suftab} --- array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of $S\$ $.
+  \item \textit{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
 \end{enumerate}
 
-We also need to introduce the concept of the \textit{lcp-intervals}.
+We also need to introduce the concept of the \textit{lcp-intervals} and \textit{lcp-interval trees}.
 \begin{definition}
-An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $l$ if
+An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\ell$ if
 
 \begin{enumerate}
-\item $lcptab[i] < l$,
+\item $lcptab[i] < \ell$,
 \item $lcptab[k] \geq l$ for all $k$ with $i + 1 \leq k \leq j$,
-\item $lcptab[k] = l$ for at least one $k$ with $i + 1 \leq k \leq j$,
-\item $lcptab[j + 1] < l$.
+\item $lcptab[k] = \ell$ for at least one $k$ with $i + 1 \leq k \leq j$,
+\item $lcptab[j + 1] < \ell$.
 \end{enumerate}
-
+\cite{enhancedsuffixarrays}
 \end{definition}
+
+Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree.
+
+\begin{definition}
+  An $m$-interval $[l..r]$ is said to be \textit{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
+  The $\ell$-interval $[i..j ]$ is then called the interval \textit{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.\cite{enhancedsuffixarrays}
+\end{definition}
+
+The lcp-interval tree is a conceptual (or virtual) tree (i.e.\ we don't need to construct it explicitly in any of the algorithms). The root of the tree is the $0$-interval $[0..n]$.
+
+The lcp-interval has an important property to the \kmer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S\cite{tallymer}. To count the \kmer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
+
+\begin{itemize}
+  \item The nodes are enumerated in bottom-up order.
+  \item The children of the particular node are enumerated in lexicographic order.
+  \item Whenever we process the children of a node, we have access to the lcp-value of the parent node % toto je skopcene, chceme to prepisat?
+  \item The values in suftab and lcptab are accesed sequentially from left to right.
+  \cite{tallymer} % chktex 2
+\end{itemize}
+
 
 % cosi o pouziti a pod
