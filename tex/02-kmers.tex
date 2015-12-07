@@ -1,16 +1,16 @@
 % chktex-file 1
-\chapter{K-mer counting}
+\chapter{K-mer Counting and K-mer histograms}
 
 % intor o kmeroch a podobne
 
 Counting of the \kmer(substring of length $k$) occurrences is one of the key problem in many applications in Bioinformatics.
-It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence reeds analysis and genome size estimation.
+It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence reeds analysis and genome size estimation. In many cases, computation of the \kmer abundance spectra (or \kmer histogram) is sufficient. The \kmer histogram is an array, where $i$-th element corresponds to the number of unique \kmers occurring in the data exactly $i$ times.
 
 In NGS data, there are usually a lot of reads, containing a lot of errors implying a large amount of unique \kmers.
 This causes a high memory usage of naive approach to this problem.
 \todo{mozno nejaky priklad s cislami}
 
-There are several existing tools addressing this issue for \kmer counting available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
+There are several existing tools addressing this issue for \kmer counting or \kmer histogram computation available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
 
 There are multiple approaches to the \kmer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
 \todo{strucne popisat niektore zo spomenutych DŠ}
@@ -23,9 +23,9 @@ Suppose we want to count \kmers in sequence $S$.
 We create a hash table $T$, and then go through the sequence $S$.
 At each position $i$, we take the \kmer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item\footnote{Suppose we have some collision resolution algorithm.} in the table.
 
-We can then query the hash table for the number of occurrences of particular \kmer, or iterate through it to get all the counts.
+We can then query the hash table for the number of occurrences of particular \kmer, or for the histogram computation iterate through it to get all the counts and increment the corresponding element in the histogram array.
 
-\section{Improvement with Enhanced Suffix Arrays}
+\section{Computing K-mer Histogram using Enhanced Suffix Arrays}
 
 An \textit{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \textit{lcp} (longes common prefix) information.
 In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
@@ -62,13 +62,18 @@ The lcp-interval tree is a conceptual (or virtual) tree (i.e.\ we don't need to 
 
 The lcp-interval has an important property to the \kmer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S\cite{tallymer}. To count the \kmer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
 
-\begin{itemize}
+\begin{enumerate}
   \item The nodes are enumerated in bottom-up order.
   \item The children of the particular node are enumerated in lexicographic order.
   \item Whenever we process the children of a node, we have access to the lcp-value of the parent node % toto je skopcene, chceme to prepisat?
   \item The values in suftab and lcptab are accesed sequentially from left to right.
-  \cite{tallymer} % chktex 2
-\end{itemize}
+\end{enumerate}
 
+We can compute the \kmer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a \kmer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
+Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a \kmer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$ and $suftab[i]+k < n$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
+
+One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested.
+
+To address the problem of counting \kmers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
 
 % cosi o pouziti a pod
