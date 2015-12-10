@@ -27,18 +27,18 @@ We can then query the hash table for the number of occurrences of particular \km
 
 \section{Computing K-mer Histogram using Enhanced Suffix Arrays}
 
-An \textit{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \textit{lcp} (longes common prefix) information.
+An \firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \firstUseOf{lcp} (longes common prefix) information.
 In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
 Every algorithm using a suffix tree can be replaced with an equivalent
 algorithm (with same time complecity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
-  \item \textit{suftab} --- array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of $S\$ $.
-  \item \textit{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
+  \item \emph{suftab} --- array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of $S\$ $.
+  \item \emph{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
 \end{enumerate}
 
-We also need to introduce the concept of the \textit{lcp-intervals} and \textit{lcp-interval trees}.
+We also need to introduce the concept of the \firstUseOf{lcp-intervals} and \firstUseOf{lcp-interval trees}.
 \begin{definition}
 An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\ell$ if
 
@@ -54,8 +54,8 @@ An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\e
 Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree.
 
 \begin{definition}
-  An $m$-interval $[l..r]$ is said to be \textit{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
-  The $\ell$-interval $[i..j ]$ is then called the interval \textit{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.\cite{enhancedsuffixarrays}
+  An $m$-interval $[l..r]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
+  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.\cite{enhancedsuffixarrays}
 \end{definition}
 
 The lcp-interval tree is a conceptual (or virtual) tree (i.e.\ we don't need to construct it explicitly in any of the algorithms). The root of the tree is the $0$-interval $[0..n]$.
@@ -75,5 +75,25 @@ Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Aga
 One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested.
 
 To address the problem of counting \kmers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
+
+\section{Filtering Unique K-mers using Bloom Filter}
+
+In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about $1$-$5\%$. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of \kmers from same position in DNA will be different. Together with low probability of \kmers from different location be the same and low probability that errors cause \kmers from different positions to be same, we get most \kmers unique in low to mid coverage data. If we do not store these \kmers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique \kmers.
+
+The Bloom filter supports two operations --- \emph{add} for adding an element to Bloom filter and \emph test for testing whether an element is in Bloom filter. The following property holds for the test operation:
+\begin{itemize}
+  \item If the element is set in the Bloom filter, returns \emph{true}.
+  \item If the element is not set it returns \emph{false} with high probability.
+\end{itemize}
+If the test method returns true, the element is probably set in the filter, otherwise it is definitely not there.
+
+The Bloom Filter basically consists of a bit vector of length $n$ and $m$ hashing functions, each transforming the element to the position in the bit vector. The parameters directly affect the false positive rate of the Bloom filter.
+Adding of the element computes $m$ positions from $m$ hashing functions applied to the element and sets them to one.
+Testing computes $m$ positions from the element and checks whether each of them is one. If any of them is zero, returns false, otherwise returns true. Further details are described in~\cite{bloomfilter}.
+
+We can use Bloom Filter to store information about all \kmers we have seen at some point of computation. We just add every \kmer to the Bloom filter during the computation. Before adding the \kmer, we first check if the \kmer is already in the Bloom filter. If yes, it means we (probably) have seen this \kmer before and we also add it to the hash table. This way we get approximate counts for each \kmer.
+With one more pass we can get exact counts. We go through the \kmers once again and check if they are not in hash table, they are certainly unique. More details are in~\cite{bfcounter}.
+
+\section{Improoving Speed using Parallelism}
 
 % cosi o pouziti a pod
