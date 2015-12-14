@@ -13,7 +13,6 @@ This causes a high memory usage of naive approach to this problem.
 There are several existing tools addressing this issue for \kmer counting or \kmer histogram computation available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
 
 There are multiple approaches to the \kmer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
-\todo{strucne popisat niektore zo spomenutych DŠ}
 
 \section{Naive solution}
 
@@ -78,7 +77,7 @@ To address the problem of counting \kmers in multiple sequences (reads), we can 
 
 \section{Filtering Unique K-mers using Bloom Filter}
 
-In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about $1$-$5\%$. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of \kmers from same position in DNA will be different. Together with low probability of \kmers from different location be the same and low probability that errors cause \kmers from different positions to be same, we get most \kmers unique in low to mid coverage data. If we do not store these \kmers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique \kmers.
+In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about $1\%$. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of \kmers from same position in DNA will be different. Together with low probability of \kmers from different location be the same and low probability that errors cause \kmers from different positions to be same, we get most \kmers unique in low to mid coverage data. If we do not store these \kmers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique \kmers.
 
 The Bloom filter supports two operations --- \emph{add} for adding an element to Bloom filter and \emph test for testing whether an element is in Bloom filter. The following property holds for the test operation:
 \begin{itemize}
@@ -94,6 +93,20 @@ Testing computes $m$ positions from the element and checks whether each of them 
 We can use Bloom Filter to store information about all \kmers we have seen at some point of computation. We just add every \kmer to the Bloom filter during the computation. Before adding the \kmer, we first check if the \kmer is already in the Bloom filter. If yes, it means we (probably) have seen this \kmer before and we also add it to the hash table. This way we get approximate counts for each \kmer.
 With one more pass we can get exact counts. We go through the \kmers once again and check if they are not in hash table, they are certainly unique. More details are in~\cite{bfcounter}.
 
-\section{Improoving Speed using Parallelism}
+\section{Probabilistic K-mer Counting Using Count-Min Sketch}
+
+The Count-Min sketch\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
+\begin{itemize}
+  \item incrementcount(x)
+  \item getcount(x)
+\end{itemize}
+
+The data structure consists of $m$ hash tables, with different hash functions.
+The incrementcount(x) operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The getcount operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result.
+
+If there is collision in each table for a particular object, the getcount operation may return greater value for such object.
+
+
+% \section{Improoving Speed using Parallelism}
 
 % cosi o pouziti a pod
