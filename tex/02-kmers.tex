@@ -104,8 +104,10 @@ The Count-Min sketch\cite{countminsketch} data structure enables counting of obj
 The data structure consists of $m$ hash tables, with different hash functions.
 The incrementcount(x) operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The getcount operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result.
 
-If there is collision in each table for a particular object, the getcount operation may return greater value for such object.
+If there is collision in each table for a particular object, the getcount operation may return greater value for such object. This false positive rate depends on collision probability, which is proportional to the number of hash tables and their sizes.
 
+This data structure can be directly used to the \kmer counting problem. As it does not store the \kmers itself, it allows in memory \kmer counting and querying, which is useful for streaming applications.
+More details about false positive rate estimation and comparison to other approaches can be find in \cite{khmer}.
 
 % \section{Improoving Speed using Parallelism}
 
