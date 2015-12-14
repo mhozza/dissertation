@@ -79,7 +79,7 @@ To address the problem of counting \kmers in multiple sequences (reads), we can 
 
 In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about $1\%$. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of \kmers from same position in DNA will be different. Together with low probability of \kmers from different location be the same and low probability that errors cause \kmers from different positions to be same, we get most \kmers unique in low to mid coverage data. If we do not store these \kmers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique \kmers.
 
-The Bloom filter supports two operations --- \emph{add} for adding an element to Bloom filter and \emph test for testing whether an element is in Bloom filter. The following property holds for the test operation:
+The Bloom filter supports two operations --- \method{add} for adding an element to the Bloom filter and \method{test} for testing whether an element is in Bloom filter. The following property holds for the \method{test} operation:
 \begin{itemize}
   \item If the element is set in the Bloom filter, returns \emph{true}.
   \item If the element is not set it returns \emph{false} with high probability.
@@ -97,18 +97,31 @@ With one more pass we can get exact counts. We go through the \kmers once again 
 
 The Count-Min sketch\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
 \begin{itemize}
-  \item incrementcount(x)
-  \item getcount(x)
+  \item \method{incrementcount(x)}
+  \item \method{getcount(x)}
 \end{itemize}
 
 The data structure consists of $m$ hash tables, with different hash functions.
-The incrementcount(x) operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The getcount operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result.
+The \method{incrementcount(x)} operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The \method{getcount} operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result.
 
-If there is collision in each table for a particular object, the getcount operation may return greater value for such object. This false positive rate depends on collision probability, which is proportional to the number of hash tables and their sizes.
+If there is collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on collision probability, which is proportional to the number of hash tables and their sizes.
 
 This data structure can be directly used to the \kmer counting problem. As it does not store the \kmers itself, it allows in memory \kmer counting and querying, which is useful for streaming applications.
-More details about false positive rate estimation and comparison to other approaches can be find in \cite{khmer}.
+More details about false positive rate estimation and comparison to other approaches can be found in \cite{khmer}.
 
-% \section{Improoving Speed using Parallelism}
+\section{Other Improovements}
+
+There are two more improvements of \kmer counting methods we have found in the papers about \kmer counting.
+
+The first is ...
+
+The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for \kmer counting -- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this paper \cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in modern processors. The CAS instruction works as follows:
+\begin{lstlisting}
+def cas(location, oldvalue, newvalue):
+  currentvalue = read(location)
+  if currentvalue == oldvalue:
+    set(location, newvalue)
+  return currentvalue
+\end{lstlisting}
 
 % cosi o pouziti a pod
