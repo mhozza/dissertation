@@ -113,9 +113,20 @@ More details about false positive rate estimation and comparison to other approa
 
 There are two more improvements of \kmer counting methods we have found in the papers about \kmer counting.
 
-The first is memory usage improvement using explicit disk-memory trade-off
+\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm\cite{dsk} exploits the fact that the multi-set of \kmers can be partitioned. Each partition can be loaded in the memory separately.
 
-The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for \kmer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this paper~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in modern processors. The CAS instruction does these operations atomically:
+The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct \kmers in the input; we assume that the number of distinct \kmers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table\cite{dsk}.
+
+The algorithm works in $n_{iters} = \lceil vb/D\rceil$ iterations, where $v$ is total number of \kmers, $b$ is number of bits used to store the \kmer ($b = 2^{\lceil\log_2(2k)\rceil}$). Each \kmer is written to the disk only in $(h(m) \mod n_{iters})$-th iteration.
+
+In each iteration algorithm maintains $n_p = \lceil\frac{vb+32}{0.7n_{iters}M}\rceil$ lists of \kmers.
+It goes through all the \kmers in the input and writes the \kmers valid for the iteration to the $h(m)/n_{iters} \mod n_p$-th list on the disk.
+Then for each list on the disk it construct in memory hash table storing counts for each \kmer in the disk.
+Finally it outputs every key-value pair in the hash table.
+
+This algorithm is proved to use $D$ bits of disk space and $M$ bits of memory\cite{dsk}.
+
+\paragraph{} The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for \kmer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this paper~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in modern processors. The CAS instruction does these operations atomically:
 \begin{lstlisting}
 def cas(location, oldvalue, newvalue):
   currentvalue = read(location)
