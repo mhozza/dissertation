@@ -1,6 +1,5 @@
 all: main.pdf
 
-
 main.pdf: buildtmp/main.pdf */*tex figures/*pdf
 	cp buildtmp/main.pdf  ./
 
@@ -16,5 +15,5 @@ buildtmp/main.pdf: */*tex templates/* */*bib
 	cd buildtmp;$(MAKE) Makefile main.pdf;cd ..
 
 
-clean: 
+clean:
 	rm -f main.pdf buildtmp/*

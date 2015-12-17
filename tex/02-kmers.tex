@@ -3,33 +3,33 @@
 
 % intor o kmeroch a podobne
 
-Counting of the \kmer(substring of length $k$) occurrences is one of the key problem in many applications in Bioinformatics.
-It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence reeds analysis and genome size estimation. In many cases, computation of the \kmer abundance spectra (or \kmer histogram) is sufficient. The \kmer histogram is an array, where $i$-th element corresponds to the number of unique \kmers occurring in the data exactly $i$ times.
+Counting of the $k$-mer (substring of length~$k$) occurrences is one of the key problem in many applications in Bioinformatics.
+It is used in error correction algorithms, DNA assemblers, sequence aligners and repeat detectors. It is also suitable for various sequence read analysis and genome size estimation. In many cases, computation of the $k$-mer abundance spectra (or $k$-mer histogram) is sufficient. The $k$-mer histogram is an array, where $i$-th element corresponds to the number of unique $k$-mers occurring in the data exactly $i$ times.
 
-In NGS data, there are usually a lot of reads, containing a lot of errors implying a large amount of unique \kmers.
+In the NGS data, there are usually a lot of reads, containing many errors producing a large amount of unique $k$-mers.
 This causes a high memory usage of naive approach to this problem.
 \todo{mozno nejaky priklad s cislami}
 
-There are several existing tools addressing this issue for \kmer counting or \kmer histogram computation available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
+There are several existing tools addressing this issue for $k$-mer counting or $k$-mer histogram computation available, for example tallymer\cite{tallymer}, jellyfish\cite{jellyfish}, bfcounter\cite{bfcounter}, dsk\cite{dsk} and khmer\cite{khmer}. Each of the tool must handle some trade-off between speed, memory usage, disk usage, precision and random access capability.
 
-There are multiple approaches to the \kmer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
+There are multiple approaches to the efficient $k$-mer counting problem. Most of them involve hash tables, bloom filters or suffix arrays.
 
 \section{Naive solution}
 
 Let us first briefly explain the naive solution, so we can extend and compare it to the methods used in previously mentioned tools.
 
-Suppose we want to count \kmers in sequence $S$.
+Suppose we want to count $k$-mers in sequence $S$.
 We create a hash table $T$, and then go through the sequence $S$.
-At each position $i$, we take the \kmer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item\footnote{Suppose we have some collision resolution algorithm.} in the table.
+At each position $i$, we take the $k$-mer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item\footnote{Suppose we have some collision resolution algorithm.} in the table.
 
-We can then query the hash table for the number of occurrences of particular \kmer, or for the histogram computation iterate through it to get all the counts and increment the corresponding element in the histogram array.
+We can then query the hash table for the number of occurrences of particular $k$-mer, or for the histogram computation iterate through it to get all the counts and increment the corresponding element in the histogram array.
 
 \section{Computing K-mer Histogram using Enhanced Suffix Arrays}
 
-An \firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \firstUseOf{lcp} (longes common prefix) information.
-In contrary to the Suffix Trees, they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
+An \firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \firstUseOf{lcp} (longest common prefix) information.
+In contrary to the Suffix Trees they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
 Every algorithm using a suffix tree can be replaced with an equivalent
-algorithm (with same time complecity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
+algorithm (with same time complexity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
@@ -59,7 +59,7 @@ Next we define parent-child relationships between lcp-intervals and thus an lcp-
 
 The lcp-interval tree is a conceptual (or virtual) tree (i.e.\ we don't need to construct it explicitly in any of the algorithms). The root of the tree is the $0$-interval $[0..n]$.
 
-The lcp-interval has an important property to the \kmer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S\cite{tallymer}. To count the \kmer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
+The lcp-interval has an important property to the $k$-mer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
 
 \begin{enumerate}
   \item The nodes are enumerated in bottom-up order.
@@ -68,16 +68,16 @@ The lcp-interval has an important property to the \kmer counting problem. An int
   \item The values in suftab and lcptab are accesed sequentially from left to right.
 \end{enumerate}
 
-We can compute the \kmer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a \kmer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
-Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a \kmer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$ and $suftab[i]+k < n$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
+We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
+Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a $k$-mer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$ and $suftab[i]+k < n$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
 
 One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested.
 
-To address the problem of counting \kmers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
+To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
 
 \section{Filtering Unique K-mers using Bloom Filter}
 
-In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of \kmers from same position in DNA will be different. Together with low probability of \kmers from different location be the same and low probability that errors cause \kmers from different positions to be same, we get most \kmers unique in low to mid coverage data. If we do not store these \kmers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique \kmers.
+In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of $k$-mers from same position in DNA will be different. Together with low probability of $k$-mers from different location be the same and low probability that errors cause $k$-mers from different positions to be same, we get most $k$-mers unique in low to mid coverage data. If we do not store these $k$-mers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique $k$-mers.
 
 The Bloom filter supports two operations --- \method{add} for adding an element to the Bloom filter and \method{test} for testing whether an element is in Bloom filter. The following property holds for the \method{test} operation:
 \begin{itemize}
@@ -87,11 +87,11 @@ The Bloom filter supports two operations --- \method{add} for adding an element 
 If the test method returns true, the element is probably set in the filter, otherwise it is definitely not there.
 
 The Bloom Filter basically consists of a bit vector of length $n$ and $m$ hashing functions, each transforming the element to the position in the bit vector. The parameters directly affect the false positive rate of the Bloom filter.
-Adding of the element computes $m$ positions from $m$ hashing functions applied to the element and sets them to one.
-Testing computes $m$ positions from the element and checks whether each of them is one. If any of them is zero, returns false, otherwise returns true. Further details are described in~\cite{bloomfilter}.
+The \method{add} operation computes $m$ positions from $m$ hashing functions applied to the element and sets them to one.
+The \method{test} operation computes $m$ positions from the element and checks whether each of them is one. If any of them is zero, returns false, otherwise returns true. Further details are described in~\cite{bloomfilter}.
 
-We can use Bloom Filter to store information about all \kmers we have seen at some point of computation. We just add every \kmer to the Bloom filter during the computation. Before adding the \kmer, we first check if the \kmer is already in the Bloom filter. If yes, it means we (probably) have seen this \kmer before and we also add it to the hash table. This way we get approximate counts for each \kmer.
-With one more pass we can get exact counts. We go through the \kmers once again and check if they are not in hash table, they are certainly unique. More details are in~\cite{bfcounter}.
+We can use Bloom Filter to store information about all $k$-mers we have seen at some point of computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means we (probably) have seen this $k$-mer before and we also add it to the hash table. This way we get approximate counts for each $k$-mer.
+With one more pass we can get exact counts. We go through the $k$-mers once again and check if they are not in hash table. If not, they are certainly unique. More details are in~\cite{bfcounter}.
 
 \section{Probabilistic K-mer Counting Using Count-Min Sketch}
 
@@ -104,29 +104,29 @@ The Count-Min sketch\cite{countminsketch} data structure enables counting of obj
 The data structure consists of $m$ hash tables, with different hash functions.
 The \method{incrementcount(x)} operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The \method{getcount} operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result. %chktex 36
 
-If there is collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on collision probability, which is proportional to the number of hash tables and their sizes.
+If there is a collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on the collision probability, which is proportional to the number of hash tables and their sizes.
 
-This data structure can be directly used to the \kmer counting problem. As it does not store the \kmers itself, it allows in memory \kmer counting and querying, which is useful for streaming applications.
+This data structure can be directly used to the $k$-mer counting problem. As it does not store the $k$-mers itself, it allows in memory $k$-mer counting and querying, which is useful for streaming applications.
 More details about false positive rate estimation and comparison to other approaches can be found in~\cite{khmer}.
 
-\section{Other Improovements}
+\section{Other Improvements}
 
-There are two more improvements of \kmer counting methods we have found in the papers about \kmer counting.
+There are two more improvements of $k$-mer counting methods we have found in the papers about $k$-mer counting.
 
-\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm\cite{dsk} exploits the fact that the multi-set of \kmers can be partitioned. Each partition can be loaded in the memory separately.
+\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned. Each partition can be loaded in the memory separately.
 
-The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct \kmers in the input; we assume that the number of distinct \kmers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table\cite{dsk}.
+The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct $k$-mers in the input; we assume that the number of distinct $k$-mers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table\cite{dsk}.
 
-The algorithm works in $n_{iters} = \lceil vb/D\rceil$ iterations, where $v$ is total number of \kmers, $b$ is number of bits used to store the \kmer ($b = 2^{\lceil\log_2(2k)\rceil}$). Each \kmer is written to the disk only in $(h(m) \mod n_{iters})$-th iteration.
+The algorithm works in $n_{iters} = \lceil vb/D\rceil$ iterations, where $v$ is total number of $k$-mers, $b$ is number of bits used to store the $k$-mer ($b = 2^{\lceil\log_2(2k)\rceil}$). Each $k$-mer is written to the disk only in $(h(m) \mod n_{iters})$-th iteration.
 
-In each iteration algorithm maintains $n_p = \lceil\frac{vb+32}{0.7n_{iters}M}\rceil$ lists of \kmers.
-It goes through all the \kmers in the input and writes the \kmers valid for the iteration to the $h(m)/n_{iters} \mod n_p$-th list on the disk.
-Then for each list on the disk it construct in memory hash table storing counts for each \kmer in the disk.
+At each iteration algorithm maintains $n_p = \lceil\frac{vb+32}{0.7n_{iters}M}\rceil$ lists of $k$-mers.
+It goes through all the $k$-mers in the input and writes the $k$-mers valid for the iteration to the $h(m)/n_{iters} \mod n_p$-th list on the disk.
+Then for each list on the disk it constructs in-memory hash table storing the counts for each $k$-mer in the disk.
 Finally it outputs every key-value pair in the hash table.
 
 This algorithm is proved to use $D$ bits of disk space and $M$ bits of memory\cite{dsk}.
 
-\paragraph{} The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for \kmer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this paper~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in modern processors. The CAS instruction does these operations atomically:
+\paragraph{} The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for $k$-mer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in the modern processors. The CAS instruction does these operations atomically:
 \begin{lstlisting}
 def cas(location, oldvalue, newvalue):
   currentvalue = read(location)
@@ -137,9 +137,16 @@ def cas(location, oldvalue, newvalue):
 If two threads access same memory location simultaneously, one of them will fail to set new value. In this case, the thread must take appropriate action.
 It can retry the CAS operation until it is successful.
 
-The algorithm for \kmer counting hash table works in two steps:
-First it computes the location of the \kmer in the hash table and then it increments the value. Both of the operations can be done thread-safe without locks using the CAS instruction.
+The algorithm for $k$-mer counting hash table works in two steps:
+First it computes the location of the $k$-mer in the hash table and then it increments the value. Both of the operations can be done thread-safe without locks using the CAS instruction.
 
 \section{Conclusion}
-\todo{zhrnut vsetko}
+
+We briefly summarized the most important approaches to the \kmer counting problem. We also described the key data structures and optimizations for the \kmer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
+
+There are a lot of available tools for \kmer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique \kmers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
+
+The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count \kmers exactly.
+
+The comparison of the tools can be found in~\cite{khmer}.
 % cosi o pouziti a pod
