@@ -1,14 +1,31 @@
+% chktex-file 1
 \chapter{Genome Size and Coverage Estimation}
 
-The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering each base. If the genome size is known, the coverage can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data) and the genome size. Thus, the estimation of the genome size and the coverage are related problems.
-
+The genome size is one of the fundamental questions related to the sequenced genome.
 The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment and use the information to better design the experiment.
-The estimate of the coverage can be used in various sequencing data analysis, e.g.\ repeat analysis and analysis of gene families (see chapter~\ref{chap:repeatsfamilies}). \todo{pozri do clankov aku maju oni motivaciu}
 
-One of possible approaches to estimate the genome size is assembling the genome and computing the size of assembled genome directly. However, this approach has several issues. The genome assembly is very hard problem. In most cases we cannot assemble the genome only from NGS data. Even if we are able to build a partial assembly, there are usually assembling errors around repetitive sequences, which can be very long and can has significant influence on the genome size. In addition, to do a genome assembly, we need to have high coverage data (which is more expensive and impossible for very large genomes).
-The better approach is to estimate the genome size from the data directly. This can be done statistically by looking at sequence overlaps. \todo{pozriet do clankov, ci tam este neico nie je}
+The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. If the genome size is known. The coverage is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data) and the genome size. The estimate of the coverage can be used in various sequencing data analysis, e.g.\ repeat analysis and analysis of gene families (see chapter~\ref{chap:repeatsfamilies}).
+
+Ideally the result of sequencing would be a complete sequence of each chromosome and we could compute the size of the genome directly.
+However, in most cases we cannot assemble the genome only from the short reads provided by the new generation sequencing machines.
+Even if we are able to build a draft (partial) assembly, there are usually assembling errors around repetitive sequences, which can be very long and missing parts. This errors can have significant influence on the genome size. In addition, to do a genome assembly, we need to have high coverage data (which is more expensive and currently impossible for very large genomes). For example, the panda genome was the first mammalian genome sequenced
+by the next-generation sequencing technologies~\cite{li2010panda}. The authors have assembled around $2.3$Gb of sequence to contigs and scaffolds, but using
+several methods, they estimate the genome size to be around $2.4$Gb.
+
+Current research in genome size estimation focuses on direct estimation from sequencing data. This approach has several advantages. It is possible to compute the estimate faster because it avoids the assembly process. It also avoids any biases introduced by genome assemblers.
 
 \section{Using K-mer Histograms for Genome Size Computation}
+
+% This can be done statistically by looking at sequence overlaps.
+Ideally we would like to compute for each base in the original genome how many times it is covered. However, this is usually not possible to do from NGS sequencing data which consists of a lot of short reads ($\approx 100$bp). We first need to provide some context for each base, so we can tell which bases in different reads corresponds to the same position in original genome. We can do this by using $k$-mers (with $k$ such that the probability of the same $k$-mers are corresponding to different position is very low)  instead of single bases.
+
+Let us assume there are no errors in the reads and every \kmer in original sequence is unique. Let $c$ be the average number of reads covering a single base of the genome. When we look at a $k$-mer starting at particular position, not all reads covering its start will cover entire $k$-mer. Therefore we have to adjust the coverage to be used as $k$-mer coverage. If all reads has length $r$, the average coverage of a single $k$-mer will be $c_k = c (r - k + 1)/r$. From now on, we can work with collection of \kmers instead of reads and use $c_k$ as coverage.
+
+We assume that in NGS sequencing the starting positions of reads are selected randomly from the genome.
+Under the assumptions stated in previous paragraph, we can model the abundance of \kmers as \emph{Poisson distribution}. The abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that single \kmer occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
+This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value grater then zero in Poisson distribution, which is $1/(1-e^{-c_k})$.
+
+\todo{teraz releasneme predpoklady a popiseme 3 clanky - williams waterman a ovest}
 
 %cosi o tom ze pozerat na overlapy je narocne a kmery su na to fajne
 
