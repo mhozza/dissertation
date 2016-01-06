@@ -25,15 +25,14 @@ We assume that in NGS sequencing the starting positions of reads are selected ra
 Under the assumptions stated in previous paragraph, we can model the abundance of \kmers as \emph{Poisson distribution}. The abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that single \kmer occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
 This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value grater then zero in Poisson distribution, which is $1/(1-e^{-c_k})$.
 
-\todo{teraz releasneme predpoklady a popiseme 3 clanky - williams waterman a ovest}
+\todo{teraz releasneme predpoklady a popiseme 3 clanky --- williams waterman a ovest}
 
-%cosi o tom ze pozerat na overlapy je narocne a kmery su na to fajne
+Real genomes contains a lot of repeats (\todo{priklad, niekde bola tusim kvasinka 30\%}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good estimate for real data, the estimators have to consider this issues.
 
-% \section{Williams}
-%
-% \section{Watermann}
-%
-% \section{Covest}
+The first research in this field focused on handling repeats and contained very simple error handling approaches. In~\cite{waterman}, they estimated the genome size and coverage based on probabilistic models of repeat content of the genome. They did not consider the errors in the data and run their program on error corrected data.\
+In~\cite{williams} authors \todo{zistit a popisat co vlastne robili}. They removed errors simply by truncating the low abundance part of the histogram.
+
+The recent paper~\cite{covest} focused on modeling errors directly. \todo{popisat zakladne idey}
 
 \section{Conclusion}
 \todo{conclusion}
