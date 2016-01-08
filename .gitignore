@@ -3,3 +3,4 @@ main.pdf
 buildtmp
 .ipynb_checkpoints
 *.log
+t/*
