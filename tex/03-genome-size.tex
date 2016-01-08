@@ -39,4 +39,12 @@ This is fixed in final model. According to~\cite{waterman} and~\cite{williams}, 
 This method allows genome size and coverage estimation for low coverage data ($0.5\times$) or higher error rates (10\%).
 
 \section{Conclusion}
-\todo{conclusion}
+
+In this chapter we dealt with a problem of estimating the genome size and the coverage. We showed two main approaches to this problems based on \kmer histogram analysis.
+
+The first approach was based on precise modeling of repeat content and omitted the error modeling, whereas the second approach was based on precise error modeling and simple repeat modeling.
+The first approach works well on high coverage data and is more suitable for genomes, where the repeat content is very different from the simple model in the second approach.
+
+The second approach works well even in very low coverage data ($0.5\times$) or with highly erroneous data ($10\%$ error rate). This approach is very universal and easily extensible to more difficult models.
+
+The possibility of estimating the genome size and the coverage from low coverage data is very useful for cheaper experiment design and for analysis of large genomes, such as plant genomes where the sizes are in tens of gigabases.
