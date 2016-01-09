@@ -10,7 +10,7 @@ buildtmp/main.pdf: */*tex templates/* */*bib
 	cp templates/* buildtmp
 	cp tex/references.bib buildtmp
 	ls tex/[0-9]*tex | sort |sed -e 's/^/\\input ..\//' > buildtmp/mainMatter.tex
-	echo '\\n'"ewcommand"'\\r'"evision[0]{`git log --no-merges --pretty=format:"%h %cd" -n 1 --date=short` (`git branch|grep '^\*'| sed -e 's/\** //'` + `git status -s | wc -l` file changes)}" > buildtmp/revision.tex
+	./revision.sh
 	cd figures; make; cd ..
 	cd buildtmp;$(MAKE) Makefile main.pdf;cd ..
 

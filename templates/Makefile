@@ -1,5 +1,5 @@
 
-all: main.pdf main.epub
+all: main.pdf
 
 main.pdf: main.tex ../*tex ../tex/*tex ../tex/*bib
 	pdflatex main.tex
