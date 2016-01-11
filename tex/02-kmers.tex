@@ -98,14 +98,18 @@ First it computes the location of the $k$-mer in the hash table and then it incr
 
 \section{Computing K-mer Histogram using Enhanced Suffix Arrays}
 
+\emph{Suffix tree}\cite{suffixtree} is a data structure widely used in string processing. Basically, it is a compressed lexicographical tree build from all suffixes of a string. Let's have an alphabet $\Sigma$ and a string $S \in \Sigma^*$. Usually, for easier construction and manipulation, suffix tree is constructed from string $S\$$ instead of $S$, where $\$$ is a lexicographically smaller than every character in $\Sigma$. The suffix tree can be constructed in $O(|S|)$ time and space complexity~\cite{suffixtree}.
+
+\emph{Suffix arrays}\cite{suffixarray} were developed as more space efficient data structure for string processing problems. The suffix array requires only $4n$ bytes in its basic form, whereas a suffix tree require $20n$ bytes in worst case~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$$ (similarly to suffix arrays we append $\$$ end marker to the original string $S$). The suffix array can also be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
+
+With basic suffix arrays it was not possible to directly replace the suffix tree with the suffix array in any suffix tree based string processing problem and maintain its time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$.
+
 \firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \firstUseOf{lcp} (longest common prefix) information.
-In contrary to the Suffix Trees they use less memory and are faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
-Every algorithm using a suffix tree can be replaced with an equivalent
-algorithm (with same time complexity) based on a suffix array and additional information\cite{enhancedsuffixarrays}.
+In contrast to the Suffix Trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity.\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
-  \item \emph{suftab} --- array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of $S\$ $.
+  \item \emph{suftab} --- basic suffix array, i.e.\ array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of string $S\$ $.
   \item \emph{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
 \end{enumerate}
 
@@ -129,9 +133,9 @@ Next we define parent-child relationships between lcp-intervals and thus an lcp-
   The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.\cite{enhancedsuffixarrays}
 \end{definition}
 
-The lcp-interval tree is a conceptual (or virtual) tree (i.e.\ we don't need to construct it explicitly in any of the algorithms). The root of the tree is the $0$-interval $[0..n]$.
+The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition.
 
-The lcp-interval has an important property to the $k$-mer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
+The lcp-interval has an important property to the $k$-mer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
 
 \begin{enumerate}
   \item The nodes are enumerated in bottom-up order.
