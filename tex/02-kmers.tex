@@ -105,7 +105,7 @@ First it computes the location of the $k$-mer in the hash table and then it incr
 With basic suffix arrays it was not possible to directly replace the suffix tree with the suffix array in any suffix tree based string processing problem and maintain its time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$.
 
 \firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with \firstUseOf{lcp} (longest common prefix) information.
-In contrast to the Suffix Trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity.\cite{enhancedsuffixarrays}.
+In contrast to the Suffix Trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
@@ -113,43 +113,38 @@ We can represent Enhanced Suffix Array of string $S$ as two tables:
   \item \emph{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
 \end{enumerate}
 
-We also need to introduce the concept of the \firstUseOf{lcp-intervals} and \firstUseOf{lcp-interval trees}.
+We also need to introduce the concept of the \firstUseOf{lcp-intervals} and \firstUseOf{lcp-interval trees}. The notion of lcp-intervals was first used in~\cite{enhancedsuffixarrays}.
 \begin{definition}
 An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\ell$ if
 
 \begin{enumerate}
 \item $lcptab[i] < \ell$,
-\item $lcptab[k] \geq l$ for all $k$ with $i + 1 \leq k \leq j$,
+\item $lcptab[k] \geq \ell$ for all $k$ with $i + 1 \leq k \leq j$,
 \item $lcptab[k] = \ell$ for at least one $k$ with $i + 1 \leq k \leq j$,
 \item $lcptab[j + 1] < \ell$.
 \end{enumerate}
-\cite{enhancedsuffixarrays}
 \end{definition}
 
-Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree.
+Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree\cite{enhancedsuffixarrays}.
 
 \begin{definition}
   An $m$-interval $[l..r]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
-  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.\cite{enhancedsuffixarrays}
+  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.
 \end{definition}
 
 The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition.
 
-The lcp-interval has an important property to the $k$-mer counting problem. An interval $[i..j]$ represents a string occurring $j - i + 1$ times in S~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree. We can use the algorithm from~\cite{enhancedsuffixarrays} to enumerate the nodes. The algorithm has following important features:
+The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in S~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 
-\begin{enumerate}
-  \item The nodes are enumerated in bottom-up order.
-  \item The children of the particular node are enumerated in lexicographic order.
-  \item Whenever we process the children of a node, we have access to the lcp-value of the parent node % toto je skopcene, chceme to prepisat?
-  \item The values in suftab and lcptab are accesed sequentially from left to right.
-\end{enumerate}
+We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes from~\cite{enhancedsuffixarrays}. The algorithm traverses the tree in bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
 
-We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
-Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a $k$-mer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$ and $suftab[i]+k < n$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
+We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
 
-One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested.
+Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a $k$-mer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
 
-To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
+One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in~\cite{tallymer}, but the suffix arrays are used also in other tools e.g.~\cite{jellyfish}.
+
+% To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
 
 \section{Conclusion}
 
@@ -158,6 +153,5 @@ We briefly summarized the most important approaches to the \kmer counting proble
 There are a lot of available tools for \kmer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique \kmers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
 
 The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count \kmers exactly.
-
 The comparison of the tools can be found in~\cite{khmer}.
 % cosi o pouziti a pod
