@@ -1,5 +1,5 @@
 % chktex-file 1
-\chapter{K-mer Counting and K-mer abundance histograms}
+\chapter[K-mer Counting]{K-mer Counting and K-mer abundance histograms}
 
 % intor o kmeroch a podobne
 
@@ -15,7 +15,7 @@ We will use the \kmer histograms in~chapter~\ref{chap:genomesize} for estimating
 
 NGS data, usually consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
 This causes a high memory usage of naive approach to this problem.
-\todo{mozno nejaky priklad s cislami}
+\todo{nejaky priklad s cislami}
 
 There are several existing tools addressing this issue for $k$-mer counting or $k$-mer histogram computation, for example Tallymer\cite{tallymer}, JELLYFISH\cite{jellyfish}, BFCounter\cite{bfcounter}, DSK\cite{dsk} and Khmer\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem, use hash tables, Bloom filters or suffix arrays.
 
@@ -31,7 +31,7 @@ We can then query the hash table for the number of occurrences of a~particular $
 
 For small genomes with very low error rate, this approach is sufficient. However, higher error rate produces more unique \kmers and together with large genomes makes the hash table so big it doesn't fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
 
-\section{Filtering Unique K-mers using Bloom Filter}
+\section[Filtering Unique K-mers]{Filtering Unique K-mers using Bloom Filter}
 
 In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of $k$-mers from same position in DNA will be different. Together with low probability of $k$-mers from different location be the same and low probability that errors cause $k$-mers from different positions to be same, we get most $k$-mers unique in low to mid coverage data. If we do not store these $k$-mers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique $k$-mers.
 
@@ -49,7 +49,7 @@ The \method{test} operation computes $m$ positions from the element and checks w
 We can use Bloom Filter to store information about all $k$-mers we have seen at some point of computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means we (probably) have seen this $k$-mer before and we also add it to the hash table. This way we get approximate counts for each $k$-mer.
 With one more pass we can get exact counts. We go through the $k$-mers once again and check if they are not in hash table. If not, they are certainly unique. More details are in~\cite{bfcounter}.
 
-\section{Probabilistic K-mer Counting Using Count-Min Sketch}
+\section[Probabilistic K-mer Counting]{Probabilistic K-mer Counting Using Count-Min Sketch}
 
 The Count-Min sketch\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
 \begin{itemize}
@@ -65,7 +65,7 @@ If there is a collision in each table for a particular object, the \method{getco
 This data structure can be directly used to the $k$-mer counting problem. As it does not store the $k$-mers itself, it allows in memory $k$-mer counting and querying, which is useful for streaming applications.
 More details about false positive rate estimation and comparison to other approaches can be found in~\cite{khmer}.
 
-\section{Other Improvements of the Hashing Approach}
+\section[Other Improvements]{Other Improvements of the Hashing Approach}
 
 There are two more improvements of $k$-mer counting methods we have found in the papers about $k$-mer counting.
 
@@ -96,7 +96,7 @@ It can retry the CAS operation until it is successful.
 The algorithm for $k$-mer counting hash table works in two steps:
 First it computes the location of the $k$-mer in the hash table and then it increments the value. Both of the operations can be done thread-safe without locks using the CAS instruction.
 
-\section{Computing K-mer Histogram using Enhanced Suffix Arrays}
+\section[Enhanced Suffix Arrays]{Computing K-mer Histogram using Enhanced Suffix Arrays}
 
 \emph{Suffix tree}\cite{suffixtree} is a data structure widely used in string processing. Basically, it is a compressed lexicographical tree build from all suffixes of a string. Let's have an alphabet $\Sigma$ and a string $S \in \Sigma^*$. Usually, for easier construction and manipulation, suffix tree is constructed from string $S\$$ instead of $S$, where $\$$ is a lexicographically smaller than every character in $\Sigma$. The suffix tree can be constructed in $O(|S|)$ time and space complexity~\cite{suffixtree}.
 
@@ -133,6 +133,8 @@ Next we define parent-child relationships between lcp-intervals and thus an lcp-
 \end{definition}
 
 The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition.
+
+\todo{example, figures}
 
 The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in S~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 

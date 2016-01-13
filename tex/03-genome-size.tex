@@ -1,5 +1,5 @@
 % chktex-file 1
-\chapter{Genome Size and Coverage Estimation}
+\chapter[Genome Size and Coverage]{Genome Size and Coverage Estimation}
 \label{chap:genomesize}
 
 The genome size is one of the fundamental questions related to the sequenced genome.
@@ -15,7 +15,7 @@ several methods, they estimate the genome size to be around $2.4$Gb.
 
 Current research in genome size estimation focuses on direct estimation from sequencing data. This approach has several advantages: it is possible to compute the estimate faster because it avoids the assembly process and it also avoids any biases introduced by genome assemblers.
 
-\section{Using K-mer Histograms for Genome Size Computation}
+\section[K-mer Histograms]{Using K-mer Histograms for Genome Size Computation}
 
 % This can be done statistically by looking at sequence overlaps.
 Ideally we would like to compute for each base in the original genome how many times it is covered. However, this is usually not possible to do from NGS sequencing data which consists of a lot of short reads ($\approx 100$bp). We first need to provide some context for each base, so we can tell which bases in different reads corresponds to the same position in original genome. We can do this by using $k$-mers (with $k$ such that the probability of the same $k$-mers are corresponding to different position is very low)  instead of single bases.
