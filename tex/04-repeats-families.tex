@@ -6,24 +6,46 @@
 
 \todo{intro to repeats - depends on what will be in general intro}
 
-\todo{clanky:}
-\begin{itemize}
-  \item !important \cite{novak2010graph}
-  \item !important \cite{pertea2003tigr}
-  \item !important \cite{swaminathan2007global}
-  \item \cite{gu2008identification}
-  % \item \cite{sveinsson2013transposon} - blbost
-  \item \cite{shapiro2005repetitive}
-\end{itemize}
+\subsection{Partial Sequence Assembly}
+
+We can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
+Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the contrary the average coverage of repetitive sequences will be higher and the chance of overlapping repetitive sequences will be higher.
+
+The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation\cite{swaminathan2007global}:
+$$E(M) = Ne^{-2c\sigma}(1-e^{c\sigma})^{j-1}$$
+$$\sigma = 1 - \frac{T}{L},$$
+where $c$ is the coverage, $L$ is the read length, and $T$ the base pair overlap required for contig formation.
+
+The estimated copy number, $C$, within any sequence window was then calculated by\cite{swaminathan2007global}:
+$$C = \frac{o}{e}$$
+$$e = \frac{cw}{L},$$
+where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length.
+
+This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes. This method was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data\cite{swaminathan2007global}.
+However, this method suffers from several drawbacks. The major drawback is that larger repeats can be split into multiple sequences. In addition, it depends on slow assembly process.
+
+\subsection{Sequence Clustering}
+
+\todo{clustering}\cite{novak2010graph}\cite{pertea2003tigr}
+
+\subsection{Conclusion}
 
 \todo{conclusion}
+
+% \todo{clanky:}
+% \begin{itemize}
+%   \item \cite{gu2008identification}
+%   % \item \cite{sveinsson2013transposon} - blbost
+%   \item \cite{shapiro2005repetitive}
+% \end{itemize}
 
 % Velmi zhruba o com to ma asi byt
 % - nejake problemy a ako ich riesit - dat je vela, da sa spravit nizsie pokrytie (aj random samplovanim)
 % - vlastnosti repeatov - je ich viac ako beznych sekvencie - teda ked nahodne sekvenujeme, tak ocakavame ze tam bude viac podobnych sekvencii ktore zodpovedaju repeatu ako podobnych co zodpovedaju nerepeatu (repeaty maju ako keby vacsi coverage)
 % - ked znizujeme pokrytie, znizujeme pravdepodobnost ze sa dany kus sekvencii vyskytne v datach. kedze repeatov je viac, tak tie maju vyssiu pravdepodobnost ze sa dostanu do dat, cize vieme pokrytie nastavit tak, aby to co ostane v datach boli s vysokou pravdepodobostov repeaty, a s vysokou pravdepodobnostou sa tam dostanu vsetky (resp ocakavame ze sa ich tam dostane dost velka cast)
-% - niekolko metod -> nastavit pokrytie dost nizko a detegovat komponenty suvislosti (tclust, nastudovat)
+% niekolko metod:
 % - urobit ciastocne assembly a zobrat kontigy (tiez nastudovat)
+% - nastavit pokrytie dost nizko a detegovat komponenty suvislosti (tclust, nastudovat)
 % - grafove klastrovanie\cite{novak2010graph} -> pisu ze celkom sikovne
 % - spomenut rozdieli oproti modelovaniu repeatov z predoslej kapitoly
 
