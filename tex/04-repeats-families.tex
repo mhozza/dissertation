@@ -1,14 +1,26 @@
 \chapter{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
-\todo{short general intro, what do they have in common, maybe definitions and description how are they created...}
+\todo{short general intro, what do they have in common, maybe definitions and description how are they created...}\cite{venner2009dynamics}
+% (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
 
-\section{Repeats}
+\section{Finding the Known Repeats in Assembled Genome}
+
+% (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
+% - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
+% - a hladanie zalozene cisto na podobnosti sekvencii (BLAST a spol) a na profilovych HMM
+% - oblubene nastroje su napr. repeatmasker http://repeatmasker.org/, interproscan, HMMer
+% - tieto veci staci pomerne strucne vysvetlit, bez velkych detailov
+
+\section{De Novo Repeat Finding}
 
 \todo{intro to repeats - depends on what will be in general intro}
+% (3) dalsia cast by mohla byt o hladani repeatov, ktore este nie su zname (de novo discovery)
+% - tu mozes zacat s programami, ktore to hladaju v poskladanom genome, napr RepeatScout pripadne dalsie
+% - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
 
 \subsection{Partial Sequence Assembly}
 
-We can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
+As we mentioned in section \ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
 Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the contrary the average coverage of repetitive sequences will be higher and the chance of overlapping repetitive sequences will be higher.
 
 The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation\cite{swaminathan2007global}:
@@ -24,9 +36,23 @@ where $o$ represents the observed number of reads matching in the sequence windo
 This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes. This method was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data\cite{swaminathan2007global}.
 However, this method suffers from several drawbacks. The major drawback is that larger repeats can be split into multiple sequences. In addition, it depends on slow assembly process.
 
-\subsection{Sequence Clustering}
+\subsection{Sequencing Data Clustering}
 
-\todo{clustering}\cite{novak2010graph}\cite{pertea2003tigr}
+The other approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
+The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. Such graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold\cite{pertea2003tigr, novak2010graph}. \todo{spomenut mgblast?}
+
+The basic method of clustering the graph is to split it by connected components. The granularity of such graph strongly depends on sequence coverage. The higher the coverage is, the smaller number and bigger clusters will be found in the graph. Additionally, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences. This method is used in \emph{tclust}\cite{pertea2003tigr}.
+
+The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical alglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
+The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in random graph. It can be masured as:
+$$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
+where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_ij$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if comunity $c_i = c_j$.
+We want to find the clustering with maximal modularity.
+\todo{greedy algorithm}
+
+\todo{citations}
+
+\todo{figures}
 
 \subsection{Conclusion}
 
@@ -49,8 +75,9 @@ However, this method suffers from several drawbacks. The major drawback is that 
 % - grafove klastrovanie\cite{novak2010graph} -> pisu ze celkom sikovne
 % - spomenut rozdieli oproti modelovaniu repeatov z predoslej kapitoly
 
-\section{Gene Families}
+\section{Evolution of Gene Families}
 \todo{intro to gene families - depends on what will be in general intro}
+% (4) posledna cast by bola o evolucii velkosti genovych rodin (s tym, ze modely a postupy by sa dali pouzit aj na repeaty, pripadne pohladaj, ci to niekto robil)
 
 \todo{clanky:}
 \begin{itemize}
