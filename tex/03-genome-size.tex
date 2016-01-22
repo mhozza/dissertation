@@ -5,7 +5,9 @@
 The genome size is one of the fundamental questions related to the sequenced genome.
 The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment\todo{aky experiment} and use the information to better design the experiment itself.
 
-The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data) and the genome size. The estimate of a coverage can be used in various sequencing data analyses, e.g.\ repeat analysis and analyses of gene families (see chapter~\ref{chap:repeatsfamilies}). \todo{ked bude 4 kapitola, tak toto prepisat podla topho ako to tam pouzijeme}
+The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage $c$ is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data $L\cdot N$, where $L$ is the read length and $N$ is the number of reads) and the genome size $G$.
+$$c = \frac{NL}{G}$$
+The estimate of a coverage can be used in various sequencing data analyses, e.g.\ repeat analysis and analyses of gene families (see chapter~\ref{chap:repeatsfamilies}). \todo{ked bude 4 kapitola, tak toto prepisat podla topho ako to tam pouzijeme}
 
 Ideally the result of sequencing would be a complete sequence of each chromosome and we could compute the size of the genome directly.
 However, in most cases we cannot assemble the genome only from the short reads provided by the new generation sequencing machines.
@@ -22,15 +24,25 @@ Ideally we would like to compute for each base in the original genome how many t
 
 \subsection{Simplified Scenario}
 
-Now let us introduce several approaches for computing a genome size and a coverage from \kmer histograms. Firstly let us assume there are no errors in the reads and every \kmer in the original sequence is unique. Let $c$ be the average number of reads covering a single base of the genome. When we look at a $k$-mer starting at particular position, not all reads covering its start will cover the entire $k$-mer.
+Now let us introduce several approaches for computing a genome size and a coverage from \kmer histograms.
+Let $c$ be the average number of reads covering a single base of the genome. When we look at a $k$-mer starting at particular position, not all reads covering its start will cover the entire $k$-mer.
 Therefore we have to adjust the coverage for $k$-mers.
 If all reads have the same length $r$, the average coverage of a single $k$-mer will be $c_k = c (r - k + 1)/r$.
+In the following text, we will work with collection of \kmers instead of reads and use $c_k$ coverage.
 
-From now, we can work with collection of \kmers instead of reads and use $c_k$ coverage.
-
-We assume that in NGS sequencing the starting positions of reads are selected randomly from the genome.
-Under the assumptions stated in previous paragraph, we can model the abundance of \kmers as \emph{Poisson distribution}. The abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that a given \kmer from the genome occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
+Firstly let us assume there are no errors in the reads and every \kmer in the original sequence is unique.
+We also assume that in NGS sequencing the starting positions of reads are selected randomly from the genome.
+Under these assumptions, the probability that a particular position or \kmer is covered by random read is equal for all positions or \kmers. Probability that a particular position or \kmer is covered by $j$ reads is then given by the binomial distribution. The binomial distribution can be aproximated by the \emph{Poisson distribution} for large values, which enables effective computation of the probability.
+The probability, $p_j$, that particular \kmer is covered by $j$ reads can be computed from Poisson distribution as follows:
+$$ p_j =  \frac{c_k e^{-c_k}}{j!}.$$
+The $c_k$ is the average coverage and thus we can set the mean in the Poisson distribution to $c_k$.
+However, the abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that a given \kmer from the genome occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
 This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value greater then zero in Poisson distribution, which is $1-e^{-c_k}$.
+
+Given the abundance histogram, we can compute the likelihood of $c_k$, with respect to the histogram.
+$$L(H_k | c_k) = \sum_{j=1}^m h_k[j] \log p_j.$$
+We can then estimate the best $c_k$ by maximal likelihood estimation.
+
 
 \subsection{Modeling Repeats}
 
