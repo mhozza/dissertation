@@ -3,13 +3,13 @@
 \label{chap:genomesize}
 
 The genome size is one of the fundamental questions related to the sequenced genome.
-The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment and use the information to better design the experiment itself.
+The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment\todo{aky experiment} and use the information to better design the experiment itself.
 
-The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data) and the genome size. The estimate of a coverage can be used in various sequencing data analysis, e.g.\ repeat analysis and analysis of gene families (see chapter~\ref{chap:repeatsfamilies}).
+The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data) and the genome size. The estimate of a coverage can be used in various sequencing data analyses, e.g.\ repeat analysis and analyses of gene families (see chapter~\ref{chap:repeatsfamilies}). \todo{ked bude 4 kapitola, tak toto prepisat podla topho ako to tam pouzijeme}
 
 Ideally the result of sequencing would be a complete sequence of each chromosome and we could compute the size of the genome directly.
 However, in most cases we cannot assemble the genome only from the short reads provided by the new generation sequencing machines.
-Even if we are able to build a draft (partial) assembly, there are usually some missing parts and assembling errors around repetitive sequences, which can be very long. This errors can have significant influence to the genome size. In addition, to do a genome assembly, we need to have high coverage data (which is more expensive and currently impossible for very large genomes). For example, the panda genome was the first mammalian genome sequenced
+Even if we are able to build a draft (partial) assembly, there are usually some missing parts and assembly errors around repetitive sequences. This errors can have significant influence on the genome size estimates. In addition, to do a genome assembly, we need to have high coverage data, which is expensive for very large genomes. For example, the panda genome was the first mammalian genome sequenced
 by the next-generation sequencing technologies~\cite{li2010panda}. The authors have assembled around $2.3$Gb of sequence to contigs and scaffolds, but using
 several methods, they estimate the genome size to be around $2.4$Gb.
 
@@ -18,15 +18,21 @@ Current research in genome size estimation focuses on direct estimation from seq
 \section[K-mer Histograms]{Using K-mer Histograms for Genome Size Computation}\label{sec:kmerhist}
 
 % This can be done statistically by looking at sequence overlaps.
-Ideally we would like to compute for each base in the original genome how many times it is covered. However, this is usually not possible to do from NGS sequencing data which consists of a lot of short reads ($\approx 100$bp). We first need to provide some context for each base, so we can tell which bases in different reads corresponds to the same position in original genome. We can do this by using $k$-mers (with $k$ such that the probability of the same $k$-mers are corresponding to different position is very low)  instead of single bases.
+Ideally we would like to compute for each base in the original genome how many times it is covered by reads. Since genome assembly is not available, we will approximate this process using reads only. We will consider the context of each base, so that we can tell which bases in different reads corresponds to the same position in the original genome. We can do this by using $k$-mers (with $k$ such that the probability of two identical $k$-mers corresponding to different positions in the genome is very low).
 
-Now let us introduce several approaches for computing a genome size and a coverage from \kmer histograms. Firstly let us assume there are no errors in the reads and every \kmer in the original sequence is unique. Let $c$ be the average number of reads covering a single base of the genome. When we look at a $k$-mer starting at particular position, not all reads covering its start will cover entire $k$-mer.
+\subsection{Simplified Scenario}
+
+Now let us introduce several approaches for computing a genome size and a coverage from \kmer histograms. Firstly let us assume there are no errors in the reads and every \kmer in the original sequence is unique. Let $c$ be the average number of reads covering a single base of the genome. When we look at a $k$-mer starting at particular position, not all reads covering its start will cover the entire $k$-mer.
 Therefore we have to adjust the coverage for $k$-mers.
-If all reads has length $r$, the average coverage of a single $k$-mer will be $c_k = c (r - k + 1)/r$. From now on, we can work with collection of \kmers instead of reads and use $c_k$ as a coverage.
+If all reads have the same length $r$, the average coverage of a single $k$-mer will be $c_k = c (r - k + 1)/r$.
+
+From now, we can work with collection of \kmers instead of reads and use $c_k$ coverage.
 
 We assume that in NGS sequencing the starting positions of reads are selected randomly from the genome.
-Under the assumptions stated in previous paragraph, we can model the abundance of \kmers as \emph{Poisson distribution}. The abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that single \kmer occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
-This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value grater then zero in Poisson distribution, which is $1/(1-e^{-c_k})$.
+Under the assumptions stated in previous paragraph, we can model the abundance of \kmers as \emph{Poisson distribution}. The abundance of some \kmers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that a given \kmer from the genome occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
+This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value greater then zero in Poisson distribution, which is $1-e^{-c_k}$.
+
+\subsection{Modeling Repeats}
 
 Real genomes contains a lot of repeats (\todo{priklad, niekde bola tusim kvasinka 30\%}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good estimate for real data, the estimators have to consider this issues.
 
@@ -35,15 +41,24 @@ Real genomes contains a lot of repeats (\todo{priklad, niekde bola tusim kvasink
 \paragraph{} In~\cite{williams} authors analyzed \kmer histograms multiplied by an abundance of columns (i.e.\ let $H_k$ be the \kmer histogram and $n = |H_k|$, the transformed histogram $W_k = 1 \cdot H_k[1], 2\cdot H_k[2], \dots, n \cdot H_k[n]$). They looked for the principal peek in $W_k$ which represented the coverage of single copy parts of genome --- \emph{the modal coverage} --- and other peeks at integer multiplies of modal coverage which represented the sequence repeats.
 They filtered errors simply by truncating the low abundance part of the histogram.
 
+\subsection{Modeling Errors}
+
 \paragraph{} The recent paper~\cite{covest} focused on modeling errors directly. They provided several probabilistic models graded by complexity.
 The simplest model considered errors contributing only to abundance $1$ in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats. The model is a mixture of two distributions --- the distribution for erroneous \kmers and the distribution for error free \kmers. The abundances of the error free \kmers are generated from the truncated Poisson distribution with mean $c'$. Let $\epsilon$ be the error rate, we can compute $c_k$ from $c'$ by dividing it by the probability that \kmer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
 
-The probability that same error happen multiple times increases with increasing coverage. Hence the second model considers errors contributing also to higher abundances.
+The probability that the same error happen multiple times increases with increasing coverage. Hence the second model considers errors contributing also to higher abundances.
 The second model is a mixture of truncated Poisson distributions with means $\lambda_s \forall s \in \{0\dots k\}$, where $s$ is a number of errors in each \kmer considered in the partial distribution. This model still does not consider any repeats in the original sequence.
 This is fixed in final model.
 
-According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. As this method focuses on low coverage estimation, it models repeats in very simple way. It uses 3 parameters --- for single copy parts of genome, for parts which are repeated exactly twice and all others. The proportions of the \kmers repeated more than twice are modeled using a geometric distribution. The model distribution is then a mixture of probabilities from the previous model, where $c_k$ is replaced by $o \cdot c_k$ and $o$ is number of the \kmer.
+According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. As this method focuses on low coverage estimation, it models repeats in very simple way. It uses 3 parameters --- for single copy parts of genome, for parts which are repeated exactly twice and all others. The proportions of the \kmers repeated more than twice are modeled using a geometric distribution.
+
+The model distribution is then a mixture of probabilities from the previous model, where $c_k$ is replaced by $o \cdot c_k$ and $o$ is number of the \kmer.
 This method allows genome size and coverage estimation for low coverage data ($0.5\times$) or higher error rates (10\%).
+
+\subsection{Testing the Models}
+
+\todo{ako sa testuju}
+\todo{sumar z vysledkov clankov}
 
 \section{Conclusion}
 
