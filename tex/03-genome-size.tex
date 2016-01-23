@@ -44,28 +44,34 @@ $$L(H_k | c_k) = \sum_{j=1}^m h_k[j] \log p_j.$$
 We can then estimate the best $c_k$ by maximal likelihood estimation.
 
 
-\subsection{Modeling Repeats}
+\subsection{Modeling Repeats}\label{subsec:repeatmodles}
 
 Real genomes contains a lot of repeats (\todo{priklad, niekde bola tusim kvasinka 30\%}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good estimate for real data, the estimators have to consider this issues.
 
-\paragraph{} The first research in this field focused on handling repeats and contained very simple error handling approaches. In~\cite{waterman}, they estimated the genome size and coverage based on probabilistic models of repeat content of the genome and used EM algorithm to fit the parameters of the model to the data. They did not consider the errors in the data and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process.
+\todo{ako modeluju repeaty}
 
-\paragraph{} In~\cite{williams} authors analyzed \kmer histograms multiplied by an abundance of columns (i.e.\ let $H_k$ be the \kmer histogram and $n = |H_k|$, the transformed histogram $W_k = 1 \cdot H_k[1], 2\cdot H_k[2], \dots, n \cdot H_k[n]$). They looked for the principal peek in $W_k$ which represented the coverage of single copy parts of genome --- \emph{the modal coverage} --- and other peeks at integer multiplies of modal coverage which represented the sequence repeats.
+The first research in this field focused on handling repeats and contained very simple error handling approaches. In~\cite{waterman}, they estimated the genome size and coverage based on probabilistic models of repeat content of the genome and used EM algorithm to fit the parameters of the model to the data.
+
+In~\cite{williams} authors analyzed \kmer histograms multiplied by an abundance of columns (i.e.\ let $H_k$ be the \kmer histogram and $n = |H_k|$, the transformed histogram $W_k = 1 \cdot H_k[1], 2\cdot H_k[2], \dots, n \cdot H_k[n]$). They looked for the principal peek in $W_k$ which represented the coverage of single copy parts of genome --- \emph{the modal coverage} --- and other peeks at integer multiplies of modal coverage which represented the sequence repeats.
 They filtered errors simply by truncating the low abundance part of the histogram.
-
-\subsection{Modeling Errors}
-
-\paragraph{} The recent paper~\cite{covest} focused on modeling errors directly. They provided several probabilistic models graded by complexity.
-The simplest model considered errors contributing only to abundance $1$ in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats. The model is a mixture of two distributions --- the distribution for erroneous \kmers and the distribution for error free \kmers. The abundances of the error free \kmers are generated from the truncated Poisson distribution with mean $c'$. Let $\epsilon$ be the error rate, we can compute $c_k$ from $c'$ by dividing it by the probability that \kmer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
-
-The probability that the same error happen multiple times increases with increasing coverage. Hence the second model considers errors contributing also to higher abundances.
-The second model is a mixture of truncated Poisson distributions with means $\lambda_s \forall s \in \{0\dots k\}$, where $s$ is a number of errors in each \kmer considered in the partial distribution. This model still does not consider any repeats in the original sequence.
-This is fixed in final model.
 
 According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. As this method focuses on low coverage estimation, it models repeats in very simple way. It uses 3 parameters --- for single copy parts of genome, for parts which are repeated exactly twice and all others. The proportions of the \kmers repeated more than twice are modeled using a geometric distribution.
 
 The model distribution is then a mixture of probabilities from the previous model, where $c_k$ is replaced by $o \cdot c_k$ and $o$ is number of the \kmer.
 This method allows genome size and coverage estimation for low coverage data ($0.5\times$) or higher error rates (10\%).
+
+\subsection{Modeling Errors}
+
+In~\cite{waterman} and \cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In~\cite{williams} they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
+
+In our paper\cite{covest}, we focused on modeling errors directly. We provided several probabilistic models graded by complexity.
+The simplest model considered errors contributing only to abundance of one in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats. The model is a mixture of two distributions --- the distribution for erroneous \kmers and the distribution for error free \kmers. The abundances of the error free \kmers are generated from the truncated Poisson distribution with mean $c'$. Let $\epsilon$ be the error rate, we can compute $c_k$ from $c'$ by dividing it by the probability that \kmer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
+
+The probability that the same error happen multiple times increases with increasing coverage. Hence the second model considers errors contributing also to higher abundances.
+The second model is a mixture of truncated Poisson distributions with means $\lambda_s \forall s \in \{0\dots k\}$, where $s$ is a number of errors in each \kmer considered in the partial distribution. This model still does not consider any repeats in the original sequence.
+This is fixed in final model, where repeats were modeled by geometric distribution (see section \ref{subsec:repeatmodles}).
+
+\todo{short conclusion}
 
 \subsection{Testing the Models}
 
