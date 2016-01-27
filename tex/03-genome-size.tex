@@ -40,16 +40,18 @@ However, the abundance of some \kmers under this distribution may be zero and we
 This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value greater then zero in Poisson distribution, which is $1-e^{-c_k}$.
 
 Given the abundance histogram, we can compute the likelihood of $c_k$, with respect to the histogram.
-$$L(H_k | c_k) = \sum_{j=1}^m h_k[j] \log p_j.$$
+$$L(c_k | H_k) = \sum_{j=1}^m H_k[j] \log p_j.$$
 We can then estimate the best $c_k$ by maximal likelihood estimation.
 
 
 \subsection{Modeling Repeats}\label{subsec:repeatmodles}
 
+\todo{toto este treba ucesat poriadne}
+
 Real genomes contains a lot of repeats (\todo{priklad, niekde bola tusim kvasinka 30\%}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good estimate for real data, the estimators have to consider this issues. Let us deal with handling repeats first.
 
 % Methods described in~\cite{waterman} and ~\cite{williams} were focused on handling repeats.
-The first method~\cite{waterman} is based on simplified scenario described above. Suppose, the \kmer $w$ occurs $n(w)$ times in the sequence. Let $x_i(w)$ be the number of reads covering the $i$-th occurrence of $w$. Similarly to the simplified scenario, $x_i(w)$ can be modeled by the Poisson distribution with mean $c_k$, which is the base coverage. The the total number of occurrences of $w$ in reads can be than modeled as $$\sum_{i=1}^{n(w)} x_i(w) = \sum_{i=1}^{n(w)} Pois(c_k) = n(w) Pois(c_k).$$
+\paragraph{}The first method~\cite{waterman} is based on simplified scenario described above. Suppose, the \kmer $w$ occurs $n(w)$ times in the sequence. Let $x_i(w)$ be the number of reads covering the $i$-th occurrence of $w$. Similarly to the simplified scenario, $x_i(w)$ can be modeled by the Poisson distribution with mean $c_k$, which is the base coverage. The the total number of occurrences of $w$ in reads can be than modeled as $$\sum_{i=1}^{n(w)} x_i(w) = \sum_{i=1}^{n(w)} Pois(c_k) = n(w) Pois(c_k).$$
 
 Suppose there are $n_f$ repeat families in the data. The number of occurences of any \kmer in $i$-th family, $F_i$, is a Poisson random variable with parameter $a_i c_k$. Moreover, we assume that proportion of different \kmers in $F_i$ of all unique \kmers in the original sequence is $\alpha_i$.
 We then need to solve following problem: we have set of samples from a mixed Poisson distribution and some of the samples are dependent. We want to estimate $a_i,\,\alpha_i$ for $i = 1\dots n_f$.
@@ -61,7 +63,7 @@ a_i c_k & = \frac{\displaystyle\sum_w n(w) \Pr[w \in F_i | n(w)]}{\displaystyle\
 \Pr[w \in F_i | n(w)] & = \frac{\alpha_i}{\displaystyle\sum_{j=1}^{n_f} \alpha_j \left(\frac{a_j}{a_i}\right)^{n(w)} e^{(\alpha_i-a_j)c_k}}.
 \end{align*}
 
-Note that this use standard Poisson distribution for their estimates. Thus we need to calculate the number of \kmers which are not present in our data. We can use following formula to estimate it~\cite{waterman}:
+Note that this method uses standard Poisson distribution for their estimates. Thus we need to calculate the number of \kmers which are not present in our data. We can use following formula to estimate it~\cite{waterman}:
 $$H_k[0] = \frac{\displaystyle\sum_{i=1}^{n_f}\alpha_i e^{-a_i c_k} \sum_{i=1}^{|H_k|}H_k[i]}{\displaystyle\sum_{i=1}^{n_f}\alpha_i\left(1 - e^{-a_i c_k}\right)}$$
 
 We can use EM algorithm to obtain the values of the parameters $a_i,\, \alpha_i$ and $c_k$ from above equations, which iteratively computes the parameters based on values of the parameters from previous step and stops when they converge or change very little.
@@ -74,22 +76,38 @@ If we know the parameters we can compute the genome size using one of the follow
 && G & = \frac{N(L-k+1)}{\min\{a_j c_k: j = 1,\dots,|H_k|\}}&&.
 \end{flalign*}
 
+\paragraph{}The second method~\cite{williams} exploits the fact that if the \emph{modal} (single-copy) coverage is $c$, than coverage of repetitive region would be an integer multiply of $c$.
 
+Recall that if \kmers were randomly sampled from a genome without repeats, the shape of the \kmer histogram would be a single Poisson distribution.
+$$H_k[j] \approx a_1 Poisson(j; c_k)$$
+where $H_k[j]$ is the number of \kmers observed $o$ times, $a_1$ is the number of unique \kmers, and $c_k$ is the \kmer coverage.
 
-% The first research in this field focused on handling repeats and contained very simple error handling approaches.
-%
-% In~\cite{waterman}, they estimated the genome size and coverage based on probabilistic models of repeat content of the genome and used EM algorithm to fit the parameters of the model to the data.
-%
-% \todo{ako modeluju repeaty}
-%
-%
-% In~\cite{williams} authors analyzed \kmer histograms multiplied by an abundance of columns (i.e.\ let $H_k$ be the \kmer histogram and $n = |H_k|$, the transformed histogram $W_k = 1 \cdot H_k[1], 2\cdot H_k[2], \dots, n \cdot H_k[n]$). They looked for the principal peek in $W_k$ which represented the coverage of single copy parts of genome --- \emph{the modal coverage} --- and other peeks at integer multiplies of modal coverage which represented the sequence repeats.
-% They filtered errors simply by truncating the low abundance part of the histogram.
-%
-% According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. As this method focuses on low coverage estimation, it models repeats in very simple way. It uses 3 parameters --- for single copy parts of genome, for parts which are repeated exactly twice and all others. The proportions of the \kmers repeated more than twice are modeled using a geometric distribution.
-%
-% The model distribution is then a mixture of probabilities from the previous model, where $c_k$ is replaced by $o \cdot c_k$ and $o$ is number of the \kmer.
-% This method allows genome size and coverage estimation for low coverage data ($0.5\times$) or higher error rates (10\%).
+Let $a_o$ be the number of \kmers in the original genome, which repeat in the genome $o$ times. As we already have mentioned, distribution of abundances of the \kmers with abundance $o$ would be $Pois(o*c_k)$ and the number of \kmers occurring in the data $j$ times would be $a_o Poisson(j; o*c_k)$. Hence, if we put all sequences together, we sum up the distribution for each level of abundance and the shape of the histogram would be~\cite{williams}:
+$$H_k[j] \approx \sum_o a_o Poisson(j; o\cdot c_k).$$
+This can be generalized to over-dispersed Poisson shapes by introducing a single over-dispersion shape parameter $s$ to allow distributions with excess variance~\cite{williams}:
+$$P(j; c_k, \{a_o\}, s) = \sum_o a_o NegBinomial(j; \mu=c_k\cdot o;\sigma^2=s/o).$$
+%treba spomenut dovod?? ze im poisson mixture tak dobre nefitoval akp toto?
+This model can be used to infer the parameters by maximizing the likelihood for the observed histogram $H_k$:
+$$L(c_k, \{a_o\}, s | H_k) = \sum_j Poisson(H_k[j]; P(j; c_k, \{a_o\}, s)).$$
+
+The number of unique \kmers is the sum of the $\{a_o\}$ coefficients and the size of the genome can be estimated as the sum of the products of the unique \kmers and their relative abundances:
+$$G = \sum_o o\cdot a_o.$$
+
+\paragraph{} According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. In our paper\cite{covest}, we focused on estimates from low coverage data, thus the approaches described above would not be applicable. Instead of that we decided to model the repeats very simply.
+
+Let $p_j(c)$ be the probability that a particular \kmer occurs $j$ times in the data given the coverage $c$. The probability that a \kmer from sequence repeated $o$ times occures $j$ times in the data is then $p_{o,j} = p_j(o\cdot c)$.
+Similarly to the previous method, we can model the overall probability distribution as a mixture distribution:
+$$p_j = \sum_{o=1}^\infty \beta_o p_{o,j}.$$
+
+We assumed that the probability that sequence repeats $n$ times decreases with increasing $n$. We decided to model repeats by the geometric distribution. We also decided to model the single-copy sequences and sequences which repeats exactly twice in the genome separately. We introduced three parameters --- $q_1$, $q_2$, and $q$ --- for the single-copy, two-copy and the parameter for geometric distribution for higher abundance sequences.
+
+We can then use these parameters to define a mixture of distributions to express the $\beta_o$ parameters as follows:
+$\beta_1 = q_1$, $\beta_2 = (1-q_1) q_2$, and $\beta_o =
+(1-q_1)(1-q_2)q(1-q)^{o-3}$ for $o\ge 3$.
+
+The likelihood can be computed using similar formula to the simplified scenario:
+$$L(\theta | H_k) = \sum_{j=1}^m H_k[j] \log p_j.$$
+where $\theta = \{c_k, q_1, q_2, q\}$ is the parameter vector.
 
 \subsection{Modeling Errors}
 
@@ -110,6 +128,8 @@ This is fixed in final model, where repeats were modeled by geometric distributi
 \todo{sumar z vysledkov clankov}
 
 \section{Conclusion}
+
+\todo{toto este treba upravit}
 
 In this chapter we dealt with a problem of estimating the genome size and the coverage. We showed two main approaches to this problems based on \kmer histogram analysis.
 
