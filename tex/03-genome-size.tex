@@ -3,7 +3,10 @@
 \label{chap:genomesize}
 
 The genome size is one of the fundamental questions related to the sequenced genome.
-The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment\todo{aky experiment} and use the information to better design the experiment itself.
+
+\todo{motivation, see panda paper???}
+
+% The estimate of genome size can be very useful in experiment design in biology. If it is possible to estimate the genome size from low coverage sequencing data, biologists can do this estimate with low cost prior the experiment\todo{aky experiment} and use the information to better design the experiment itself.
 
 The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage $c$ is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data $L\cdot N$, where $L$ is the read length and $N$ is the number of reads) and the genome size $G$.
 $$c = \frac{NL}{G}$$
@@ -156,6 +159,68 @@ This model still does not consider any repeats in the original sequence, but can
 \subsection{Testing the Models}
 \todo{ako sa testuju}
 \todo{sumar z vysledkov clankov}
+
+The methods described in previous subsections were evaluated on both, simulated and real datasets.
+
+The first method\cite{waterman} was tested on four errorfree simulated datasets to show various properties of the method, and one real dataset --- BAC, H\_NH0140H23. The first experiment focused on comparing the random vs. tandem repeats (Table~\ref{tab:waterman1}). The authors claim that position of the repeats does not have any relation to the estimates.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{ccccccc}
+\toprule
+\multicolumn{4}{c}{Original} &
+\multicolumn{3}{c}{Estimated} \\
+\cmidrule(r{4pt}){1-4} \cmidrule(l){5-7}
+$G$ (kb) & $L$ (bp) & $c$ & repeat profile & $G$ (kb) & $c$ & repeat profile\\
+\midrule
+100 & 500 & 3 & \specialcell[t]{$15\times$(30\%) \\ $7\times$(14\%) \\ random} & 98.371 & 3.05 & \specialcell[t]{$15\times$(30.1\%) \\ $7\times$(13.1\%)}\\
+100 & 500 & 3 & \specialcell[t]{$15\times$(30\%) \\ $7\times$(14\%) \\ tandem} & 97.087 & 3.09 & \specialcell[t]{$13\times$(35.3\%) \\ $7\times$(17.2\%)}\\
+\bottomrule
+\end{tabular}
+\caption{Comparing random and tandem repeats. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The both simulated datasets contain two repeat families 2kb long sequence repeated $15\times$ and 2kb long sequence repeated $7\times$.}\label{tab:waterman1}
+\end{table}
+
+The second experiment focused on influence of the dataset size. The both datasets have the same coverage, read length and repeat structure, but the second dataset is $10\times$ as long as the first one. They also increased the overage of the first dataset to $10\times$ and compared to the original one (Table~\ref{tab:waterman2}). The authors claim that with larger dataset the estimate gets better and it is easier to distinguish between the repeat families.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{ccccccc}
+\toprule
+\multicolumn{4}{c}{Original} &
+\multicolumn{3}{c}{Estimated} \\
+\cmidrule(r{4pt}){1-4} \cmidrule(l){5-7}
+$G$ (kb) & $L$ (bp) & $c$ & repeat profile & $G$ (kb) & $c$ & repeat profile\\
+\midrule
+80 & 500 & 3 & \specialcell[t]{$2\times$(15\%) \\ $12\times$(15\%) \\ tandem} & 73.104 & 3.283 & $12\times$(17.3\%)\\
+800 & 500 & 3 & \specialcell[t]{$2\times$(15\%) \\ $12\times$(15\%) \\ tandem} & 782.789 & 3.067 & \specialcell[t]{$2\times$(14.2\%) \\ $12\times$(15.1\%)}\\
+80 & 500 & 10 & \specialcell[t]{$2\times$(15\%) \\ $12\times$(15\%) \\ tandem} & 79.289 & 9.928 & \specialcell[t]{$2\times$(27\%) \\ $12\times$(15.7\%)}\\
+\bottomrule
+\end{tabular}
+\caption{Comparing various repeat sizes. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The first sequence contains two repeat families 6kb long sequence repeated $2\times$ and 1kb long sequence repeated $12\times$. In the larger sequence the sizes of the repeated sequences are 60kb and 10kb respectively.}\label{tab:waterman2}
+\end{table}
+
+Finally, they showed performance of the method on the real data.
+The genome size was 103,432 bp and the coverage was $3.018\times$.
+They had 1674 error corrected reads with minimal length 101 bp, maximal length 777bp, mean length 507bp, median 553 bp, and standard deviation was 148bp.
+They run several experiments on these data. Firstly, they ran the algorithm on 609 randomly selected reads. Secondly they simulated 1674 reads from the original sequence. Lastly they counted $12$-mers from the original sequence (Table \ref{tab:waterman3}).
+The estimated genome size and coverage was 103,696 bp and $2.945\times$ respectively.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Substring family & real reads & simulated reads & count 12-mer with errors\\
+\midrule
+unique & 66.1\% & 47.8\% & 50\%\\
+repeated twice & 16.46\% & 11.99\% & 14\%\\
+repeated 3 times & 0\% & 22.11\% & 21\%\\
+repeated 4 times & 14.25\% & 4.24\% & 4\%\\
+repeated 5 times & 0\% & 4.39\% & 3\%\\
+the rest & 3.19\% & 9.47\% & 8\%\\
+\bottomrule
+\end{tabular}
+\caption{Proportions of repetitive sequences in real data exmeriments.}\label{tab:waterman3}
+\end{table}
 
 \section{Conclusion}
 
