@@ -1,6 +1,25 @@
 \chapter{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
-\todo{short general intro, what do they have in common, maybe definitions and description how are they created...}\cite{venner2009dynamics}
+Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and creation process.
+
+Repeats usually does not have any function and are often represented by several thousands of copies\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
+\emph{Simple sequence repeate} consists of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
+\emph{Retrotransposons} are capable of moving to different sites in DNA by the reverse transcription.
+\emph{DNA transposons} moves through the DNA by being copied and reinserted as DNA sequences\cite{cell}.
+
+The gene families are groups of related genes. They arise by duplication of an ancestral gene. The different members of the families diverge due to mutations during the evolution. Some of the mutations may result in loss of ability to produce a functional gene product. The nonfunctional gene copies are called \emph{pseudogenes}.
+Gene duplications can arise by two mechanisms: duplication of a segment of DNA, or by reverse transcription of an mRNA, followed by integration of the cDNA copy into a new chromosomal site.
+Duplication by reverse transcription usually yields an inactive gene copy (\emph{processed pseudogene}).
+The copy number of gene families is much lower than in repeats.
+
+As the repeats and gene families consists of multiple very similar sequences in DNA, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short sequences from DNA (reads). Repetitive sequences are usually longer than reads, and therefore reads from various positions of the same repetitive DNA are very hard to distinguish, which makes hard to determine the size of the repetitive sequence.
+
+Repetitive sequences forms a substantial part of DNA. For example,
+transposable elements forms more then 70\% of the genome in some plants and amphibians, and 45\% in human genome\cite{biemont2006genetics}.
+Therefore studying repetitive sequences is one of the essential tasks in DNA analysis.
+
+In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios.
+
 % (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
 
 \section{Finding the Known Repeats in Assembled Genome}
@@ -18,7 +37,7 @@
 % - tu mozes zacat s programami, ktore to hladaju v poskladanom genome, napr RepeatScout pripadne dalsie
 % - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
 
-\subsection{Finding Repeats by \Kmer abundance histogram analysis}
+\subsection{Finding Repeats by K-mer abundance histogram analysis}
 
 \todo{odvolat sa na kapitolu 3, pripadne spomenut advanced algoritmus z \cite{waterman}}
 
