@@ -23,6 +23,30 @@ In this chapter we will present multiple approaches for detecting repetitive seq
 % (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
 
 \section{Finding the Known Repeats in Assembled Genome}
+\todo{intro}
+
+\subsection{Finding Tandem Repeats}
+Tandem repeats are repeats which occurs consequently one after another. The tandem repeats are not in our focus in this thesis, so we will not address them in depth.
+
+There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
+
+In this section we will briefly present the main idea used in tandem repeats finder.
+
+The tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
+
+The detection algorithm looks for exactly matching \kmers which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible \kmers (probes).
+For each probe $p$ it stores a history list $H_p$.
+When a particular position $i$ is added to the $H_p$, for all previous positions $j$ in $H_p$, $d = i - j$ becomes a possible pattern size.
+The algorithm also maintains a distance list $D_d$, which is basically a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The updates sets right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to analysis component of the algorithm.
+
+In analysis, the pattern consisting of positions $j+1\dots i$ is selected and aligned with the surrounding sequences using wraparound dynamic programming\cite{fischetti1992apostolico, myers1989approximate}. If at least two copies are aligned, the tandem repeat is reported.
+
+The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}), but we will not go any deeper in this work.
+
+\subsection{Finding Random Repeats(Transposons?)}
+\todo{better title for this}
+\todo{some intro}
+\todo{najst clanky aa spisat}
 
 % (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
 % - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
