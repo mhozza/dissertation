@@ -22,13 +22,8 @@ In this chapter we will present multiple approaches for detecting repetitive seq
 
 % (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
 
-\section{Finding the Known Repeats in Assembled Genome}
-\todo{intro}
-
-\subsection{Finding Tandem Repeats}
-Tandem repeats are repeats which occurs consequently one after another. The tandem repeats are not in our focus in this thesis, so we will not address them in depth.
-
-There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
+\section{Finding Tandem Repeats}
+Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
 
 In this section we will briefly present the main idea used in tandem repeats finder.
 
@@ -41,12 +36,29 @@ The algorithm also maintains a distance list $D_d$, which is basically a sliding
 
 In analysis, the pattern consisting of positions $j+1\dots i$ is selected and aligned with the surrounding sequences using wraparound dynamic programming\cite{fischetti1992apostolico, myers1989approximate}. If at least two copies are aligned, the tandem repeat is reported.
 
-The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}), but we will not go any deeper in this work.
+The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}).
 
-\subsection{Finding Random Repeats(Transposons?)}
-\todo{better title for this}
-\todo{some intro}
-\todo{najst clanky aa spisat}
+Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
+
+\section{Finding the Known Repeats and Families in Assembled Genome}
+
+The known repeats and families are stored in several databases. Some examples of repeat databases are repbase\cite{repbase}, dfam\cite{dfam}, and example of the gene family databases is pfam\cite{pfam}.
+
+There are two approaches for sequence finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
+
+\paragraph{}
+\todo{odstavcek o blaste a spol}
+
+\paragraph{}
+\todo{co je HMM?}
+The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides. The profile HMM have to take into account all this mutation and return higher probability for the sequences belonging to the family, than for other sequences.
+Assume, we have a multiple alignment of sequences from the family. The profile HMM\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching positions in the alignment. Each state $m_k,\, 1 \leq k \leq M$, have a distinct emission distribution.
+For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide and allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ is added.
+The architecture of the model can be seen in figure\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
+\todo{obrazok}
+
+
+The commonly used tools for finding and repeats and families in the assembled genomes are repeat masker\cite{repeatmasker}, interproscan\cite{}, HMMer\cite{}.
 
 % (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
 % - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
