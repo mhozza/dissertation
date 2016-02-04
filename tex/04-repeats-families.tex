@@ -54,16 +54,19 @@ There are two approaches for sequence finding. The first one is based on sequenc
 The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides. The profile HMM have to take into account all this mutation and return higher probability for the sequences belonging to the family, than for other sequences.
 Assume, we have a multiple alignment of sequences from the family. The profile HMM\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching positions in the alignment. Each state $m_k,\, 1 \leq k \leq M$, have a distinct emission distribution.
 For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide and allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ is added.
-The architecture of the model can be seen in figure\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
+The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 \todo{obrazok}
 
+Once a model is built it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
+There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferring in HMM is the Viterbi algorithm, which is very slow comparing to sequnece alignment method\cite{eddy2011accelerated}. Recently published algorithm, HMMER3\cite{eddy2011accelerated}, for the alignment uses multiple segment Viterbi algorithm\cite{eddy2011accelerated}, which enables fast computation of an optimal sum of multiple ungapped local
+alignment segments. This can be used as heuristic filter before running the full algorithm.
 
-The commonly used tools for finding and repeats and families in the assembled genomes are repeat masker\cite{repeatmasker}, interproscan\cite{}, HMMer\cite{}.
+The most used tools for finding and repeats and gene families in the assembled genomes are repeat masker\cite{repeatmasker}, interproscan\cite{mitchell2015interpro}, HMMER\cite{eddy2011accelerated}.
 
 % (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
 % - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
 % - a hladanie zalozene cisto na podobnosti sekvencii (BLAST a spol) a na profilovych HMM
-% - oblubene nastroje su napr. repeatmasker http://repeatmasker.org/, interproscan, HMMer
+% - oblubene nastroje su napr. repeatmasker http://repeatmasker.org/, interproscan, HMMER
 % - tieto veci staci pomerne strucne vysvetlit, bez velkych detailov
 
 \section{De Novo Repeat Finding}
@@ -72,6 +75,7 @@ The commonly used tools for finding and repeats and families in the assembled ge
 % (3) dalsia cast by mohla byt o hladani repeatov, ktore este nie su zname (de novo discovery)
 % - tu mozes zacat s programami, ktore to hladaju v poskladanom genome, napr RepeatScout pripadne dalsie
 % - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
+\subsection{Finding De Novo Repeats in assembled genome}
 
 \subsection{Finding Repeats by K-mer abundance histogram analysis}
 
