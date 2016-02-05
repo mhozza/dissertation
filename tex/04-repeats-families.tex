@@ -40,22 +40,24 @@ The more details on the statistical criteria and indel handling can be found in~
 
 Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
 
-\section{Finding the Known Repeats and Families in Assembled Genome}
+\section{Finding the Known Repeats and Gene Families in Assembled Genome}
 
 The known repeats and families are stored in several databases. Some examples of repeat databases are repbase\cite{repbase}, dfam\cite{dfam}, and example of the gene family databases is pfam\cite{pfam}.
 
+In the database search, we are usually interested in all  sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of repeats from the database, which appears in our sequence.
 There are two approaches for sequence finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
-\paragraph{}
-\todo{co je local alignment}
+\paragraph{Searching by sequence similarity.}
+In the local alignment, on the input there are two sequences and the output is alignment of some substrings of the sequences. Usually, we are interested in an alignment with highest score, or score above some threshold.
 The standard algorithms for local alignment of 2 sequences look for the optimal local alignment according to some scoring scheme. They use a dynamic programming algorithm to find the optimal alignment. The time complexity of this approach is proportional to the product of the lengths of both sequences, which makes this approach very slow for long sequences.
 
 Therefore there have been developed heuristic algorithms, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST\cite{blast}.
-BLAST firstly looks for exact matches of length $T$, called seeds.
+BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
 Each seed is then extended to maximize the score. The standard BLAST algorithm searches only for gapless alignments (i.e.\ it does not consider any indels), but there are versions which also enables gaps in the alignment.
 
-\paragraph{}
-\todo{co je HMM?}
+\paragraph{Searching by profile HMM.}
+The \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which generates a random sequence together with its annotation by the states. HMM is similar to the finite automaton. It has a finite number of states, transitions and emissions. At each step the HMM moves to next state (which might be the same as current) according to transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+
 The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides. The profile HMM have to take into account all this mutation and return higher probability for the sequences belonging to the family, than for other sequences.
 Assume, we have a multiple alignment of sequences from the family. The profile HMM\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching positions in the alignment. Each state $m_k,\, 1 \leq k \leq M$, have a distinct emission distribution.
 For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide and allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ is added.
