@@ -47,7 +47,12 @@ The known repeats and families are stored in several databases. Some examples of
 There are two approaches for sequence finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
 \paragraph{}
-\todo{odstavcek o blaste a spol}
+\todo{co je local alignment}
+The standard algorithms for local alignment of 2 sequences look for the optimal local alignment according to some scoring scheme. They use a dynamic programming algorithm to find the optimal alignment. The time complexity of this approach is proportional to the product of the lengths of both sequences, which makes this approach very slow for long sequences.
+
+Therefore there have been developed heuristic algorithms, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST\cite{blast}.
+BLAST firstly looks for exact matches of length $T$, called seeds.
+Each seed is then extended to maximize the score. The standard BLAST algorithm searches only for gapless alignments (i.e.\ it does not consider any indels), but there are versions which also enables gaps in the alignment.
 
 \paragraph{}
 \todo{co je HMM?}
@@ -61,7 +66,8 @@ Once a model is built it can be used for search. The search involves a local ali
 There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferring in HMM is the Viterbi algorithm, which is very slow comparing to sequnece alignment method\cite{eddy2011accelerated}. Recently published algorithm, HMMER3\cite{eddy2011accelerated}, for the alignment uses multiple segment Viterbi algorithm\cite{eddy2011accelerated}, which enables fast computation of an optimal sum of multiple ungapped local
 alignment segments. This can be used as heuristic filter before running the full algorithm.
 
-The most used tools for finding and repeats and gene families in the assembled genomes are repeat masker\cite{repeatmasker}, interproscan\cite{mitchell2015interpro}, HMMER\cite{eddy2011accelerated}.
+There are various tools for finding repeats and gene families, implementing these methods.
+The most used ones are repeat masker\cite{repeatmasker}, interproscan\cite{mitchell2015interpro}, HMMER\cite{eddy2011accelerated}.
 
 % (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
 % - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
@@ -75,7 +81,7 @@ The most used tools for finding and repeats and gene families in the assembled g
 % (3) dalsia cast by mohla byt o hladani repeatov, ktore este nie su zname (de novo discovery)
 % - tu mozes zacat s programami, ktore to hladaju v poskladanom genome, napr RepeatScout pripadne dalsie
 % - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
-\subsection{Finding De Novo Repeats in assembled genome}
+\subsection{Finding de Novo Repeats in assembled genome}
 
 \subsection{Finding Repeats by K-mer abundance histogram analysis}
 
