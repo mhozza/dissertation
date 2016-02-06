@@ -80,7 +80,6 @@ The more details on the statistical criteria and indel handling can be found in~
 Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
 
 \subsubsection{Finding Interspersed Repeats}
-\todo{ napr RepeatScout pripadne dalsie}
 
 The first methods (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}) for finding repeats in assembled genome were based on computation of pairwise similarities. However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise repeats would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
 Also, local sequence alignments do not usually correspond to the biological boundaries.\cite{recon}.
@@ -139,22 +138,20 @@ However, this method suffers from several drawbacks. The major drawback is that 
 \subsection{Sequencing Data Clustering}
 
 The other approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
-The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. Such graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold\cite{pertea2003tigr, novak2010graph}. \todo{spomenut mgblast?}
+The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. Such graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
 
-The basic method of clustering the graph is to split it by connected components. The granularity of such graph strongly depends on sequence coverage. The higher the coverage is, the smaller number and bigger clusters will be found in the graph. Additionally, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences. This method is used in \emph{tclust}\cite{pertea2003tigr}.
+The basic method of clustering the graph, used in \emph{tclust}\cite{pertea2003tigr}, is to split it by connected components. The granularity of such graph strongly depends on sequence coverage. The higher the coverage is, the smaller number and bigger clusters will be found in the graph. Additionally, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
-The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical alglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
-The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in random graph. It can be masured as:
+The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical aglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
+The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in random graph. It can be masured as\cite{novak2010graph}:
 $$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
-where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if comunity $c_i = c_j$.
-We want to find the clustering with maximal modularity.
+where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if community $c_i = c_j$.
 
-
-\todo{greedy algorithm}
-
-\todo{citations}
+We can find the clustering with maximal modularity using a greedy algorithm. In the beginning every vertex has its own community.
+At each iteration, for every pair of communities, the expected gain to the modularity if they are merged, $\Delta Q$, is computed. The communities with the greatest $\Delta Q$ are then merged. This is repeated until only one community is left. Finally, the iteration with maximal overall $Q$ is selected as final clustering.
 
 \todo{figures}
+\todo{short conclusion}
 
 \subsection{Conclusion}
 
