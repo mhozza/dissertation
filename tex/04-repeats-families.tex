@@ -14,31 +14,13 @@ The copy number of gene families is much lower than in repeats.
 
 As the repeats and gene families consists of multiple very similar sequences in DNA, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short sequences from DNA (reads). Repetitive sequences are usually longer than reads, and therefore reads from various positions of the same repetitive DNA are very hard to distinguish, which makes hard to determine the size of the repetitive sequence.
 
-Repetitive sequences forms a substantial part of DNA. For example,
+Repetitive sequences forms a substantial part of DNA.\@ For example,
 transposable elements forms more then 70\% of the genome in some plants and amphibians, and 45\% in human genome\cite{biemont2006genetics}.
 Therefore studying repetitive sequences is one of the essential tasks in DNA analysis.
 
 In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios.
 
 % (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
-
-\section{Finding Tandem Repeats}
-Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
-
-In this section we will briefly present the main idea used in tandem repeats finder.
-
-The tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
-
-The detection algorithm looks for exactly matching \kmers which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible \kmers (probes).
-For each probe $p$ it stores a history list $H_p$.
-When a particular position $i$ is added to the $H_p$, for all previous positions $j$ in $H_p$, $d = i - j$ becomes a possible pattern size.
-The algorithm also maintains a distance list $D_d$, which is basically a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The updates sets right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to analysis component of the algorithm.
-
-In analysis, the pattern consisting of positions $j+1\dots i$ is selected and aligned with the surrounding sequences using wraparound dynamic programming\cite{fischetti1992apostolico, myers1989approximate}. If at least two copies are aligned, the tandem repeat is reported.
-
-The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}).
-
-Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
 
 \section{Finding the Known Repeats and Gene Families in Assembled Genome}
 
@@ -71,31 +53,78 @@ alignment segments. This can be used as heuristic filter before running the full
 There are various tools for finding repeats and gene families, implementing these methods.
 The most used ones are repeat masker\cite{repeatmasker}, interproscan\cite{mitchell2015interpro}, HMMER\cite{eddy2011accelerated}.
 
-% (2) dalsia cast sa tyka detekcie znamych repeatov a znamych rodin v uz poskladanych genomoch (pripadne by sa dalo aj v jednotlivych readoch, ale bolo by to pomerne pomale)
-% - tu mozes spomenut databazy znamych repeatov, napr repbase, dfam a rodin napr. pfam
-% - a hladanie zalozene cisto na podobnosti sekvencii (BLAST a spol) a na profilovych HMM
-% - oblubene nastroje su napr. repeatmasker http://repeatmasker.org/, interproscan, HMMER
-% - tieto veci staci pomerne strucne vysvetlit, bez velkych detailov
-
 \section{De Novo Repeat Finding}
 
-\todo{intro to repeats - depends on what will be in general intro}
-% (3) dalsia cast by mohla byt o hladani repeatov, ktore este nie su zname (de novo discovery)
-% - tu mozes zacat s programami, ktore to hladaju v poskladanom genome, napr RepeatScout pripadne dalsie
-% - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
+\todo{intro to denovo repeat finding}
+
 \subsection{Finding de Novo Repeats in assembled genome}
+
+\todo{intro}
+
+\subsubsection{Finding Tandem Repeats}
+Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
+
+In this section we will briefly present the main idea used in tandem repeats finder.
+
+The tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
+
+The detection algorithm looks for exactly matching \kmers\ which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible \kmers\ (probes).
+For each probe $p$ it stores a history list $H_p$.
+When a particular position $i$ is added to the $H_p$, for all previous positions $j$ in $H_p$, $d = i - j$ becomes a possible pattern size.
+The algorithm also maintains a distance list $D_d$, which is basically a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The updates sets right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to analysis component of the algorithm.
+
+In analysis, the pattern consisting of positions $j+1\dots i$ is selected and aligned with the surrounding sequences using wraparound dynamic programming\cite{fischetti1992apostolico, myers1989approximate}. If at least two copies are aligned, the tandem repeat is reported.
+
+The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}).
+
+Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
+
+\subsubsection{Finding Interspersed Repeats}
+\todo{ napr RepeatScout pripadne dalsie}
+
+The first methods (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}) for finding repeats in assembled genome were based on computation of pairwise similarities. However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise repeats would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
+Also, local sequence alignments do not usually correspond to the biological boundaries.\cite{recon}.
+
+In~\cite{repscout}, they present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant \kmers\ and then extend it to the repeat family consensus.
+
+If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends a seed one base at a time, adding a base which has a majority among all sequences. It discards a sequences which stop align to the consensus and stops when most sequences stops to align. More precisely, let $S1,\dots S_n$ be strings containing occurrences of a repeat family, which share a \kmer\ seed, the consensus sequence $Q$ is the sequence which maximizes
+$$A(Q; S_1 \dots S_n) = \left[\sum_k a(Q, S_k)\right] - c |Q|,$$
+where $a(Q, S_k)$ is a fit-preferred\cite{repscout} alignment score and $c$ is a repeat frequency threshold.
+Algorithm then starts from $Q = \text{\kmer\ seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
+
+Since many abundant \kmers\ may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed \kmers\ from the \kmer\ count table.
+
+\todo{short consclusion}
+
+% - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
 
 \subsection{Finding Repeats by K-mer abundance histogram analysis}
 
-\todo{odvolat sa na kapitolu 3, pripadne spomenut advanced algoritmus z \cite{waterman}}
+Some of the algorithms for the genome size estimation described in Section~\ref{sec:kmerhist} can be also used for detecting repeats.
+In the basic form the algorithms tell us, the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provide algorithm for finding the consensus for repeats.
+
+The algorithm uses two basic observations:
+
+\begin{enumerate}
+  \item The repeat family is expected to have multiple \kmers\ with  unusually high coverage.
+  \item The reads covering a different copies of a particular repeat family can be separated into different groups, starting from one read and extending it if there are more then a prespecified number of reads, which prefix matches the suffix of the currently considered read.
+\end{enumerate}
+
+Using (1), we can find parts of repetitive sequences and using (2), we can extend them to obtain a consensus of a repeat family.
+
+We can also obtain a copy number of the repeat family. In~\cite{waterman}, they described two methods for finding the copy number of the family.
+The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated coverage.
+The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. Finally we find all paths from reads from category (a) to category (c).
+
+The major drawback of this method is that it needs error free reads and higher coverage.
 
 \subsection{Partial Sequence Assembly}
 
-As we mentioned in section \ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
+As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
 Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the contrary the average coverage of repetitive sequences will be higher and the chance of overlapping repetitive sequences will be higher.
 
 The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation\cite{swaminathan2007global}:
-$$E(M) = Ne^{-2c\sigma}(1-e^{c\sigma})^{j-1}$$
+$$E(M) = Ne^{-2c\sigma}{(1-e^{c\sigma})}^{j-1}$$
 $$\sigma = 1 - \frac{T}{L},$$
 where $c$ is the coverage, $L$ is the read length, and $T$ the base pair overlap required for contig formation.
 
@@ -117,8 +146,10 @@ The basic method of clustering the graph is to split it by connected components.
 The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical alglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
 The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in random graph. It can be masured as:
 $$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
-where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_ij$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if comunity $c_i = c_j$.
+where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if comunity $c_i = c_j$.
 We want to find the clustering with maximal modularity.
+
+
 \todo{greedy algorithm}
 
 \todo{citations}
@@ -147,12 +178,12 @@ We want to find the clustering with maximal modularity.
 % - spomenut rozdieli oproti modelovaniu repeatov z predoslej kapitoly
 
 \section{Evolution of Gene Families}
-\todo{intro to gene families - depends on what will be in general intro}
+\todo{intro to gene families --- depends on what will be in general intro}
 % (4) posledna cast by bola o evolucii velkosti genovych rodin (s tym, ze modely a postupy by sa dali pouzit aj na repeaty, pripadne pohladaj, ci to niekto robil)
 
 \todo{clanky:}
 \begin{itemize}
-  \item \cite{hahn2005estimating}
+  \item~\cite{hahn2005estimating}
 \end{itemize}
 
 \todo{conclusion}
