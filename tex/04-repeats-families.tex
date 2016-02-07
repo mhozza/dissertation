@@ -207,9 +207,7 @@ Phylogenetic trees are heavily used in the study of the evolution. The leaves of
 
 The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms\cite{felsenstein1981evolutionary}.
 
-\todo{testing hypothesis}
-To test the hypothesis against null model, the $P$-value is usually used.
-\todo{p-value short definition}
+To test the hypothesis against null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
 
 Since the root family size is not known, we need to use conditional $P$-values conditioned of specific value of the root family size.
 The conditional $P$-value is computed as the probability that a random gene family with the same root size has smaller conditional likelihood.
