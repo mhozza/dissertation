@@ -157,30 +157,11 @@ At each iteration, for every pair of communities, the expected gain to the modul
 
 \todo{conclusion}
 
-% \todo{clanky:}
-% \begin{itemize}
-%   \item \cite{gu2008identification}
-%   % \item \cite{sveinsson2013transposon} - blbost
-%   \item \cite{shapiro2005repetitive}
-% \end{itemize}
-
-% Velmi zhruba o com to ma asi byt
-% - nejake problemy a ako ich riesit - dat je vela, da sa spravit nizsie pokrytie (aj random samplovanim)
-% - vlastnosti repeatov - je ich viac ako beznych sekvencie - teda ked nahodne sekvenujeme, tak ocakavame ze tam bude viac podobnych sekvencii ktore zodpovedaju repeatu ako podobnych co zodpovedaju nerepeatu (repeaty maju ako keby vacsi coverage)
-% - ked znizujeme pokrytie, znizujeme pravdepodobnost ze sa dany kus sekvencii vyskytne v datach. kedze repeatov je viac, tak tie maju vyssiu pravdepodobnost ze sa dostanu do dat, cize vieme pokrytie nastavit tak, aby to co ostane v datach boli s vysokou pravdepodobostov repeaty, a s vysokou pravdepodobnostou sa tam dostanu vsetky (resp ocakavame ze sa ich tam dostane dost velka cast)
-% niekolko metod:
-% - urobit ciastocne assembly a zobrat kontigy (tiez nastudovat)
-% - nastavit pokrytie dost nizko a detegovat komponenty suvislosti (tclust, nastudovat)
-% - grafove klastrovanie\cite{novak2010graph} -> pisu ze celkom sikovne
-% - spomenut rozdieli oproti modelovaniu repeatov z predoslej kapitoly
-
 \section{Evolution of Gene Families}
-\todo{intro to gene families --- depends on what will be in general intro}
-% (4) posledna cast by bola o evolucii velkosti genovych rodin (s tym, ze modely a postupy by sa dali pouzit aj na repeaty, pripadne pohladaj, ci to niekto robil)
 
-\todo{intro}
+Prior the wide availability of whole genome assemblies, enabled by newer sequencing technologies, evolution studies focused on small numbers of nucleotide differences between orthologous genes. Nowadays, it is possible to focus on large-scale genome differences, e.g.\ changes in the sizes of gene families.
 
-\todo{null model purpose (part of intro maybe)}
+The gene families may very among different organisms. In the evolutionary biology, we would like to distinguish which changes are due to evolutionary forces and which are just by chance. To do this, we need some null model, which models ``normal'' (random) evolution of the gene families. One such model is a birth-death based model presented in~\cite{hahn2005estimating}.
 
 Suppose, that in a gene family the number of genes is given by discrete random variable $X(t)$. Then probability that $X(t) = c$, given that $X(0) = s$ is $P(X(t) = c | X(0) = s)$.
 In \emph{birth-death model}, we define two parameters: birth rate $\lambda$ and death rate $\mu$, where the probability that any gene being duplicated (and fixed) is $\lambda \Delta t$ or being lost is $\mu \Delta t$. In family of size $X(t)$ the possible transitions are\cite{hahn2005estimating}:
@@ -193,21 +174,22 @@ In \emph{birth-death model}, we define two parameters: birth rate $\lambda$ and 
 If a gene family contains zero genes, it is not possible to gain or lose any genes, therefore it is considered as absorbing state.
 
 We often set $\lambda = \mu$. In that case, the transition probabilities are\cite{hahn2005estimating}:
-$$P(X(t) = c | X(0) = s) = \sum_{j=0}^{\min(s, c)} {s \choose j}{s+x-j-1 \choose s-1}\alpha^{s+c-2j}(1-2\alpha)^j,$$
+$$P(X(t) = c | X(0) = s) = \sum_{j=0}^{\min(s, c)} {s \choose j}{s+x-j-1 \choose s-1}\alpha^{s+c-2j}{(1-2\alpha)}^j,$$
 where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and variation are\cite{hahn2005estimating}:
 \begin{align*}
   \operatorname{Mean}(X(t) = c | X(0) = s) &= s\\
   \operatorname{Var}(X(t) = c | X(0) = s) &= 2s\lambda t
 \end{align*}
 
-
 Based on the birth-death model and the structure of \emph{phylogenetic tree}, we can construct \emph{probabilistic graph model}, which parametrizes the probability distributions of the gene family sizes in the tree.
 
 Phylogenetic trees are heavily used in the study of the evolution. The leaves of a phylogenetic tree are the studied species and internal nodes are their common ancestors. In our case we will be using rooted binary phylogenetic tree (Figure~\ref{}\todo{obrazok}), where root is the common ancestor of all studied species and at every speciation event (internal node) only two species arise. The length of edges corresponds to the evolution time between a node and its parent. Usually only information about leafs is available and we need to estimate the information about ancestral organisms.
 
-The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms\cite{felsenstein1981evolutionary}.
+The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
 
 To test the hypothesis against null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
+
+In order to compute the likelihood and its corresponding value, we need to specify a prior distribution for the root node. The prior should be noninformative and a natural choice is a uniform distribution\cite{felsenstein1981evolutionary}. However, this prior introduces an undesirable bias --- it attributes a larger likelihoods to smaller gene families\cite{hahn2005estimating}. Other priors also showed to be unsuitable\cite{hahn2005estimating}.
 
 Since the root family size is not known, we need to use conditional $P$-values conditioned of specific value of the root family size.
 The conditional $P$-value is computed as the probability that a random gene family with the same root size has smaller conditional likelihood.
@@ -218,7 +200,7 @@ If we detect unlikely gene family evolution, we might want to know, which branch
 One method of identification is to try to delete every branch (one at a time) and recompute the $P$-values. If the $P$-value increases largely, it means that the other branches followed the birth-dead model.
 The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximisation algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
 
-\todo{spomenut nejako overall pristup, ze nemozme dat ziadny prior pre root a ze model ma spolocne $\lambda$ pre vsetky hrany a podobne}
+
 
 \todo{conclusion}
 
