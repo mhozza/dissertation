@@ -1,16 +1,17 @@
 \chapter{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
-Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and creation process.
+Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
+The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides.
 
 Repeats usually does not have any function and are often represented by several thousands of copies\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
 \emph{Simple sequence repeate} consists of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
 \emph{Retrotransposons} are capable of moving to different sites in DNA by the reverse transcription.
 \emph{DNA transposons} moves through the DNA by being copied and reinserted as DNA sequences\cite{cell}.
 
-The gene families are groups of related genes. They arise by duplication of an ancestral gene. The different members of the families diverge due to mutations during the evolution. Some of the mutations may result in loss of ability to produce a functional gene product. The nonfunctional gene copies are called \emph{pseudogenes}.
+The gene families are groups of related genes.
+Their copy number is usually much lower than in repeats, and they arise by duplication of an ancestral gene. The different members of the families diverge due to mutations during the evolution which may result in loss of ability to produce a functional gene product. The nonfunctional gene copies are called \emph{pseudogenes}.
 Gene duplications can arise by two mechanisms: duplication of a segment of DNA, or by reverse transcription of an mRNA, followed by integration of the cDNA copy into a new chromosomal site.
 Duplication by reverse transcription usually yields an inactive gene copy (\emph{processed pseudogene}).
-The copy number of gene families is much lower than in repeats.
 
 As the repeats and gene families consists of multiple very similar sequences in DNA, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short sequences from DNA (reads). Repetitive sequences are usually longer than reads, and therefore reads from various positions of the same repetitive DNA are very hard to distinguish, which makes hard to determine the size of the repetitive sequence.
 
@@ -18,31 +19,29 @@ Repetitive sequences forms a substantial part of DNA.\@ For example,
 transposable elements forms more then 70\% of the genome in some plants and amphibians, and 45\% in human genome\cite{biemont2006genetics}.
 Therefore studying repetitive sequences is one of the essential tasks in DNA analysis.
 
-In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios.
+In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios. We start by finding known repeats and gene families in assembled genome, and continue with de novo repeat finding in both assembled genome and reads. In the last section, we present a gene family evolution model.
 
-% (1) v uvode moze byt strucny popis co su repeaty a genove rodiny z biologickeho hladiska a preco sposobuju problemy pri assembly
+\section{Finding the Known Repeats and Gene Families in the Assembled Genome}
 
-\section{Finding the Known Repeats and Gene Families in Assembled Genome}
-
-The known repeats and families are stored in several databases. Some examples of repeat databases are repbase\cite{repbase}, dfam\cite{dfam}, and example of the gene family databases is pfam\cite{pfam}.
+The known repeats and families are stored in several databases. Some examples of repeat databases include repbase\cite{repbase}, dfam\cite{dfam}, and one example of the gene family databases is pfam\cite{pfam}.
 
 In the database search, we are usually interested in all  sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of repeats from the database, which appears in our sequence.
 There are two approaches for sequence finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
 \paragraph{Searching by sequence similarity.}
 In the local alignment, on the input there are two sequences and the output is alignment of some substrings of the sequences. Usually, we are interested in an alignment with highest score, or score above some threshold.
-The standard algorithms for local alignment of 2 sequences look for the optimal local alignment according to some scoring scheme. They use a dynamic programming algorithm to find the optimal alignment. The time complexity of this approach is proportional to the product of the lengths of both sequences, which makes this approach very slow for long sequences.
+The standard algorithms for local alignment of two sequences look for the optimal local alignment according to some scoring scheme. They use a dynamic programming algorithm to find the optimal alignment. The time complexity of this approach is proportional to the product of the lengths of both sequences, which makes this approach very slow for long sequences.
 
 Therefore there have been developed heuristic algorithms, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST\cite{blast}.
 BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
 Each seed is then extended to maximize the score. The standard BLAST algorithm searches only for gapless alignments (i.e.\ it does not consider any indels), but there are versions which also enables gaps in the alignment.
 
 \paragraph{Searching by profile HMM.}
-The \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which generates a random sequence together with its annotation by the states. HMM is similar to the finite automaton. It has a finite number of states, transitions and emissions. At each step the HMM moves to next state (which might be the same as current) according to transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+The \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which generates a random sequence together with its annotation by the states. HMM is similar to the finite automaton. It has a finite number of states, transitions and emissions. At each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
 
-The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides. The profile HMM have to take into account all this mutation and return higher probability for the sequences belonging to the family, than for other sequences.
+The profile HMM have to take into account all mutations (substitutions, insertions and deletions) and return higher probability for the sequences belonging to the family, than for other sequences.
 Assume, we have a multiple alignment of sequences from the family. The profile HMM\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching positions in the alignment. Each state $m_k,\, 1 \leq k \leq M$, have a distinct emission distribution.
-For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide and allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ is added.
+For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
 The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 \todo{obrazok}
 
@@ -52,14 +51,15 @@ alignment segments. This can be used as heuristic filter before running the full
 
 There are various tools for finding repeats and gene families, implementing these methods.
 The most used ones are repeat masker\cite{repeatmasker}, interproscan\cite{mitchell2015interpro}, HMMER\cite{eddy2011accelerated}.
+The profile HMMs enable probabilistic approach to the sequence finding which has several advantages. It can contain more information about the family than a single consensus sequence used in sequence similarity approach, i.e.\ if at particular position $3/5$ of the sequences has A and $2/5$ of the sequences has T, the consensus sequence contains only information about A, whereas the profile HMM contains information about the distribution of nucleotides.
 
 \section{De Novo Repeat Finding}
 
-\todo{intro to denovo repeat finding}
+In practice not all repeats are known and contained in the databases and databases only for a few organisms was well constructed (e.g.\ repeat masker contains databases for human and mouse\cite{repeatmasker}). Therefore algorithms for finding new repeats and gene families are needed.
 
-\subsection{Finding de Novo Repeats in assembled genome}
+\subsection{Finding de Novo Repeats in the Assembled Genome}
 
-\todo{intro}
+With the beginning of NGS, sequencing become cheaper and genomes of more organisms were sequenced. The fully and correctly assembled genomes are best source for repeat analysis, thus the need for finding repeats in such sequences arised.
 
 \subsubsection{Finding Tandem Repeats}
 Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder\cite{trf}, ATR\cite{atr}, TANTAN\cite{tantan} and Sunflower model\cite{nanasi2014probabilistic}.
@@ -77,9 +77,9 @@ In analysis, the pattern consisting of positions $j+1\dots i$ is selected and al
 
 The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (\cite{tantan, nanasi2014probabilistic}).
 
-Next, we will focus mainly on interspersed repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
+Next, we will focus mainly on general repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
 
-\subsubsection{Finding Interspersed Repeats}
+\subsubsection{Finding General Repeats}
 
 The first methods (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}) for finding repeats in assembled genome were based on computation of pairwise similarities. However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise repeats would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
 Also, local sequence alignments do not usually correspond to the biological boundaries.\cite{recon}.
@@ -93,14 +93,16 @@ Algorithm then starts from $Q = \text{\kmer\ seed}$ and greedily extends $Q$ wit
 
 Since many abundant \kmers\ may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed \kmers\ from the \kmer\ count table.
 
-\todo{short consclusion}
+Finding tandem repeats is easier task than general repeat finding and it can complement the general repeat finding methods, i.e.\ the tandem repeats may be masked first from the genome so the general method has to find less repeats, which may lead to improved performance.
 
-% - potom spomen pristupy, ktore pracuju z readov, pri nizsom pokryti - to je to, co si zrejme zacal pisat a tu sa da strucne spravit aj odvolavka na programy z kapitoly 3
+\subsection{Finding Repeats in Reads}\label{sect:repeats-reads}
 
-\subsection{Finding Repeats by K-mer abundance histogram analysis}
+The methods described in previous subsection needed assembled genome, which is not always available. Next we will present several methods for de novo repeat finding in the sequencing reads. The key property of the sequencing data is that sequences in the genome with higher abundance, will have higher representation in the sequencing data. Thus these methods has to identify such sequences.
+
+\subsubsection{Finding Repeats by K-mer Abundance Histogram Analysis}
 
 Some of the algorithms for the genome size estimation described in Section~\ref{sec:kmerhist} can be also used for detecting repeats.
-In the basic form the algorithms tell us, the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provide algorithm for finding the consensus for repeats.
+In the basic form the algorithms tell us, the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provided an algorithm for finding the consensus for repeats.
 
 The algorithm uses two basic observations:
 
@@ -115,14 +117,15 @@ We can also obtain a copy number of the repeat family. In~\cite{waterman}, they 
 The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated coverage.
 The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. Finally we find all paths from reads from category (a) to category (c).
 
-The major drawback of this method is that it needs error free reads and higher coverage.
+The major disadvantage of this method is that it needs error free reads and a higher coverage.
+Next we present two methods which works also in low coverage scenario.
 
-\subsection{Partial Sequence Assembly}
+\subsubsection{Partial Sequence Assembly}
 
-As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on target coverage.
-Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the contrary the average coverage of repetitive sequences will be higher and the chance of overlapping repetitive sequences will be higher.
+As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on the target coverage.
+Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the other side the average coverage of repetitive sequences will be higher and thus the chance of overlapping repetitive sequences will be higher.
 
-The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation\cite{swaminathan2007global}:
+The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value of $m$ can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation\cite{swaminathan2007global}:
 $$E(M) = Ne^{-2c\sigma}{(1-e^{c\sigma})}^{j-1}$$
 $$\sigma = 1 - \frac{T}{L},$$
 where $c$ is the coverage, $L$ is the read length, and $T$ the base pair overlap required for contig formation.
@@ -133,37 +136,33 @@ $$e = \frac{cw}{L},$$
 where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length.
 
 This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes. This method was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data\cite{swaminathan2007global}.
-However, this method suffers from several drawbacks. The major drawback is that larger repeats can be split into multiple sequences. In addition, it depends on slow assembly process.
+However, this method suffers from several drawbacks. The disadvantage of this method is that larger repeats can be split into multiple sequences. In addition, it depends on slow assembly process.
 
-\subsection{Sequencing Data Clustering}
+\subsubsection{The Sequencing Data Clustering}
 
-The other approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
+The other approach to the de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
 The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. Such graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
 
 The basic method of clustering the graph, used in \emph{tclust}\cite{pertea2003tigr}, is to split it by connected components. The granularity of such graph strongly depends on sequence coverage. The higher the coverage is, the smaller number and bigger clusters will be found in the graph. Additionally, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
 The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical aglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
-The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in random graph. It can be masured as\cite{novak2010graph}:
+The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be masured as\cite{novak2010graph}:
 $$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
 where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if community $c_i = c_j$.
 
 We can find the clustering with maximal modularity using a greedy algorithm. In the beginning every vertex has its own community.
 At each iteration, for every pair of communities, the expected gain to the modularity if they are merged, $\Delta Q$, is computed. The communities with the greatest $\Delta Q$ are then merged. This is repeated until only one community is left. Finally, the iteration with maximal overall $Q$ is selected as final clustering.
-
 \todo{figures}
-\todo{short conclusion}
 
-\subsection{Conclusion}
-
-\todo{conclusion}
+In this section, we presented three methods for the de novo repeat finding in the sequencing reads. The first method is quick, but works only on higher coverage. The second and the last methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives a clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into same cluster.
 
 \section{Evolution of Gene Families}
 
-Prior the wide availability of whole genome assemblies, enabled by newer sequencing technologies, evolution studies focused on small numbers of nucleotide differences between orthologous genes. Nowadays, it is possible to focus on large-scale genome differences, e.g.\ changes in the sizes of gene families.
+Prior the wide availability of whole genome assemblies, allowed by newer sequencing technologies, evolution studies focused on small numbers of nucleotide differences between orthologous genes. Nowadays, it is possible to focus on large-scale genome differences, e.g.\ changes in the sizes of gene families.
 
 The gene families may very among different organisms. In the evolutionary biology, we would like to distinguish which changes are due to evolutionary forces and which are just by chance. To do this, we need some null model, which models ``normal'' (random) evolution of the gene families. One such model is a birth-death based model presented in~\cite{hahn2005estimating}.
 
-Suppose, that in a gene family the number of genes is given by discrete random variable $X(t)$. Then probability that $X(t) = c$, given that $X(0) = s$ is $P(X(t) = c | X(0) = s)$.
+Suppose, that in a gene family the number of genes is given by discrete random variable $X(t)$. The probability that $X(t) = c$, given that $X(0) = s$ is $P(X(t) = c | X(0) = s)$.
 In \emph{birth-death model}, we define two parameters: birth rate $\lambda$ and death rate $\mu$, where the probability that any gene being duplicated (and fixed) is $\lambda \Delta t$ or being lost is $\mu \Delta t$. In family of size $X(t)$ the possible transitions are\cite{hahn2005estimating}:
 \begin{itemize}
   \item probability of one gain: $\lambda X(t) \Delta t + o(\Delta t)$
@@ -175,7 +174,7 @@ If a gene family contains zero genes, it is not possible to gain or lose any gen
 
 We often set $\lambda = \mu$. In that case, the transition probabilities are\cite{hahn2005estimating}:
 $$P(X(t) = c | X(0) = s) = \sum_{j=0}^{\min(s, c)} {s \choose j}{s+x-j-1 \choose s-1}\alpha^{s+c-2j}{(1-2\alpha)}^j,$$
-where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and variation are\cite{hahn2005estimating}:
+where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and variance are\cite{hahn2005estimating}:
 \begin{align*}
   \operatorname{Mean}(X(t) = c | X(0) = s) &= s\\
   \operatorname{Var}(X(t) = c | X(0) = s) &= 2s\lambda t
@@ -183,7 +182,7 @@ where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and var
 
 Based on the birth-death model and the structure of \emph{phylogenetic tree}, we can construct \emph{probabilistic graph model}, which parametrizes the probability distributions of the gene family sizes in the tree.
 
-Phylogenetic trees are heavily used in the study of the evolution. The leaves of a phylogenetic tree are the studied species and internal nodes are their common ancestors. In our case we will be using rooted binary phylogenetic tree (Figure~\ref{}\todo{obrazok}), where root is the common ancestor of all studied species and at every speciation event (internal node) only two species arise. The length of edges corresponds to the evolution time between a node and its parent. Usually only information about leafs is available and we need to estimate the information about ancestral organisms.
+Phylogenetic trees are heavily used in the study of the evolution. The leaves of a phylogenetic tree are the studied species and internal nodes are their common ancestors. In our case we will be using rooted binary phylogenetic tree (Figure~\ref{}\todo{obrazok}), where root is the common ancestor of all studied species and at every speciation event (internal node) only two species arise. The length of edges corresponds to the evolution time between a node and its parent. Usually only information about leaves is available and we need to estimate the information about ancestral organisms.
 
 The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
 
@@ -197,12 +196,15 @@ To perform a statistic test, we can use supremum $P$-value, which is the maximal
 If such supremum $P$-value is small, it means that it is unlikely explainable by the birth-death model.
 
 If we detect unlikely gene family evolution, we might want to know, which branch of the phylogenetic tree is responsible for the violation of the model.
-One method of identification is to try to delete every branch (one at a time) and recompute the $P$-values. If the $P$-value increases largely, it means that the other branches followed the birth-dead model.
+One method of identification is to try to delete every branch (one at a time) and recompute the $P$-values. If the $P$-value increases largely, it means that the other branches followed the birth-dead model and thus this branch is responsible for the low $P$-value.
 The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximisation algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
 
-
-
-\todo{conclusion}
+The approach presented in this section has several limitations. It assumes that rates in the whole phylogenetic tree is the same, which might not be true in some organisms. Moreover the unlikely branch detection assumes that only one branch is responsible for the different behavior of family sizes evolution.
 
 \section{Conclusion}
-\todo{conclusion}
+
+In this chapter we presented several methods for repeat finding in various scenarios.
+Some of this methods, mostly those which find repeats from reads (Section~\ref{sect:repeats-reads}) are developed for the reads which has significantly higher abundance than the gene families, and may need to be adjusted to be used for gene family discovery.
+
+In last section we presented one model for gene family evolution. The presented method worked with exact counts of the gene families. If we have counted the gene family sizes from reads, only approximate counts (e.g.\ given by some probability distributions) would be available. The model needs to be modified to work with probabilities instead of exact counts in order to work with such counts.
+We will address this issues in our dissertation thesis, see Section~\ref{sect:repeats-families}.
