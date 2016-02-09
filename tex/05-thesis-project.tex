@@ -1,8 +1,10 @@
 \chapter{Thesis Project}
 
-\todo{intro co tu bude}
+In this chapter we present our plans for the dissertation thesis. The thesis will consist of two main topics:
+the coverage and genome size estimation, and finding and evolution of repeats and gene families.
+We will summarize the current status and problems.
 
-\section{Estimating the coverage and size of the genome}
+\section{Estimating the Coverage and Size of the Genome}
 
 We developed a tool for estimating the genome size from low coverage erroneous sequencing data, called CovEst, which we have described in Chapter~\ref{chap:genomesize}. We published and presented CovEst on SPIRE 2015 conference\cite{covest}.
 
@@ -30,7 +32,7 @@ We estimate the parameters from single \kmer\ histogram. It is also possible to 
 Moreover the \kmers\ in histogram are not completely independent. Each \kmer\ is shares some sequence with $k-1$ other consecutive \kmers. We may alter this dependence using spaced $k$-mers, i.e\ we omit some positions in the \kmer.
 The mask for the spaced \kmers\ can by chosen randomly for a single run of the \kmer\ counting algorithm. We can also build multiple histograms using multiple \kmer\ masks.
 
-\section{Repeats and gene families}\label{sect:repeats-families}
+\section{Repeats and Gene Families}\label{sect:repeats-families}
 
 In Chapter~\ref{chap:repeatsfamilies} we presented various methods for finding repeats. We also presented a model for gene family evolution.
 In our dissertation thesis we would like to blend these two concepts.
