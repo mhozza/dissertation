@@ -90,79 +90,34 @@
 
 \subsection{Genome}
 
-\todo{nieco strucne o genome}
+Each life form is build from at least one cell. One of the most important part of the cell is \emph{DNA}, which is located in the cell core.
+DNA (Deoxyribonucleic acid) carries the genetic information used for development, functioning and reproduction of the cell or an organism.
+DNA is composed of two complementary strains which form a double helix structure. Each strain consist of four nucleotides: cytosine (C), guanine (G), adenine (A), or thymine (T).
+The nucleotides are complementary, i.e.\ if in one strain there is A in the other is T, and if in one is G in the other is C, see Figure~\ref{}\todo{figure}.
+DNA molecules are organized in chromosomes.
+The \emph{genome} is a set of all chromosomes in the cell, it includes both the coding and the non-coding parts of DNA.\@
+The coding part of the genome is called gene. Each gene can be translated into a protein sequence which it encodes.
 
 \subsection{DNA Sequencing and Assembly}
 
-\todo{nieco o sekvenovani, aj ine ako NGS}
+Obtaining a DNA sequence or its part from the cell is called \emph{DNA sequencing}.
+DNA sequencing connects experimental methods of obtaining the sequence from the cell core and the computational analysis of the sequencing data called sequence assembling.
+
+The first sequenced genome was a simple RNA virus in 1976. The 3.2Gb long human genome was first sequenced in 2001 and it took 13 years and cost about 3 billions dollars. Nowadays it is possible to sequence such large genome for much lower cost (several tens thousands dollars).
+
+The traditional sequencing method, called \emph{Sanger sequencing}, was developed by Frederick Sanger in 1977\cite{sanger1977dna}. It was also used in first human genome sequencing.
+In the Sanger sequencing, two strand DNA is first split into single strand DNA.\@ Such single strand DNA can be used to create its copies, if particular enzymes and sufficient amount of nucleotides is available. The key role in Sanger sequencing form modified nucleotides. The nucleotides are modified in two ways: they are colored by florescent coloring and modified such the DNA copy process cannot continue after the nucleotide. This yields in bunch of DNA segments of various lengths, which are basically the sequenced DNA prefixes interrupted by the colored nucleotide in its last position. Every position is represented by multiple segments. The segments are then sorted using electrophoresis and the colors are read from shortest to longest segment forming a DNA sequence.
+
+Only short sequences, up to 500--1000 bases, can be read this way. Therefore the original DNA has to be split into many overlapping short sequences prior the sequencing.
+Therefore instead of one long sequence per chromosome, we get many short sequences which have to be assembled together to obtain the whole sequence.
+
+Since 2005, there have been commercially available sequencing machines of second generation (or new generation sequencing machines). There are multiple different technologies for NGS, but they all share some properties.
+They produce a huge amount of reads from the same sample, and are faster and cheaper. They also produce much shorter reads (35--400 bases) then Sanger sequencing, which makes a DNA assembly even harder task.
+
+\subsubsection{DNA Assembly}
+
 \todo{ked to zosekvenujeme treba to poskladat, spomenut priblizne princip, par toolov a problemy ake to ma --- coverage treba vysoky, problemy s repeatmi}
 
+\end{itemize}
 
 \todo{chceme aj celu minimovku nejak zhrnut a dat motivaciu k tym repeatom}
-
-%
-% In this section we review several biological terms that will be needed. More
-% information about DNA, proteins, and genes can be found in
-% \cite{BiologyForDummies, UnderstandingBioinformatics}. Practically every cell of living
-% organisms contains one or several \firstUseOf{DNA} molecules. DNA is a double
-% stranded molecule consisting of two long sequences (strands) of
-% \firstUseOf{nucleotides} (nucleotides are also referred to as bases or
-% \firstUseOf{residues}). There are four types of nucleotides in DNA: adenosine,
-% cytosine, guanine, and thymine represented by letters $A,C,G$ and $T$
-% respectively. In RNA nucleotide $T$ is replaced with uracil, denoted by $U$.
-% The nucleotides at the same position in
-% the two strands are connected by hydrogen bonds and are complementary: $A$ is
-% always connected with $T$ and $C$ is always connected with $G$. Therefore we
-% can represent DNA molecule by a sequence over alphabet $\{A,C,G,T\}$, since the
-% complementary strand can be easily computed.
-%
-% Some parts of DNA encode \firstUseOf{proteins}. Proteins play an important role in cell
-% biology since  they regulate many processes in the cell and are catalysts to
-% many chemical reactions. Proteins are sequences of \firstUseOf{amino acid}
-% molecules. There are $20$ amino acids that can be encoded in DNA. Parts of DNA
-% that encode proteins are called \firstUseOf{genes} (gene is ``substring'' of
-% DNA that will be translated into one protein). We refer to the DNA
-% sequences of an organism as to its \firstUseOf{genome}.
-%
-% The rational behind sequence alignment is to represent the evolution of two
-% sequences. According to the evolution theory, currently living organisms
-% evolved from a single common ancestor through small changes in their genomes.
-% There are many types of changes.  Substitutions change  a nucleotide at some
-% position to another nucleotide.  Insertions and deletions add or remove parts
-% of the genomic sequence. Other changes includes duplications (a region of a
-% sequence is copied into a different part of the genome), inversions (a region
-% of the sequence is inverted), and even large genome rearrangements (large
-% regions  change their position within the genome).
-%
-% The speciation is an event, when a new species is created. This happens mostly
-% due to physical separation of populations of the same species. Subsequently, each
-% population evolves differently to a point, that they form
-% different species. We can represent the evolution of a set of species using a binary
-% tree. Each leaf represents a current species, each internal vertex represents
-% a speciation event, and the root represents the common ancestor of all species in
-% the tree. The branch lengths usually correspond to the amount of changes in
-% the genome or to the time.
-%
-% We say that two parts of biological sequences $X$ and $Y$ are
-% \firstUseOf{homologous}, if they originate from the same sequence in some
-% common ancestor of $X$ and $Y$. Due to their common origin, homologous sequences are often similar.
-% However high evolutionary
-% distance may cause the sequences to diverge so much that the sequence
-% similarity is as low as for two random sequences.
-%
-% As we mentioned in the previous section, an alignment is a data structure that
-% represents sequences and their relation through some evolutionary changes
-% (substitutions, insertions and deletions).  It is obtained by adding gap
-% symbols ($-$) into the sequences so that they have the same length and form a
-% 2-dimensional array or a matrix, where each sequence is in its own row. When
-% aligning two homologous sequences, we want to place
-% homologous parts of the sequences into the same columns.
-%
-% Additionally, we distinguish between two types of homologs: orthologs and
-% paralogs. The orthologs are two different sequences that originated from the
-% common ancestor sequence by a speciation event. The paralogs are two different
-% sequences that evolved by duplication event within the same organism. The
-% distinction is important when aligning repetitive regions; we want to align
-% orthologous copies of the motif, but the paralogous copies are very similar, and it is very
-% hard to distinguish between paralogous and orthologous copies.
-%
