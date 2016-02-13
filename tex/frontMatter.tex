@@ -1,19 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%                       FRONT PAGE                        %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\ifx\draft\undefined
 \thispagestyle{empty}
 \noindent
-%\begin{minipage}{0.20\textwidth}
-%	\includegraphics[width=0.9\textwidth]{../figures/logouni}
-%\end{minipage}
-%\begin{minipage}{0.79\textwidth}
-	\begin{center}
-		\sc \mfuniversity \\
-		\mffaculty \\
-		\mfdepartment
-	\end{center}
-%\end{minipage}
+\begin{center}
+	\sc \mfuniversity \\
+	\mffaculty \\
+	\mfdepartment
+\end{center}
 \vfill
 \begin{center}
 	\begin{minipage}{0.8\textwidth}
@@ -23,21 +17,23 @@
 		\centerline{\LARGE\sc\mftitleb}
 		\smallskip
 		\centerline{(\mfthesistype)}
-		\bigskip
-		\bigskip
-		\centerline{\large\sc\mfauthor}
-		\bigskip\bigskip
 		%\hrule
 	\end{minipage}
 \end{center}
-% \afterpage{\blankpage}
 \vfill
-{\bf Advisor:} \mfadvisor
-\hfill\mfplacedate
-%\eject % EOP i
-\pagebreak
-\fi
-
+{\bf
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+~\mfyear
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.59\textwidth}
+\begin{flushright} \large
+\mfauthor
+\end{flushright}
+\end{minipage}
+}
+\eject
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                  TITLE PAGE                               %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,6 +66,7 @@
 %\afterpage{\blankpage}
 %\pagebreak
 %\fi
+\eject
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%               THESIS ASSIGNMENT                          %%%%
@@ -81,21 +78,21 @@
 %%%               DECLARATION                                %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\ifx\draft\undefined
-\chapter*{}
-
-{~}\vspace{10cm}
-
-\begin{minipage}{0.25\textwidth}~\end{minipage}
-\begin{minipage}{0.69\textwidth}
-\mfdeclaration
-
-\bigskip\bigskip
-
-\hfill\hbox to 6cm{\dotfill}
-\end{minipage}
-\vfill % EOP iii
-\fi
+% \ifx\draft\undefined
+% \chapter*{}
+%
+% {~}\vspace{10cm}
+%
+% \begin{minipage}{0.25\textwidth}~\end{minipage}
+% \begin{minipage}{0.69\textwidth}
+% \mfdeclaration
+%
+% \bigskip\bigskip
+%
+% \hfill\hbox to 6cm{\dotfill}
+% \end{minipage}
+% \vfill % EOP iii
+% \fi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%               ACKNOWLEDGMENTS                            %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,10 +107,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%       TOC, list of tables, list of figures                %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\ifx\draft\undefined
-
- \chapter*{Abstrakt}
+%
+% \ifx\draft\undefined
+%
+%  \chapter*{Abstrakt}
 %
 %\begin{tabular}{l l}
 %Autor: & \mfauthor \\
@@ -129,15 +126,15 @@
 %
 %\bigskip
 
-\input ../tex/abstrakt.tex
+% \input ../tex/abstrakt.tex
 
-\medskip
-\noindent
-{\sc Kľúčové slová}: \mfkeywordssk
-\fi
-\ifx\draft\undefined
+% \medskip
+% \noindent
+% {\sc Kľúčové slová}: \mfkeywordssk
+% \fi
+% \ifx\draft\undefined
 
- \chapter*{Abstract}
+ % \chapter*{Abstract}
 
 %\begin{tabular}{l l}
 %Author: & \mfauthor \\
@@ -152,14 +149,13 @@
 %\end{tabular}
 
 %\bigskip
-
-\input ../tex/abstract.tex
-
-\medskip
-\noindent
-{\sc Keywords}: \mfkeywords
-\fi
-
+%
+% \input ../tex/abstract.tex
+%
+% \medskip
+% \noindent
+% {\sc Keywords}: \mfkeywords
+% \fi
 
 \tableofcontents
 \listoftables
