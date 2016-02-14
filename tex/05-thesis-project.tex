@@ -6,12 +6,12 @@ We will summarize the current status and problems.
 
 \section{Estimating the Coverage and Size of the Genome}
 
-We developed a tool for estimating the genome size from low coverage erroneous sequencing data, called CovEst, which we have described in Chapter~\ref{chap:genomesize}. We published and presented CovEst on SPIRE 2015 conference\cite{covest}.
+We developed a tool for estimating the genome size from low coverage erroneous sequencing data, called CovEst, which we have described in Chapter~\ref{chap:genomesize}. We published and presented CovEst on SPIRE 2015 conference~\cite{covest}.
 
 The tool is just a prototype and various issues need to be fixed prior the final version. Most importantly the model parameters finding algorithm speed have to be improved. Also more complex models can be added. Finally, we can make the algorithm more robust by increasing the independence of the data, or using multiple $k$-mer histograms.
 
 \paragraph{Parameter estimation algorithm improvements.}
-In the current version, we use the L-BFGS-B\cite{l-bfgs-b} algorithm for parameter estimation, with fine-tuning using the grid search.
+In the current version, we use the L-BFGS-B~\cite{l-bfgs-b} algorithm for parameter estimation, with fine-tuning using the grid search.
 The L-BFGS-B algorithm often fails to find the locally maximal likelihood, therefore a fine tuning is needed.
 
 The grid search algorithm, is a local search algorithm, which searches the parameter grid of depth $G$, with step $S$ around the actual parameter vector, i.e.\ if we have 5 parameters $P = p_1\dots p_5$ and $G = 3$, the grid of parameters would be $\{p_1 S^{-3}, p_1 S^{-2}, \dots, p_1 S^3\} \times \cdots \times \{p_5 S^{-3}, \dots, p_5 S^3\}$. We can omit the current parameter vector from the grid. The size of the grid is ${(2G)}^P - 1$ and increases exponentially with increasing parameter count. The algorithm is iterative and the step decreases if the previous iteration was unable to find better enough parameters. Once the step size is too small, the algorithm stops.

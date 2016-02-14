@@ -4,7 +4,7 @@
 
 The genome size is one of the fundamental questions related to the sequenced genome. The knowledge of the genome size allow a systematic analysis of many organisms.
 
-The NGS produces sequencing data very quickly and for low cost. Computational methods for analysis of NGS data are useful tool for DNA analytics. The computational methods for genome size analysis provide cheaper and faster replacement for the biological genome size estimation i.e.\ Real-time PCR-based method\cite{wilhelm2003real}.
+The NGS produces sequencing data very quickly and for low cost. Computational methods for analysis of NGS data are useful tool for DNA analytics. The computational methods for genome size analysis provide cheaper and faster replacement for the biological genome size estimation i.e.\ Real-time PCR-based method~\cite{wilhelm2003real}.
 
 The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage $c$ is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data $L\cdot N$, where $L$ is the read length and $N$ is the number of reads) and the genome size $G$.
 $$c = \frac{NL}{G}$$
@@ -73,7 +73,7 @@ $$H_k[0] = \frac{\displaystyle\sum_{i=1}^{n_f}\alpha_i e^{-a_i c_k} \sum_{i=1}^{
 
 We can use EM algorithm to obtain the values of the parameters $a_i,\, \alpha_i$ and $c_k$ from above equations, which iteratively computes the parameters based on values of the parameters from previous step and stops when they converge or change very little. In this case, we select $\min(a_i \cdot c_k)$ as the single-copy coverage to estimate the genome size.
 
-\paragraph{}The second method, KSA\cite{williams}, exploits the fact that if the \emph{modal} (single-copy) coverage is $c$, than coverage of repetitive region would be an integer multiply of $c$.
+\paragraph{}The second method, KSA~\cite{williams}, exploits the fact that if the \emph{modal} (single-copy) coverage is $c$, than coverage of repetitive region would be an integer multiply of $c$.
 
 Let $a_o$ be the number of $k$-mers in the original genome, which repeat in the genome $o$ times.
 The number of $k$-mers occurring in the data $j$ times would be $a_o Poisson(j; o*c_k)$. Hence, if we put all sequences together, we sum up the distribution for each level of abundance and the shape of the observed $k$-mer histogram would be~\cite{williams}:
@@ -84,7 +84,7 @@ $$P(j; c_k, \{a_o\}, s) = \sum_o a_o NegBinomial(j; \mu=c_k\cdot o;\sigma^2=s/o)
 Similarly to the model described in simplified scenario, this model can be used to infer the parameters by maximizing the likelihood for the observed histogram $H_k$:
 $$L(c_k, \{a_o\}, s | H_k) = \sum_j Poisson(H_k[j]; P(j; c_k, \{a_o\}, s)).$$
 
-\paragraph{} According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. In our paper, CovEst\cite{covest}, we focused on estimates from low coverage data, where it would not be possible to use the approaches described above. Instead of that we decided to model the repeats very simply.
+\paragraph{} According to~\cite{waterman} and~\cite{williams}, to be able to distinguish and model repeats, the higher coverage is necessary. In our paper, CovEst~\cite{covest}, we focused on estimates from low coverage data, where it would not be possible to use the approaches described above. Instead of that we decided to model the repeats very simply.
 
 Similarly to the KSA, we can model the overall probability distribution as a mixture distribution:
 $$p_j = \sum_{o=1}^\infty \beta_o p_{o,j}.$$
@@ -101,14 +101,14 @@ where $\theta = \{c_k, q_1, q_2, q\}$ is the parameter vector.
 
 \subsection{Modeling Errors}
 
-In~\cite{waterman} and KSA\cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In KSA they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
+In~\cite{waterman} and KSA~\cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In KSA they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
 
-In CovEst\cite{covest}, we focused on modeling errors directly. We provided several probabilistic models graded by complexity.
+In CovEst~\cite{covest}, we focused on modeling errors directly. We provided several probabilistic models graded by complexity.
 The simplest model considered errors contributing only to abundance of one in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats.
 The model is a mixture of two distributions --- the distribution for erroneous $k$-mers and the distribution for error free $k$-mers. The abundances of the error free $k$-mers are generated from the truncated Poisson distribution with mean $c'$.
 Let $\epsilon$ be the error rate of the sequencing machine (i.e.\ a single base is read correctly with probability $(1-\epsilon)$), we can compute $c_k$ from $c'$ by dividing it by the probability that $k$-mer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
 We introduced a mixture coefficient $\alpha$, which denotes a proportion of erroneous $k$-mers among all unique $k$-mers in the sequencing data. The $\alpha$ is related to probability that a particular $k$-mer contains error, which is $\gamma = {(1-\epsilon)}^k$.
-We can use a simple formula to relate $\alpha$ to $\gamma$: $\alpha = (1-\gamma)/(1-\gamma+\gamma/c')$\cite{covest}.
+We can use a simple formula to relate $\alpha$ to $\gamma$: $\alpha = (1-\gamma)/(1-\gamma+\gamma/c')$~\cite{covest}.
 
 Using the alpha we can express the formulas for the probability that a $k$-mer appears $j$ times in the data:
 \begin{align*}
@@ -143,7 +143,7 @@ This model still does not consider any repeats in the original sequence, but can
 \subsection{Testing the Models}
 The methods described in previous subsections were evaluated on both, simulated and real datasets. The problem with testing on real data is that we need to know the correct answer, so we need to either take a sequence for which the size is known or obtain the sequence length by biological methods.
 
-\paragraph{}The first method\cite{waterman} was tested on four errorfree simulated datasets to show various properties of the method, and one real dataset --- BAC, H\_NH0140H23. The first experiment focused on comparing the random vs.\ tandem repeats (Table~\ref{tab:waterman1}). The authors claim that position of the repeats does not have any relation to the estimates.
+\paragraph{}The first method~\cite{waterman} was tested on four errorfree simulated datasets to show various properties of the method, and one real dataset --- BAC, H\_NH0140H23. The first experiment focused on comparing the random vs.\ tandem repeats (Table~\ref{tab:waterman1}). The authors claim that position of the repeats does not have any relation to the estimates.
 \begin{table}[htbp]
 \centering
 \begin{tabular}{ccccccc}
@@ -157,7 +157,7 @@ $G$ (kb) & $L$ (bp) & $c$ & repeat profile & $G$ (kb) & $c$ & repeat profile\\
 100 & 500 & 3 & \specialcell[t]{$15\times$ (30\%) \\ $7\times$ (14\%) \\ tandem} & 97.087 & 3.09 & \specialcell[t]{$13\times$ (35.3\%) \\ $7\times$ (17.2\%)}\\
 \bottomrule
 \end{tabular}
-\caption[Comparing random and tandem repeats]{Comparing random and tandem repeats. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The both simulated datasets contain two repeat families 2kb long sequence repeated $15\times$ and 2kb long sequence repeated $7\times$.\cite{waterman}}\label{tab:waterman1}
+\caption[Comparing random and tandem repeats]{Comparing random and tandem repeats. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The both simulated datasets contain two repeat families 2kb long sequence repeated $15\times$ and 2kb long sequence repeated $7\times$.~\cite{waterman}}\label{tab:waterman1}
 \end{table}
 
 The second experiment focused on influence of the dataset size. The both datasets have the same coverage, read length and repeat structure, but the second dataset is $10\times$ as long as the first one. They also increased the overage of the first dataset to $10\times$ and compared to the original one (Table~\ref{tab:waterman2}). The authors claim that with larger dataset the estimate gets better and it is easier to distinguish between the repeat families.
@@ -175,7 +175,7 @@ $G$ (kb) & $L$ (bp) & $c$ & repeat profile & $G$ (kb) & $c$ & repeat profile\\
 80 & 500 & 10 & \specialcell[t]{$2\times$ (15\%) \\ $12\times$ (15\%) \\ tandem} & 79.289 & 9.928 & \specialcell[t]{$2\times$ (27\%) \\ $12\times$ (15.7\%)}\\
 \bottomrule
 \end{tabular}
-\caption[Comparing various repeat sizes]{Comparing various repeat sizes. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The first sequence contains two repeat families 6kb long sequence repeated $2\times$ and 1kb long sequence repeated $12\times$. In the larger sequence the sizes of the repeated sequences are 60kb and 10kb respectively.\cite{waterman}}\label{tab:waterman2}
+\caption[Comparing various repeat sizes]{Comparing various repeat sizes. $G$ is the genome size, $L$ is the read length, and $c$ is the coverage. The first sequence contains two repeat families 6kb long sequence repeated $2\times$ and 1kb long sequence repeated $12\times$. In the larger sequence the sizes of the repeated sequences are 60kb and 10kb respectively.~\cite{waterman}}\label{tab:waterman2}
 \end{table}
 
 Finally, they showed performance of the method on the real data.
@@ -197,10 +197,10 @@ repeated 5 times & 0\% & 4.39\% & 3\% \\
 the rest & 3.19\% & 9.47\% & 8\% \\
 \bottomrule
 \end{tabular}
-\caption[Proportions of repetitive sequences in real data exmeriments]{Proportions of repetitive sequences in real data exmeriments.\cite{waterman}}\label{tab:waterman3}
+\caption[Proportions of repetitive sequences in real data exmeriments]{Proportions of repetitive sequences in real data exmeriments.~\cite{waterman}}\label{tab:waterman3}
 \end{table}
 
-\paragraph{}The KSA method\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validate by experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}. \todo{chceme aj tabulku repeatov?}
+\paragraph{}The KSA method~\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validate by experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}. \todo{chceme aj tabulku repeatov?}
 \begin{table}[htbp]
 \centering
 \begin{tabular}{lccccc}
@@ -211,10 +211,10 @@ PFGE & 4.869 & 5.047 & 5.149 & 5.423 & 5.268\\
 $21$-mer analysis & 4.776 & 4.935 & 5.181 & 5.219 & 5.502\\
 \bottomrule
 \end{tabular}
-\caption[Estimations of the genome size of 5 E. coli strains]{Estimations of the genome size of 5 E. coli strains.\cite{williams}}\label{tab:williams}
+\caption[Estimations of the genome size of 5 E. coli strains]{Estimations of the genome size of 5 E. coli strains.~\cite{williams}}\label{tab:williams}
 \end{table}
 
-\paragraph{}Our method, CovEst\cite{covest}, was tested on several simulated datasets with various error rates and coverage as well as on real data --- E. coli (strain MG1655) --- subsampled for various coverage.
+\paragraph{}Our method, CovEst~\cite{covest}, was tested on several simulated datasets with various error rates and coverage as well as on real data --- E. coli (strain MG1655) --- subsampled for various coverage.
 We also compared our method to~\cite{williams} on both simulated (Fig.~\ref{fig:covest-ksa-sim}) and real data (Table~\ref{tab:covest-ksa-ecoli}).
 The simulated reads did not contain any repeats.
 We can see that our method is able to return usable results on much lower coverage than KSA.\@
@@ -235,7 +235,7 @@ We can see that our method is able to return usable results on much lower covera
   coverage on the logarithmic scale. Estimates more than a factor of two
   away from the real value are shown at the top or bottom of the plot.
   For each combination of parameters, we show five replicates. KSA did not
-  produce answers for some inputs\cite{covest}. }
+  produce answers for some inputs~\cite{covest}. }
 \label{fig:covest-ksa-sim}
 \end{figure}
 
@@ -252,7 +252,7 @@ KSA      & N/A     & N/A   & N/A   &  6.03 & 4.61   & 4.59   & 4.58 \\
 \caption[Comparison of E.coli genome size estimates]{Comparison of \emph{E.~coli} genome size estimates (true
   value $4.64$~Mbp) provided by CovEst and KSA at various genome
   coverage values. Estimates are given in Mbp. KSA does not run at low
-  coverage\cite{covest}.}
+  coverage~\cite{covest}.}
 \label{tab:covest-ksa-ecoli}
 
 \end{table}
@@ -263,9 +263,9 @@ KSA      & N/A     & N/A   & N/A   &  6.03 & 4.61   & 4.59   & 4.58 \\
 
 In this chapter we dealt with a problem of estimating the genome size and the coverage. We showed two main approaches to this problems based on $k$-mer histogram analysis.
 
-The first approach found in~\cite{waterman} and KSA\cite{williams} was based on precise modeling of repeat content and omitted the error modeling, whereas the second approach was based on precise error modeling and simple repeat modeling.
+The first approach found in~\cite{waterman} and KSA~\cite{williams} was based on precise modeling of repeat content and omitted the error modeling, whereas the second approach was based on precise error modeling and simple repeat modeling.
 The first approach works well on high coverage data and is more suitable for genomes, where the repeat content is very different from the simple model in the second approach.
 
-The second approach, which we presented in CovEst\cite{covest}, works well even in very low coverage data ($0.5\times$) or with highly erroneous data ($10\%$ error rate). Our approach is also very universal and easily extensible to more difficult models.
+The second approach, which we presented in CovEst~\cite{covest}, works well even in very low coverage data ($0.5\times$) or with highly erroneous data ($10\%$ error rate). Our approach is also very universal and easily extensible to more difficult models.
 
 The possibility of estimating the genome size and the coverage from low coverage data is very useful, because obtaining low coverage data is  cheaper than high coverage. Also it is more suitable in large genomes, such as plant genomes where the sizes are in tens of gigabases, where in addition to expensive cost of high coverage sequencing, it would be very time consuming to analyze such amount of data.

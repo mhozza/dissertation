@@ -1,20 +1,21 @@
 \chapter[K-mer Counting]{K-mer Counting and K-mer Abundance Histograms}
 
-A $K$-mer is a substring of length exactly~$k$. In \emph{$k$-mer counting} we take sequencing reads as an input and we want to know for each $k$-mer occurring in the reads, how many occurrences does it have. If we know all the counts of the $k$-mers, we can compute a $k$-mer histogram.
-The \emph{$k$-mer abundance histogram $H_k$ (shortly $k$-mer histogram)} is an array, where the $i$-th element (denoted by $H_k[i]$) is the number of unique $k$-mers occurring in the data exactly $i$ times. The size of the histogram denoted by $|H_k|$ is maximal $i$ such that $H_k[i] > 0$.
+A $K$-mer is a substring of length exactly~$k$. In \emph{$k$-mer counting} we take sequencing reads as an input and we want to know for each $k$-mer occurring in the reads, how many occurrences does it have. We can summarize the counts of all $k$-mers, in a $k$-mer histogram.
+The \emph{$k$-mer abundance histogram $H_k$ (shortly the $k$-mer histogram)} is an array, where the $i$-th element (denoted by $H_k[i]$) is the number of unique $k$-mers occurring in the data exactly $i$ times. The size of the histogram denoted by $|H_k|$ is maximal $i$ such that $H_k[i] > 0$.
 
-Counting of the $k$-mer (substring of length~$k$) occurrences is one of the key problem in many applications in bioinformatics.
+Counting of the $k$-mer occurrences is one of the key problem in many applications in bioinformatics.
 For example, it was used to separate several individual
 genomes when sequencing a metagenomic mixture of different microbes isolated from a certain environment~\cite{Wu2011, Wang2012}.
 It is also used in error correction algorithms e.g.\ for correcting errors prior the DNA assembly~\cite{Pevzner2001}, sequence aligners~\cite{edgar2004muscle} and repeat detectors~\cite{caponnetto2013efficiency}.
-It is also suitable for various sequence read analysis and genome size estimation\cite{covest, williams, waterman}. In many cases, computation of the $k$-mer abundance histogram is sufficient.
-We will use the $k$-mer histograms in~chapter~\ref{chap:genomesize} for estimating the coverage and the size of a genome.
+It is also suitable for various sequence read analyses and genome size estimation~\cite{covest, williams, waterman}.
+For some of these applications, computation of the $k$-mer abundance histogram is sufficient.
+In particular, we will use the $k$-mer histograms in~Chapter~\ref{chap:genomesize} for estimating the coverage and the size of a genome.
 
-NGS data, usually consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
-This causes a high memory usage of naive approach to this problem.
-\todo{nejaky priklad s cislami}
+A typical NGS data set, consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
+This causes a high memory usage of naive approaches to the problem of $k$-mer counting or $k$-mer histogram computation.
+For example the 10Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $400\times 10^6$ unique 21-mers. To just store a counter for each of them, we need approximately $4$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
 
-There are several existing tools addressing this issue for $k$-mer counting or $k$-mer histogram computation, for example Tallymer\cite{tallymer}, JELLYFISH\cite{jellyfish}, BFCounter\cite{bfcounter}, DSK\cite{dsk} and Khmer\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem, use hash tables, Bloom filters or suffix arrays.
+There are several existing tools addressing this issue $k$-mer counting or $k$-mer histogram computation, for example Tallymer~\cite{tallymer}, JELLYFISH~\cite{jellyfish}, BFCounter~\cite{bfcounter}, DSK~\cite{dsk} and Khmer~\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem use hash tables, Bloom filters or suffix arrays.
 
 \section{Simple Hashing Approach}
 
@@ -30,7 +31,7 @@ For small genomes with very low error rate, this approach is sufficient. However
 
 \section[Filtering Unique K-mers]{Filtering Unique K-mers Using Bloom Filter}
 
-In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of $k$-mers from same position in DNA will be different. Together with low probability of $k$-mers from different location be the same and low probability that errors cause $k$-mers from different positions to be same, we get most $k$-mers unique in low to mid coverage data. If we do not store these $k$-mers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}\cite{bloomfilter} to store unique $k$-mers.
+In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of $k$-mers from same position in DNA will be different. Together with low probability of $k$-mers from different location be the same and low probability that errors cause $k$-mers from different positions to be same, we get most $k$-mers unique in low to mid coverage data. If we do not store these $k$-mers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}~\cite{bloomfilter} to store unique $k$-mers.
 
 The Bloom filter supports two operations --- \method{add} for adding an element to the Bloom filter and \method{test} for testing whether an element is in Bloom filter. The following property holds for the \method{test} operation:
 \begin{itemize}
@@ -48,7 +49,7 @@ With one more pass we can get exact counts. We go through the $k$-mers once agai
 
 \section[Probabilistic K-mer Counting]{Probabilistic K-mer Counting Using Count-Min Sketch}
 
-The Count-Min sketch\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
+The Count-Min sketch~\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
 \begin{itemize}
   \item \method{incrementcount(x)} %chktex 36
   \item \method{getcount(x)} %chktex 36
@@ -66,9 +67,9 @@ More details about false positive rate estimation and comparison to other approa
 
 There are two more improvements of $k$-mer counting methods we have found in the papers about $k$-mer counting.
 
-\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned. Each partition can be loaded in the memory separately.
+\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm~\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned. Each partition can be loaded in the memory separately.
 
-The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct $k$-mers in the input; we assume that the number of distinct $k$-mers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table\cite{dsk}.
+The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct $k$-mers in the input; we assume that the number of distinct $k$-mers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table~\cite{dsk}.
 
 The algorithm works in $n_{iters} = \lceil vb/D\rceil$ iterations, where $v$ is total number of $k$-mers, $b$ is number of bits used to store the $k$-mer ($b = 2^{\lceil\log_2(2k)\rceil}$). Each $k$-mer is written to the disk only in $(h(m) \mod n_{iters})$-th iteration.
 
@@ -77,7 +78,7 @@ It goes through all the $k$-mers in the input and writes the $k$-mers valid for 
 Then for each list on the disk it constructs in-memory hash table storing the counts for each $k$-mer in the disk.
 Finally it outputs every key-value pair in the hash table.
 
-This algorithm is proved to use $D$ bits of disk space and $M$ bits of memory\cite{dsk}.
+This algorithm is proved to use $D$ bits of disk space and $M$ bits of memory~\cite{dsk}.
 
 \paragraph{} The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for $k$-mer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in the modern processors. The CAS instruction does these operations atomically:
 \begin{lstlisting}
@@ -95,9 +96,9 @@ First it computes the location of the $k$-mer in the hash table and then it incr
 
 \section[Enhanced Suffix Arrays]{Computing K-mer Histogram Using Enhanced Suffix Arrays}
 
-\emph{Suffix tree}\cite{suffixtree} is a data structure widely used in string processing. Basically, it is a compressed lexicographical tree build from all suffixes of a string. Let's have an alphabet $\Sigma$ and a string $S \in \Sigma^*$. Usually, for easier construction and manipulation, suffix tree is constructed from string $S\$$ instead of $S$, where $\$$ is a lexicographically smaller than every character in $\Sigma$. The suffix tree can be constructed in $O(|S|)$ time and space complexity~\cite{suffixtree}.
+\emph{Suffix tree}~\cite{suffixtree} is a data structure widely used in string processing. Basically, it is a compressed lexicographical tree build from all suffixes of a string. Let's have an alphabet $\Sigma$ and a string $S \in \Sigma^*$. Usually, for easier construction and manipulation, suffix tree is constructed from string $S\$$ instead of $S$, where $\$$ is a lexicographically smaller than every character in $\Sigma$. The suffix tree can be constructed in $O(|S|)$ time and space complexity~\cite{suffixtree}.
 
-\emph{Suffix arrays}\cite{suffixarray} were developed as more space efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in worst case~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$$ (similarly to suffix arrays we append $\$$ end marker to the original string $S$). Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
+\emph{Suffix arrays}~\cite{suffixarray} were developed as more space efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in worst case~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$$ (similarly to suffix arrays we append $\$$ end marker to the original string $S$). Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
 
 With basic suffix arrays it was not possible to directly replace the suffix tree with the suffix array in any suffix tree based string processing problem and maintain its time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$.
 
@@ -122,7 +123,7 @@ An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\e
 \end{enumerate}
 \end{definition}
 
-Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree\cite{enhancedsuffixarrays}.
+Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree~\cite{enhancedsuffixarrays}.
 
 \begin{definition}
   An $m$-interval $[l..r]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
@@ -143,7 +144,7 @@ Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Aga
 
 One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in~\cite{tallymer}, but the suffix arrays are used also in other tools e.g.~\cite{jellyfish}.
 
-% To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in\cite{tallymer}.
+% To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in~\cite{tallymer}.
 
 \section{Conclusion}
 
