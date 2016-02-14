@@ -1,17 +1,14 @@
-% chktex-file 1
 \chapter[K-mer Counting]{K-mer Counting and K-mer abundance histograms}
 
-% intor o kmeroch a podobne
-
-\Kmer is a substring of length exactly~$k$. In \emph{\kmer counting} we take sequencing reads as an input and we want to know for each \kmer occurring in the reads, how many occurrences does it have. If we know all the counts of the \kmers, we can compute a \kmer histogram.
-The \emph{$k$-mer abundance histogram $H_k$ (shortly \kmer histogram)} is an array, where the $i$-th element (denoted by $H_k[i]$) is the number of unique $k$-mers occurring in the data exactly $i$ times. The size of the histogram denoted by $|H_k|$ is maximal $i$ such that $H_k[i] > 0$.
+$K$-mer is a substring of length exactly~$k$. In \emph{$k$-mer counting} we take sequencing reads as an input and we want to know for each $k$-mer occurring in the reads, how many occurrences does it have. If we know all the counts of the $k$-mers, we can compute a $k$-mer histogram.
+The \emph{$k$-mer abundance histogram $H_k$ (shortly $k$-mer histogram)} is an array, where the $i$-th element (denoted by $H_k[i]$) is the number of unique $k$-mers occurring in the data exactly $i$ times. The size of the histogram denoted by $|H_k|$ is maximal $i$ such that $H_k[i] > 0$.
 
 Counting of the $k$-mer (substring of length~$k$) occurrences is one of the key problem in many applications in bioinformatics.
 For example, it was used to separate several individual
 genomes when sequencing a metagenomic mixture of different microbes isolated from a certain environment~\cite{Wu2011, Wang2012}.
 It is also used in error correction algorithms e.g.\ for correcting errors prior the DNA assembly~\cite{Pevzner2001}, sequence aligners~\cite{edgar2004muscle} and repeat detectors~\cite{caponnetto2013efficiency}.
 It is also suitable for various sequence read analysis and genome size estimation\cite{covest, williams, waterman}. In many cases, computation of the $k$-mer abundance histogram is sufficient.
-We will use the \kmer histograms in~chapter~\ref{chap:genomesize} for estimating the coverage and the size of a genome.
+We will use the $k$-mer histograms in~chapter~\ref{chap:genomesize} for estimating the coverage and the size of a genome.
 
 NGS data, usually consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
 This causes a high memory usage of naive approach to this problem.
@@ -24,12 +21,12 @@ There are several existing tools addressing this issue for $k$-mer counting or $
 Let us first briefly explain the naive solution, so we can extend and compare it to the methods used in selected published tools.
 
 Suppose we want to count occurrences of $k$-mers in sequence $S$.
-We create a hash table $T$, in which \kmers will be keys and their counts stored as values, and then scan the sequence $S$.
+We create a hash table $T$, in which $k$-mers will be keys and their counts stored as values, and then scan the sequence $S$.
 At each position $i$, we take the $k$-mer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item in the table, after handling possible collisions.
 
 We can then query the hash table for the number of occurrences of a~particular $k$-mer, or iterate through the whole table to compute the histogram.
 
-For small genomes with very low error rate, this approach is sufficient. However, higher error rate produces more unique \kmers and together with large genomes makes the hash table so big it doesn't fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
+For small genomes with very low error rate, this approach is sufficient. However, higher error rate produces more unique $k$-mers and together with large genomes makes the hash table so big it doesn't fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
 
 \section[Filtering Unique K-mers]{Filtering Unique K-mers using Bloom Filter}
 
@@ -150,10 +147,10 @@ One of the advantages of this approach, is that we can compute $H_k$ for differe
 
 \section{Conclusion}
 
-We briefly summarized the most important approaches to the \kmer counting problem. We also described the key data structures and optimizations for the \kmer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
+We briefly summarized the most important approaches to the $k$-mer counting problem. We also described the key data structures and optimizations for the $k$-mer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
 
-There are a lot of available tools for \kmer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique \kmers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
+There are a lot of available tools for $k$-mer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique $k$-mers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
 
-The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count \kmers exactly.
+The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
 The comparison of the tools can be found in~\cite{khmer}.
 % cosi o pouziti a pod

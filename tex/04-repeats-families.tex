@@ -68,7 +68,7 @@ In this section we will briefly present the main idea used in tandem repeats fin
 
 The tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
 
-The detection algorithm looks for exactly matching \kmers\ which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible \kmers\ (probes).
+The detection algorithm looks for exactly matching $k$-mers which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible $k$-mers (probes).
 For each probe $p$ it stores a history list $H_p$.
 When a particular position $i$ is added to the $H_p$, for all previous positions $j$ in $H_p$, $d = i - j$ becomes a possible pattern size.
 The algorithm also maintains a distance list $D_d$, which is basically a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The updates sets right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to analysis component of the algorithm.
@@ -84,14 +84,14 @@ Next, we will focus mainly on general repeats, which copies in contrast to the t
 The first methods (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}) for finding repeats in assembled genome were based on computation of pairwise similarities. However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise repeats would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
 Also, local sequence alignments do not usually correspond to the biological boundaries.\cite{recon}.
 
-In~\cite{repscout}, they present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant \kmers\ and then extend it to the repeat family consensus.
+In~\cite{repscout}, they present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant $k$-mers and then extend it to the repeat family consensus.
 
-If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends a seed one base at a time, adding a base which has a majority among all sequences. It discards a sequences which stop align to the consensus and stops when most sequences stops to align. More precisely, let $S1,\dots S_n$ be strings containing occurrences of a repeat family, which share a \kmer\ seed, the consensus sequence $Q$ is the sequence which maximizes
+If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends a seed one base at a time, adding a base which has a majority among all sequences. It discards a sequences which stop align to the consensus and stops when most sequences stops to align. More precisely, let $S1,\dots S_n$ be strings containing occurrences of a repeat family, which share a $k$-mer seed, the consensus sequence $Q$ is the sequence which maximizes
 $$A(Q; S_1 \dots S_n) = \left[\sum_k a(Q, S_k)\right] - c |Q|,$$
 where $a(Q, S_k)$ is a fit-preferred\cite{repscout} alignment score and $c$ is a repeat frequency threshold.
-Algorithm then starts from $Q = \text{\kmer\ seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
+Algorithm then starts from $Q = \text{$k$-mer seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
 
-Since many abundant \kmers\ may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed \kmers\ from the \kmer\ count table.
+Since many abundant $k$-mers may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed $k$-mers from the $k$-mer count table.
 
 Finding tandem repeats is easier task than general repeat finding and it can complement the general repeat finding methods, i.e.\ the tandem repeats may be masked first from the genome so the general method has to find less repeats, which may lead to improved performance.
 
@@ -107,7 +107,7 @@ In the basic form the algorithms tell us, the proportion of the repetitive seque
 The algorithm uses two basic observations:
 
 \begin{enumerate}
-  \item The repeat family is expected to have multiple \kmers\ with  unusually high coverage.
+  \item The repeat family is expected to have multiple $k$-mers with  unusually high coverage.
   \item The reads covering a different copies of a particular repeat family can be separated into different groups, starting from one read and extending it if there are more then a prespecified number of reads, which prefix matches the suffix of the currently considered read.
 \end{enumerate}
 

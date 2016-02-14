@@ -8,7 +8,7 @@ We will summarize the current status and problems.
 
 We developed a tool for estimating the genome size from low coverage erroneous sequencing data, called CovEst, which we have described in Chapter~\ref{chap:genomesize}. We published and presented CovEst on SPIRE 2015 conference\cite{covest}.
 
-The tool is just a prototype and various issues need to be fixed prior the final version. Most importantly the model parameters finding algorithm speed have to be improved. Also more complex models can be added. Finally, we can make the algorithm more robust by increasing the independence of the data, or using multiple \kmer\ histograms.
+The tool is just a prototype and various issues need to be fixed prior the final version. Most importantly the model parameters finding algorithm speed have to be improved. Also more complex models can be added. Finally, we can make the algorithm more robust by increasing the independence of the data, or using multiple $k$-mer histograms.
 
 \paragraph{Parameter estimation algorithm improvements.}
 In the current version, we use the L-BFGS-B\cite{l-bfgs-b} algorithm for parameter estimation, with fine-tuning using the grid search.
@@ -27,10 +27,10 @@ We can add more complex repeat modeling, similarly to the~\cite{williams}. We ca
 
 \paragraph{The algorithm robustness improvements.}
 
-We estimate the parameters from single \kmer\ histogram. It is also possible to build several \kmer\ histograms for different $k$. Estimating parameters from multiple histograms can avoid some artifacts or biases that may be introduced by a particular $k$ and improve the precision of the algorithm providing more data.
+We estimate the parameters from single $k$-mer histogram. It is also possible to build several $k$-mer histograms for different $k$. Estimating parameters from multiple histograms can avoid some artifacts or biases that may be introduced by a particular $k$ and improve the precision of the algorithm providing more data.
 
-Moreover the \kmers\ in histogram are not completely independent. Each \kmer\ is shares some sequence with $k-1$ other consecutive \kmers. We may alter this dependence using spaced $k$-mers, i.e\ we omit some positions in the \kmer.
-The mask for the spaced \kmers\ can by chosen randomly for a single run of the \kmer\ counting algorithm. We can also build multiple histograms using multiple \kmer\ masks.
+Moreover the $k$-mers in histogram are not completely independent. Each $k$-mer is shares some sequence with $k-1$ other consecutive $k$-mers. We may alter this dependence using spaced $k$-mers, i.e\ we omit some positions in the $k$-mer.
+The mask for the spaced $k$-mers can by chosen randomly for a single run of the $k$-mer counting algorithm. We can also build multiple histograms using multiple $k$-mer masks.
 
 \section{Repeats and Gene Families}\label{sect:repeats-families}
 
