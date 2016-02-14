@@ -13,39 +13,45 @@ In particular, we will use the $k$-mer histograms in~Chapter~\ref{chap:genomesiz
 
 A typical NGS data set, consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
 This causes a high memory usage of naive approaches to the problem of $k$-mer counting or $k$-mer histogram computation.
-For example the 10Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $400\times 10^6$ unique 21-mers. To just store a counter for each of them, we need approximately $4$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
+For example the 100Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $4\cdot 10^9$ unique 21-mers. To just store a counter for each of them, we need approximately $40$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
 
-There are several existing tools addressing this issue $k$-mer counting or $k$-mer histogram computation, for example Tallymer~\cite{tallymer}, JELLYFISH~\cite{jellyfish}, BFCounter~\cite{bfcounter}, DSK~\cite{dsk} and Khmer~\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem use hash tables, Bloom filters or suffix arrays.
+There are several existing tools addressing this issue, for example Tallymer~\cite{tallymer}, JELLYFISH~\cite{jellyfish}, BFCounter~\cite{bfcounter}, DSK~\cite{dsk} and Khmer~\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem use hash tables, Bloom filters or suffix arrays.
 
 \section{Simple Hashing Approach}
 
-Let us first briefly explain the naive solution, so we can extend and compare it to the methods used in selected published tools.
-
+Let us first briefly explain the naive solution, so that we can extend and compare it to the methods used in selected published tools.
 Suppose we want to count occurrences of $k$-mers in sequence $S$.
 We create a hash table $T$, in which $k$-mers will be keys and their counts stored as values, and then scan the sequence $S$.
 At each position $i$, we take the $k$-mer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item in the table, after handling possible collisions.
 
 We can then query the hash table for the number of occurrences of a~particular $k$-mer, or iterate through the whole table to compute the histogram.
 
-For small genomes with very low error rate, this approach is sufficient. However, higher error rate produces more unique $k$-mers and together with large genomes makes the hash table so big it doesn't fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
+For small genomes with very low sequencing error rate, this approach is sufficient. However, higher error rate produces more unique $k$-mers and together with large genomes makes the hash table so big it does not fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
 
-\section[Filtering Unique K-mers]{Filtering Unique K-mers Using Bloom Filter}
+\section[Filtering Unique K-mers]{Filtering Unique K-mers Using Bloom Filters}
 
-In NGS data, there are a lot of errors in the reads. Error rate in NGS data is usually about 1--5\%. This means that probability of 20-mer containing error with error rate 1\% is $1 - 0.99^{20} \approxeq 0.18$ i.e.\ about 18\% of $k$-mers from same position in DNA will be different. Together with low probability of $k$-mers from different location be the same and low probability that errors cause $k$-mers from different positions to be same, we get most $k$-mers unique in low to mid coverage data. If we do not store these $k$-mers in hash table, we can save a lot of memory. We can use more memory efficient, probabilistic data structure called \firstUseOf{Bloom Filter}~\cite{bloomfilter} to store unique $k$-mers.
+Error rate in Illumina sequencing machines is usually about 1--5\%. However even at $1\%$, the probability that a 20-mer contains an error is $1 - 0.99^{20} \approxeq 0.18$; i.e.\ about 18\% of $k$-mers from a given position in DNA will differ from the correct $k$-mer.
+The correct $k$-mers abundances are distributed according to the Poisson distribution with mean $c$, where $c$ is an average number of reads covering a single position in a genome (see Chapter~\ref{chap:genomesize} for more details). Thus they provide only $N_{cor}/c$ different $k$-mers.
+Since both, the probability of $k$-mers from different location be the same and the probability that errors cause $k$-mers from different positions to be same are negligible. We can compute a proportion of the erroneous $k$-mers among all different $k$-mers as $$\alpha = \frac{N_{err}}{N_{err} + N_{cor}},$$
+where $N_{cor}$ and $N_{err}$ is number of correct $k$-mers and erroneous $k$-mers respectively.
 
-The Bloom filter supports two operations --- \method{add} for adding an element to the Bloom filter and \method{test} for testing whether an element is in Bloom filter. The following property holds for the \method{test} operation:
+The higher the coverage, the higher the proportion of erroneous $k$-mers among all different $k$-mers. But at the same time the probability, that multiple errors lead to the same resulting $k$-mer increases. The lower the coverage, the higher the proportion of unique $k$-mers among all correct $k$-mers. Therefore, we get most $k$-mers unique in low to middle coverage data.
+If we do not store these unique $k$-mers in the hash table, we can save a lot of memory. We can use a more memory efficient, probabilistic data structure called \emph{Bloom filter}~\cite{bloomfilter} to store the unique $k$-mers.
+
+The Bloom filter stores a set of elements (in our case $k$-mers), and it supports two operations --- \method{add} for adding an element to the set and \method{test} for testing whether an element is in the set. The following property holds for the \method{test} operation:
 \begin{itemize}
-  \item If the element is set in the Bloom filter, returns \emph{true}.
-  \item If the element is not set it returns \emph{false} with high probability.
+  \item If the element is in the set, test returns \emph{true}.
+  \item If the element is not in the set, test returns \emph{false} with a high probability.
 \end{itemize}
-If the test method returns true, the element is probably set in the filter, otherwise it is definitely not there.
+If the test method returns true, the element is probably in the set, otherwise it is definitely not there.
 
-The Bloom Filter basically consists of a bit vector of length $n$ and $m$ hashing functions, each transforming the element to the position in the bit vector. The parameters directly affect the false positive rate of the Bloom filter.
-The \method{add} operation computes $m$ positions from $m$ hashing functions applied to the element and sets them to one.
-The \method{test} operation computes $m$ positions from the element and checks whether each of them is one. If any of them is zero, returns false, otherwise returns true. Further details are described in~\cite{bloomfilter}.
+A Bloom filter consists of a bit vector of length $n$ and $m$ hashing functions, each transforming the element to the position in the bit vector. The parameters $n$ and $m$ directly affect the false positive rate of the Bloom filter.
+The \method{add} operation computes $m$ positions from $m$ hashing functions applied to the element and sets all corresponding bits in the vector to one.
+The \method{test} operation computes $m$ positions from the element and checks whether each of them is set to one. If any of them is zero, it returns false, otherwise it returns true. Further details are described in~\cite{bloomfilter}.
 
-We can use Bloom Filter to store information about all $k$-mers we have seen at some point of computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means we (probably) have seen this $k$-mer before and we also add it to the hash table. This way we get approximate counts for each $k$-mer.
-With one more pass we can get exact counts. We go through the $k$-mers once again and check if they are not in hash table. If not, they are certainly unique. More details are in~\cite{bfcounter}.
+We can use a Bloom filter to store all $k$-mers we have seen at some point of computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means that we have probably seen this $k$-mer before, and we also add it to the hash table with the starting count 2. In this way we get approximate counts for each $k$-mer.
+With one more pass through the input data we can get exact counts.
+Any input $k$-mer, which is not in the hash table is certainly unique, and the counts of $k$-mers in the hash table can be also recomputed. This approach was used in BFCounter~\cite{bfcounter}.
 
 \section[Probabilistic K-mer Counting]{Probabilistic K-mer Counting Using Count-Min Sketch}
 
@@ -102,7 +108,7 @@ First it computes the location of the $k$-mer in the hash table and then it incr
 
 With basic suffix arrays it was not possible to directly replace the suffix tree with the suffix array in any suffix tree based string processing problem and maintain its time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$.
 
-\firstUseOf{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with the \firstUseOf{lcp (longest common prefix)} information.
+\emph{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with the \emph{lcp (longest common prefix)} information.
 In contrast to the Suffix Trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
@@ -111,7 +117,7 @@ We can represent Enhanced Suffix Array of string $S$ as two tables:
   \item \emph{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
 \end{enumerate}
 
-We also need to introduce the concept of the \firstUseOf{lcp-intervals} and \firstUseOf{lcp-interval trees}. The notion of lcp-intervals was first used in~\cite{enhancedsuffixarrays}.
+We also need to introduce the concept of the \emph{lcp-intervals} and \emph{lcp-interval trees}. The notion of lcp-intervals was first used in~\cite{enhancedsuffixarrays}.
 \begin{definition}
 An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\ell$ if
 
