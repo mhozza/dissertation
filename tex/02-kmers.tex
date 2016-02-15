@@ -55,38 +55,35 @@ Any input $k$-mer, which is not in the hash table is certainly unique, and the c
 
 \section[Probabilistic K-mer Counting]{Probabilistic K-mer Counting Using Count-Min Sketch}
 
-The Count-Min sketch~\cite{countminsketch} data structure enables counting of objects in sublinear space. It supports two operations:
+The Count-Min sketch~\cite{countminsketch} data structure enables counting objects in sublinear space. It supports two operations:
 \begin{itemize}
   \item \method{incrementcount(x)} %chktex 36
   \item \method{getcount(x)} %chktex 36
 \end{itemize}
 
-The data structure consists of $m$ hash tables, with different hash functions.
+The data structure consists of $m$ hash tables with different hash functions.
 The \method{incrementcount(x)} operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The \method{getcount} operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result. %chktex 36
 
-If there is a collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on the collision probability, which is proportional to the number of hash tables and their sizes.
+If there is a collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on the collision probability, which decreases with increasing number of hash tables and their sizes.
 
-This data structure can be directly used to the $k$-mer counting problem. As it does not store the $k$-mers itself, it allows in memory $k$-mer counting and querying, which is useful for streaming applications.
-More details about false positive rate estimation and comparison to other approaches can be found in~\cite{khmer}.
+This data structure can be directly used to the $k$-mer counting problem. As it does not store the $k$-mers themselves, it allows in memory $k$-mer counting and querying, which is useful for streaming applications.
+More details about false positive rate estimation and comparison to other approaches for $k$-mer counting can be found in~\cite{khmer}.
 
 \section[Other Improvements]{Other Improvements of the Hashing Approach}
 
-There are two more improvements of $k$-mer counting methods we have found in the papers about $k$-mer counting.
+The basic hashing approach to $k$-mer counting can be further improved in various ways; here we describe two such improvements.
 
-\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm~\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned. Each partition can be loaded in the memory separately.
+\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm~\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned, and each partition can be loaded to the memory separately.
 
-The algorithm uses a simplifying assumption: Let $d$ be the total number of distinct $k$-mers in the input; we assume that the number of distinct $k$-mers having a given hash value is at most $\lceil d/H \rceil$, where $H$ is the size of the hash table~\cite{dsk}.
+The algorithm has two parameters: the memory size $M$ and disk space $D$ expressed in bits. During the computation, the algorithm does not exceed the memory and disk space constraints given by the parameters.
 
-The algorithm works in $n_{iters} = \lceil vb/D\rceil$ iterations, where $v$ is total number of $k$-mers, $b$ is number of bits used to store the $k$-mer ($b = 2^{\lceil\log_2(2k)\rceil}$). Each $k$-mer is written to the disk only in $(h(m) \mod n_{iters})$-th iteration.
-
-At each iteration algorithm maintains $n_p = \lceil\frac{vb+32}{0.7n_{iters}M}\rceil$ lists of $k$-mers.
-It goes through all the $k$-mers in the input and writes the $k$-mers valid for the iteration to the $h(m)/n_{iters} \mod n_p$-th list on the disk.
+The algorithm works in several iterations, which number is proportional to the memory needed to store all the $k$-mers, and inversely proportional to the $D$, and maintains a multiple $k$-mer lists on the disk.
+Each $k$-mer is written to the disk only once, at the iteration determined by the hashing function.
+At each iteration, all the $k$-mers valid for the iteration are partitioned into the $k$-mer lists according to the hashing function.
 Then for each list on the disk it constructs in-memory hash table storing the counts for each $k$-mer in the disk.
 Finally it outputs every key-value pair in the hash table.
 
-This algorithm is proved to use $D$ bits of disk space and $M$ bits of memory~\cite{dsk}.
-
-\paragraph{} The second is speed improvement by parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for $k$-mer counting --- hash table, which must be shared between threads. The threads have to be able to read from and write to hash table at once, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. The thread safe, lock-free hash table implementation was presented in this~\cite{jellyfish}. It uses \emph{compare-and-swap} (CAS) instruction which is widely available in the modern processors. The CAS instruction does these operations atomically:
+\paragraph{} The second improvement is the use of parallelism. To enable parallelism, we need to allow concurrent access to the key data structure for $k$-mer counting --- a hash table, which must be shared between threads. The threads have to be able to read from and write to the hash table simultaneously, without locking the access to it. Otherwise we would loose the advantage of parallel execution, because other threads would need to wait the lock to be released. A thread safe, lock-free hash table implementation was used in software jellyfish~\cite{jellyfish}. It uses a \emph{compare-and-swap} (CAS) instruction which is widely available in the modern processors. The CAS instruction does these operations atomically:
 \begin{lstlisting}
 def cas(location, oldvalue, newvalue):
   currentvalue = read(location)
@@ -94,11 +91,11 @@ def cas(location, oldvalue, newvalue):
     set(location, newvalue)
   return currentvalue
 \end{lstlisting}
-If two threads access same memory location simultaneously, one of them will fail to set new value. In this case, the thread must take appropriate action.
+If two threads access same memory location simultaneously, one of them will fail to set new value. In this case, the thread must take an appropriate action.
 It can retry the CAS operation until it is successful.
 
 The algorithm for $k$-mer counting hash table works in two steps:
-First it computes the location of the $k$-mer in the hash table and then it increments the value. Both of the operations can be done thread-safe without locks using the CAS instruction.
+First it computes the location of the $k$-mer in the hash table and then it increments the value. Both of the operations can be done in a thread-safe way without locks using the CAS instruction.
 
 \section[Enhanced Suffix Arrays]{Computing K-mer Histogram Using Enhanced Suffix Arrays}
 
