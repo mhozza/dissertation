@@ -138,10 +138,40 @@ Next we define parent-child relationships between lcp-intervals and thus an lcp-
   The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[b..e]$. If $[i..j]$ encloses $[b..e]$ and there is no interval embedded in $[i..j]$ that also encloses $[b..e]$, then $[b..e]$ is called a child interval of $[i..j]$.
 \end{definition}
 
-The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition.
+The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition (see Figure~\ref{fig:enhancedsuffixarray}).
 
-\todo{example, figures}
+\begin{figure}[htp]
+\centering
 
+\begin{subfigure}[m]{0.47\textwidth}
+\scriptsize
+\begin{tabular}{rccl}
+    i & suftab & lcptab & suffix\\
+    0 & 0 & 0 & ACCTCGCCTCATCG\$ \\
+    1 & 10 & 1 & ATCG\$ \\
+    2 & 9 & 0 & CATCG\$ \\
+    3 & 6 & 1 & CCTCATCG\$ \\
+    4 & 1 & 4 & CCTCGCCTCATCG\$ \\
+    5 & 4 & 1 & CGCCTCATCG\$ \\
+    6 & 12 & 2 & CG\$ \\
+    7 & 7 & 1 & CTCATCG\$ \\
+    8 & 2 & 3 & CTCGCCTCATCG\$ \\
+    9 & 5 & 0 & GCCTCATCG\$ \\
+    10 & 13 & 1 & G\$ \\
+    11 & 8 & 0 & TCATCG\$ \\
+    12 & 3 & 2 & TCGCCTCATCG\$ \\
+    13 & 11 & 3 & TCG\$ \\
+    14 & 14 & 0 & \$
+\end{tabular}
+\caption{Enhanced suffix array.}
+\end{subfigure}
+~\begin{subfigure}[m]{0.47\textwidth}
+   \centering
+   \includegraphics[width=\textwidth]{../figures/lcpintervaltree}
+   \caption{LCP interval tree (top) and suffix tree (bottom).}
+\end{subfigure}
+\caption[The suffix array, suffix tree, and lcp interval tree]{The suffix array, suffix tree, and lcp interval tree of string ACCTCGCCTCATCG\$. Note that internal nodes (black) in suffix tree correspond to the nodes in lcp interval tree. The singleton nodes than correspond to the leaf nodes (grey) in the suffix tree.}\label{fig:enhancedsuffixarray}
+\end{figure}
 The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in $S$~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 
 We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. The algorithm~\cite{enhancedsuffixarrays} traverses the tree in bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
