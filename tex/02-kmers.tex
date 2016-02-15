@@ -16,6 +16,8 @@ This causes a high memory usage of naive approaches to the problem of $k$-mer co
 For example the 100Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $4\cdot 10^9$ unique 21-mers. To just store a counter for each of them, we need approximately $40$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
 
 There are several existing tools addressing this issue, for example Tallymer~\cite{tallymer}, JELLYFISH~\cite{jellyfish}, BFCounter~\cite{bfcounter}, DSK~\cite{dsk} and Khmer~\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem use hash tables, Bloom filters or suffix arrays.
+The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
+The comparison of the tools can be found in~\cite{khmer}.
 
 \section{Simple Hashing Approach}
 
@@ -99,14 +101,17 @@ First it computes the location of the $k$-mer in the hash table and then it incr
 
 \section[Enhanced Suffix Arrays]{Computing K-mer Histogram Using Enhanced Suffix Arrays}
 
-\emph{Suffix tree}~\cite{suffixtree} is a data structure widely used in string processing. Basically, it is a compressed lexicographical tree build from all suffixes of a string. Let's have an alphabet $\Sigma$ and a string $S \in \Sigma^*$. Usually, for easier construction and manipulation, suffix tree is constructed from string $S\$$ instead of $S$, where $\$$ is a lexicographically smaller than every character in $\Sigma$. The suffix tree can be constructed in $O(|S|)$ time and space complexity~\cite{suffixtree}.
+A \emph{suffix tree}~\cite{suffixtree} is a data structure widely used in string processing. It is a compressed trie build from all suffixes of a string. To index a string $S$ over an alphabet $\Sigma$, we usually append a special end marker `$\$ $', and construct a suffix tree for string $S\$ $.
+This allows easier construction and manipulation.
+The suffix tree can be constructed in $O(|S|)$ time and space complexity, and can be queried for the existence of a suffix $s$ in $O(|s|)$ time.
 
-\emph{Suffix arrays}~\cite{suffixarray} were developed as more space efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in worst case~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$$ (similarly to suffix arrays we append $\$$ end marker to the original string $S$). Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster due to poor locality of memory reference of the Suffix Trees, causing efficiency loss on cached processor architectures.
+\emph{Suffix arrays}~\cite{suffixarray} were developed as a more space-efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in the worst case to index a string of length $n$~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$ $. Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster because the suffix trees suffer from poor locality of memory reference, causing efficiency loss on cached processor architectures.
 
-With basic suffix arrays it was not possible to directly replace the suffix tree with the suffix array in any suffix tree based string processing problem and maintain its time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$.
+In typical string processing problems, basic suffix arrays cannot directly replace the suffix tree and maintain the same time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$, whereas suffix trees can do it in $O(m)$ time.
 
-\emph{Enhanced Suffix Arrays} are Suffix Arrays enhanced with some additional information --- in this case with the \emph{lcp (longest common prefix)} information.
-In contrast to the Suffix Trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
+\emph{Enhanced suffix arrays} are suffix arrays enhanced with some additional information.
+In particular, we will consider addition of the \emph{lcp (longest common prefix)} table.
+In contrast to the suffix trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
 
 We can represent Enhanced Suffix Array of string $S$ as two tables:
 \begin{enumerate}
@@ -129,32 +134,32 @@ An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\e
 Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree~\cite{enhancedsuffixarrays}.
 
 \begin{definition}
-  An $m$-interval $[l..r]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = l$ and $r = j$ because $m > \ell$.}
-  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[l..r]$. If $[i..j]$ encloses $[l..r]$ and there is no interval embedded in $[i..j]$ that also encloses $[l..r]$, then $[l..r]$ is called a child interval of $[i..j]$.
+  An $m$-interval $[b..e]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = b$ and $e = j$ because $m > \ell$.}
+  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[b..e]$. If $[i..j]$ encloses $[b..e]$ and there is no interval embedded in $[i..j]$ that also encloses $[b..e]$, then $[b..e]$ is called a child interval of $[i..j]$.
 \end{definition}
 
 The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition.
 
 \todo{example, figures}
 
-The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in S~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
+The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in $S$~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 
-We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes from~\cite{enhancedsuffixarrays}. The algorithm traverses the tree in bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
+We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. The algorithm~\cite{enhancedsuffixarrays} traverses the tree in bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
 
-We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying the former conditions.
+We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying these conditions.
 
-Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a $k$-mer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$. We increment $H_k[j-i+1]$ by one for each interval satisfying the former conditions.
+Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Again, let $d$ be the lcp-value of the parent of interval $[i..j]$, $S[suftab[j]..suftab[j] + k - 1]$ is a $k$-mer occurring exactly $j - i + 1$ times in $S$ if and only if $d < k \leq \ell$. We increment $H_k[j-i+1]$ by one for each interval satisfying this condition.
 
-One of the advantages of this approach, is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in~\cite{tallymer}, but the suffix arrays are used also in other tools e.g.~\cite{jellyfish}.
+One of the advantages of this approach is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in Tallymer~\cite{tallymer}, but the suffix arrays are used also in other tools~\cite{jellyfish}.
 
-% To address the problem of counting $k$-mers in multiple sequences (reads), we can concatenate all reads to one sequence, using dividers $\$_1\dots \$_r$. To compute occurrences for large sequences, we need to split the sequence into multiple shorter non-overlaping sequences and use divide and conquer algorithm described in~\cite{tallymer}.
+\todo{ked bude cas, spomenut compressed suffix arrays}
 
-\section{Conclusion}
-
-We briefly summarized the most important approaches to the $k$-mer counting problem. We also described the key data structures and optimizations for the $k$-mer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
-
-There are a lot of available tools for $k$-mer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique $k$-mers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
-
-The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
-The comparison of the tools can be found in~\cite{khmer}.
+% \section{Conclusion}
+%
+% We briefly summarized the most important approaches to the $k$-mer counting problem. We also described the key data structures and optimizations for the $k$-mer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
+%
+% There are a lot of available tools for $k$-mer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique $k$-mers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
+%
+% The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
+% The comparison of the tools can be found in~\cite{khmer}.
 % cosi o pouziti a pod
