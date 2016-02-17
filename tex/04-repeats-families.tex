@@ -23,7 +23,7 @@ In this chapter we will present multiple approaches for detecting repetitive seq
 
 \section[Known Repeats in Assem\dots]{Finding the Known Repeats and Gene Families in the Assembled Genome}
 
-The known repeats and gene families are stored in several databases. Examples of repeat databases include repbase~\cite{repbase}, dfam~\cite{dfam}, and a well-known example of a gene family databases is pfam~\cite{pfam}.
+The known repeats and gene families are stored in several databases. Examples of repeat databases include Repbase~\cite{repbase}, Dfam~\cite{dfam}, and a well-known example of a gene family databases is Pfam~\cite{pfam}.
 
 In the database search, we are usually interested in all sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of regions in our sequence which are homologous to repeats from the database.
 There are two approaches for repeat finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
@@ -39,8 +39,8 @@ Each seed is then extended to maximize the score.
 \paragraph{Searching by profile HMM.}
 A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, transitions and, emissions. A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
 
-The profile HMM has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
-Assume that we have a multiple alignment of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing \todo{}.
+The profile HMM is a\todo{} has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
+Assume that we have a multiple alignment of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in corresponding place in the sequence.
 For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
 The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 \todo{obrazok}
@@ -53,12 +53,12 @@ alignment segments. This can be used as heuristic filter before running the full
 \end{reformulate}
 
 There are various tools for finding repeats and gene families, implementing these methods.
-The most used ones are repeatmasker~\cite{repeatmasker}, interproscan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
+The most used ones are RepeatMasker~\cite{repeatmasker}, InterProScan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
 The profile HMMs enable probabilistic approach to the sequence similarity search, which has several advantages. It can contain more information about the family than a single consensus sequence used in sequence similarity approach, i.e.\ if at particular position $3/5$ of the sequences has A and $2/5$ of the sequences has T, the consensus sequence contains only information about A, whereas the profile HMM contains information about the distribution of nucleotides.
 
 \section{De Novo Repeat Finding}
 
-In practice not all repeats are known and contained in the databases and databases only for a few organisms was well constructed (e.g.\ repeat masker contains databases for human and mouse~\cite{repeatmasker}). Therefore algorithms for finding new repeats and gene families are needed.
+In practice not all repeats are known and contained in the databases and databases only for a few organisms was well constructed (e.g.\ RepeatMasker contains databases for human and mouse~\cite{repeatmasker}). Therefore algorithms for finding new repeats and gene families are needed.
 
 \subsection{Finding de Novo Repeats in the Assembled Genome}
 
