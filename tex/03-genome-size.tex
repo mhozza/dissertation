@@ -53,7 +53,11 @@ $$G = \frac{NL}{c}.$$
 
 \subsection{Modeling Repeats}\label{subsec:repeatmodles}
 
-Real genomes often contain a lot of repeats (\todo{priklad, niekde bola tusim kvasinka 30\%}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
+For example, transposable
+elements forms more then 70\% of the genome in some plants and amphibians, and 45\%
+in human genome [5].
+
+Real genomes often contain a lot of repeats (e.g.\ transposable elements forms more than 45\% of human genome}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
 
 The repetitive sequences can be modeled similarly to the single copy sequences. Let $f(j; c)$ be the probability that a particular $k$-mer occurs $j$ times in the data given the coverage $c$. The probability that a $k$-mer from sequence repeated $o$ times occurs $j$ times in the reads is then $p_{o,j} = f(j; o\cdot c)$.
 
@@ -155,7 +159,8 @@ The genome size was 103,432 bp and the coverage was $3.018\times$.
 They had 1674 error-corrected reads with median length 553 bp.
 The estimated genome size and coverage was 103,696 bp and $2.945\times$ respectively.
 
-\paragraph{}The KSA method~\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validate by experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}. \todo{2 vety aj o repeatoch}
+\paragraph{}The KSA method~\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validate by experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}.
+
 \begin{table}[htbp]
 \centering
 \begin{tabular}{lccccc}

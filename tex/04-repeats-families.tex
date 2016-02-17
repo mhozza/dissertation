@@ -1,57 +1,60 @@
 \chapter[Rep.\ and Gene Fam.]{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
 Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
-The repeat or gene family consist of set of sequences assigned to the family. The particular sequences may differ due to mutations acquired during the evolution. This may be substitution, insertion, or deletion of one or more nucleotides.
+A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to common evolutionary. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
 
-Repeats usually does not have any function and are often represented by several thousands of copies~\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
-\emph{Simple sequence repeate} consists of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
-\emph{Retrotransposons} are capable of moving to different sites in DNA by the reverse transcription.
-\emph{DNA transposons} moves through the DNA by being copied and reinserted as DNA sequences~\cite{cell}.
+Repeats usually do not have any function and are often represented by several thousands of copies in a genome~\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
+\emph{Simple sequence repeats} consist of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
+\emph{Retrotransposons} are capable of moving to different sites in DNA by reverse transcription.
+\emph{DNA transposons} move through the DNA by being copied and reinserted as DNA sequences~\cite{cell}.
 
-The gene families are groups of related genes.
+Gene families are groups of related genes.
 Their copy number is usually much lower than in repeats, and they arise by duplication of an ancestral gene. The different members of the families diverge due to mutations during the evolution which may result in loss of ability to produce a functional gene product. The nonfunctional gene copies are called \emph{pseudogenes}.
 Gene duplications can arise by two mechanisms: duplication of a segment of DNA, or by reverse transcription of an mRNA, followed by integration of the cDNA copy into a new chromosomal site.
 Duplication by reverse transcription usually yields an inactive gene copy (\emph{processed pseudogene}).
 
-As the repeats and gene families consists of multiple very similar sequences in DNA, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short sequences from DNA (reads). Repetitive sequences are usually longer than reads, and therefore reads from various positions of the same repetitive DNA are very hard to distinguish, which makes hard to determine the size of the repetitive sequence.
+As the repeats and gene families consist of multiple very similar sequences, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short reads. Repetitive sequences are usually longer than reads, and therefore reads from different copies of the same repetitive DNA are very hard to distinguish, which makes it hard to determine the copy number of the repetitive sequence.
 
 Repetitive sequences forms a substantial part of DNA.\@ For example,
-transposable elements forms more then 70\% of the genome in some plants and amphibians, and 45\% in human genome~\cite{biemont2006genetics}.
+transposable elements forms more a 70\% of the genome in some plants and amphibians, and 45\% in the human genome~\cite{biemont2006genetics}.
 Therefore studying repetitive sequences is one of the essential tasks in DNA analysis.
 
-In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios. We start by finding known repeats and gene families in assembled genome, and continue with de novo repeat finding in both assembled genome and reads. In the last section, we present a gene family evolution model.
+In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios. We start by finding known repeats and gene families in an assembled genome, and continue with de novo repeat finding in both assembled genome and reads. In the last section, we present a model of gene family evolution.
 
 \section[Known Repeats in Assem\dots]{Finding the Known Repeats and Gene Families in the Assembled Genome}
 
-The known repeats and families are stored in several databases. Some examples of repeat databases include repbase~\cite{repbase}, dfam~\cite{dfam}, and one example of the gene family databases is pfam~\cite{pfam}.
+The known repeats and gene families are stored in several databases. Examples of repeat databases include repbase~\cite{repbase}, dfam~\cite{dfam}, and a well-known example of a gene family databases is pfam~\cite{pfam}.
 
-In the database search, we are usually interested in all  sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of repeats from the database, which appears in our sequence.
-There are two approaches for sequence finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
+In the database search, we are usually interested in all sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of regions in our sequence which are homologous to repeats from the database.
+There are two approaches for repeat finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
 \paragraph{Searching by sequence similarity.}
-In the local alignment, on the input there are two sequences and the output is alignment of some substrings of the sequences. Usually, we are interested in an alignment with highest score, or score above some threshold.
-The standard algorithms for local alignment of two sequences look for the optimal local alignment according to some scoring scheme. They use a dynamic programming algorithm to find the optimal alignment. The time complexity of this approach is proportional to the product of the lengths of both sequences, which makes this approach very slow for long sequences.
+In the problem of local alignment, on the input there are two sequences and the output is alignment of some substrings of the sequences. Usually, we are interested in an alignment with the highest score, or score above some threshold.
+The standard algorithms for local alignment of two sequences find the optimal local alignment using a dynamic programming~\cite{durbin}. The time complexity of this approach is proportional to the product of the lengths of the two input sequences, which makes this approach very slow for long sequences.
 
-Therefore there have been developed heuristic algorithms, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST~\cite{blast}.
+Therefore heuristic algorithms have been developed, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST~\cite{blast}.
 BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
-Each seed is then extended to maximize the score. The standard BLAST algorithm searches only for gapless alignments (i.e.\ it does not consider any indels), but there are versions which also enables gaps in the alignment.
+Each seed is then extended to maximize the score.
 
 \paragraph{Searching by profile HMM.}
-The \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which generates a random sequence together with its annotation by the states. HMM is similar to the finite automaton. It has a finite number of states, transitions and emissions. At each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, transitions and, emissions. A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
 
-The profile HMM have to take into account all mutations (substitutions, insertions and deletions) and return higher probability for the sequences belonging to the family, than for other sequences.
-Assume, we have a multiple alignment of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching positions in the alignment. Each state $m_k,\, 1 \leq k \leq M$, have a distinct emission distribution.
-For each matching state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any nucleotide. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, the dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
+The profile HMM has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
+Assume that we have a multiple alignment of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing \todo{}.
+For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
 The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 \todo{obrazok}
 
-Once a model is built it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
-There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferring in HMM is the Viterbi algorithm, which is very slow comparing to sequnece alignment method~\cite{eddy2011accelerated}. Recently published algorithm, HMMER3~\cite{eddy2011accelerated}, for the alignment uses multiple segment Viterbi algorithm~\cite{eddy2011accelerated}, which enables fast computation of an optimal sum of multiple ungapped local
+Once a model is built, it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
+There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferrence in HMMs is the Viterbi algorithm, which is very slow compared to the sequnece alignment method~\cite{eddy2011accelerated}.
+\begin{reformulate}
+Recently published algorithm, HMMER3~\cite{eddy2011accelerated}, for the alignment uses multiple segment Viterbi algorithm~\cite{eddy2011accelerated}, which enables fast computation of an optimal sum of multiple ungapped local
 alignment segments. This can be used as heuristic filter before running the full algorithm.
+\end{reformulate}
 
 There are various tools for finding repeats and gene families, implementing these methods.
-The most used ones are repeat masker~\cite{repeatmasker}, interproscan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
-The profile HMMs enable probabilistic approach to the sequence finding which has several advantages. It can contain more information about the family than a single consensus sequence used in sequence similarity approach, i.e.\ if at particular position $3/5$ of the sequences has A and $2/5$ of the sequences has T, the consensus sequence contains only information about A, whereas the profile HMM contains information about the distribution of nucleotides.
+The most used ones are repeatmasker~\cite{repeatmasker}, interproscan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
+The profile HMMs enable probabilistic approach to the sequence similarity search, which has several advantages. It can contain more information about the family than a single consensus sequence used in sequence similarity approach, i.e.\ if at particular position $3/5$ of the sequences has A and $2/5$ of the sequences has T, the consensus sequence contains only information about A, whereas the profile HMM contains information about the distribution of nucleotides.
 
 \section{De Novo Repeat Finding}
 
