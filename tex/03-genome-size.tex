@@ -53,11 +53,7 @@ $$G = \frac{NL}{c}.$$
 
 \subsection{Modeling Repeats}\label{subsec:repeatmodles}
 
-For example, transposable
-elements forms more then 70\% of the genome in some plants and amphibians, and 45\%
-in human genome [5].
-
-Real genomes often contain a lot of repeats (e.g.\ transposable elements forms more than 45\% of human genome}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
+Real genomes often contain a lot of repeats (e.g.\ transposable elements forms more than 45\% of human genome~\cite{biemont2006genetics}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
 
 The repetitive sequences can be modeled similarly to the single copy sequences. Let $f(j; c)$ be the probability that a particular $k$-mer occurs $j$ times in the data given the coverage $c$. The probability that a $k$-mer from sequence repeated $o$ times occurs $j$ times in the reads is then $p_{o,j} = f(j; o\cdot c)$.
 
