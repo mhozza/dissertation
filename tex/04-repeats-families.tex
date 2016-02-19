@@ -29,12 +29,9 @@ In the database search, we are usually interested in all sequences from the data
 There are two approaches for repeat finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
 \paragraph{Searching by sequence similarity.}
-In the problem of local alignment, on the input there are two sequences and the output is alignment of some substrings of the sequences (Figure~\ref{fig:alignment_example}). Usually, we are interested in an alignment with the highest score, or score above some threshold.
+In the problem of local alignment, on the input there are two sequences, and the output is alignment of some substrings of the sequences (Figure~\ref{fig:alignment_example}). Usually, we are interested in an alignment with the highest score, or score above some threshold.
+The example of a simple scoring scheme is $+1$ if the two bases in a column matches and $-1$ otherwise. The score is then a sum of all column scores.
 The standard algorithms for local alignment of two sequences find the optimal local alignment using a dynamic programming~\cite{durbin}. The time complexity of this approach is proportional to the product of the lengths of the two input sequences, which makes this approach very slow for long sequences.
-
-Therefore heuristic algorithms have been developed, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST~\cite{blast}.
-BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
-Each seed is then extended to maximize the score.
 
 \begin{figure}[htp]
     \centering
@@ -86,27 +83,50 @@ TATGAGGTCGACCGTTTCAGCGTGACTATAGACGTCATTGAAGCAATATACAGG------AACACCACCT
     \caption[Local alignment]{Two sequences and their local alignment. The red uppercase letters denote the aligned parts of the sequences. There are matches, mismatches and gaps in the alignment.}\label{fig:alignment_example}
 \end{figure}
 
+Therefore heuristic algorithms have been developed, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST~\cite{blast}.
+BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
+Each seed is then extended to maximize the score.
+
 
 \paragraph{Searching by profile HMM.}
-A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, transitions and, emissions. A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, and three probability distributions: the distribution of starting states, the transition distribution and emission distribution.
+For each state, the transition distribution defines a probability $P(s)$ that in the next step we move to the state $s$, and the emission distribution defines a probability $P(x)$ that the state emits a symbol $x$.
+A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
 
 The profile HMM is a linear HMM for describing a similar sequences family. It has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
-Assume that we have a multiple alignment of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in corresponding place in the sequence.
+Assume that we have a multiple alignment (Figure~\ref{fig:multiple-alignment} ) of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in a corresponding place in the sequence from the family.
 For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
 The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
+
+\begin{figure}[htp]
+\centering
+\small
+\begin{BVerbatim}
+ACCCGCGTCATCG--TATCACCAGATTCCTGGTATAT
+CCCTGCTTATTGGTATTTCACCTGCTTCCTGGTATAT
+ACCTGCTTACCGGTATATCACCCGCTTAG------AT
+ACCAACTTACTTAA-----ACCGGCTGA-------GT
+AC--GCTTACTGGTATATCACCTGCTTGCTGGTATAT
+ACCTTCTTACTAGTATAACG--TACGTACTGGGATAT
+AGCTGCTTATTGCCATATCGCGAGCTTTCTTGTATAT
+ACCTGCTTACTGGAATTTAACATGCTTACGGG-----
+ACTTGCTTACGGGTAT-TCACCTGG---CTGGTTTCT
+ACGTGCTGCCGCTTATTTCACCAGGCCACTGGTTAAT
+\end{BVerbatim}
+\caption[Multiple alignment]{Example of a multiple alignment of ten sequences. Note that in a single column, most nucleotides are the same.}
+\label{fig:multiple-alignment}
+\end{figure}
+
+
 \begin{figure}[htp]
     \centering
-    \includegraphics[width=.8\textwidth]{../figures/profile_hmm}
+    \includegraphics[width=.7\textwidth]{../figures/profile_hmm}
     \caption[Profile HMM]{Example of a profile HMM of length 6. The green states are match states, the yellow are insert states, the red are delete states, the leftmost state is a start state, and the rightmost state is an end state.
      The start, end, and delete states start are silent.}\label{fig:profile-hmm}
 \end{figure}
 
 Once a model is built, it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
-There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferrence in HMMs is the Viterbi algorithm, which is very slow compared to the sequnece alignment method~\cite{eddy2011accelerated}.
-\begin{reformulate}
-Recently published algorithm, HMMER3~\cite{eddy2011accelerated}, for the alignment uses multiple segment Viterbi algorithm~\cite{eddy2011accelerated}, which enables fast computation of an optimal sum of multiple ungapped local
-alignment segments. This can be used as heuristic filter before running the full algorithm.
-\end{reformulate}
+There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferrence in HMMs is the Viterbi algorithm, which is very slow compared to the sequnece alignment method~\cite{eddy2011accelerated}. In a HMMER3~\cite{eddy2011accelerated}, authors present a heuristic preprocessing method, which firstly finds ungapped seeds and use them to constrain the search space of the Viterbi algorithm.
 
 There are various tools for finding repeats and gene families, implementing these methods.
 The most used ones are RepeatMasker~\cite{repeatmasker}, InterProScan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
