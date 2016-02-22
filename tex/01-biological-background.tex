@@ -8,10 +8,16 @@ We define a genome, describe a DNA sequencing process, and its issues. Then we e
 Each life form is build from at least one cell. One of the most important part of the cell is \emph{DNA}, which is located in the cell core.
 DNA (Deoxyribonucleic acid) carries the genetic information used for development, functioning and reproduction of the cell or an organism.
 DNA is composed of two complementary strains which form a double helix structure. Each strain consist of four nucleotides: cytosine (C), guanine (G), adenine (A), or thymine (T).
-The nucleotides are complementary, i.e.\ if in one strain there is A in the other is T, and if in one is G in the other is C, see Figure~\ref{}\todo{figure}.
+The nucleotides are complementary, i.e.\ if in one strain there is A in the other is T, and if in one is G in the other is C, see Figure~\ref{fig:dnahelix}.
 DNA molecules are organized in chromosomes.
 The \emph{genome} is a set of all chromosomes in the cell, it includes both the coding and the non-coding parts of DNA.\@
 The coding part of the genome is called gene. Each gene can be translated into a protein sequence which it encodes.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.5\textwidth]{../figures/dna-helix}
+  \caption[DNA helix]{The DNA helix. Each strain consists of many nucleotides. The nucleotides A---T, and C---G are complementary.\cite{dnahelix}}\label{fig:dnahelix}
+\end{figure}
 
 \section{DNA Sequencing}
 
@@ -22,6 +28,12 @@ The first sequenced genome was a simple RNA virus in 1976. The 3.2Gb long human 
 
 The traditional sequencing method, called \emph{Sanger sequencing}, was developed by Frederick Sanger in 1977~\cite{sanger1977dna}. It was also used in first human genome sequencing.
 In the Sanger sequencing, two strand DNA is first split into single strand DNA.\@ Such single strand DNA can be used to create its copies, if particular enzymes and sufficient amount of nucleotides is available. The key role in Sanger sequencing form modified nucleotides. The nucleotides are modified in two ways: they are colored by florescent coloring and modified such the DNA copy process cannot continue after the nucleotide. This yields in bunch of DNA segments of various lengths, which are basically the sequenced DNA prefixes interrupted by the colored nucleotide in its last position. Every position is represented by multiple segments. The segments are then sorted using electrophoresis and the colors are read from shortest to longest segment forming a DNA sequence.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/sanger}
+  \caption[Sanger sequencing]{Example of a Sanger sequencing read. The four bases are detected using different fluorescent labels. These are detected and represented as `peaks' of different colors, which can then be interpreted to determine the base sequence, shown at the top~\cite{wiki:sanger-img}.}\label{fig:sanger}
+\end{figure}
 
 Only short sequences, up to 500--1000 bases, can be read this way. Therefore the original DNA has to be split into many overlapping short sequences prior the sequencing.
 Therefore instead of one long sequence per chromosome, we get many short sequences which have to be assembled together to obtain the whole sequence.
@@ -41,6 +53,12 @@ The other problem of the DNA assembling is caused be repetitive sequences. These
 
 There are two main approaches to the genome assembly used in modern genome assemblers. The first is based on overlap-layout-consensus framework (e.g.\ Celera~\cite{myers2000celera}, SGA~\cite{simpson2010sga}). The second is based on de Bruin graphs (e.g.\ Velvet~\cite{zerbino2008velvet}, ALLPATHS-LG~\cite{gnerre2011allpaths}). Both this methods construct a string graph~\cite{myers2005stringgraph} from the sequencing data. The first method does it by computing all overlaps, whereas the second method builds it from the de Bruin graph.
 
-Let us consider a genome with several perfect repeats, whose lengths are longer then reads. The string graph of a genome is then created by collapsing all the like repetitive sequences (Figure~\ref{}). If we build a string graph from data, the vertices are all unambiguous sequences, and the edges are between those which are overlapping. An Euler tour in a string graph forms a possible assembly.
+Let us consider a genome with several perfect repeats, whose lengths are longer then reads. The string graph of a genome is then created by collapsing all the like repetitive sequences (Figure~\ref{fig:string-graph}). If we build a string graph from data, the vertices are all unambiguous sequences, and the edges are between those which are overlapping. An Euler tour in a string graph forms a possible assembly.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.5\textwidth]{../figures/string-graph.png}
+  \caption[String graph]{A string graph constructed from a genome. The repetitive parts are collapsed together~\cite{myers2005stringgraph}.}\label{fig:string-graph}
+\end{figure}
 
 To resolve a repetitive sequence lengths and order of the parts of genome, some assemblers use paired reads as additional data. Such paired reads are pairs of reads for which we know approximate distance in the genome. Multiple distance paired reads can be combined together, to get better result.

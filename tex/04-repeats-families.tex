@@ -80,13 +80,12 @@ cagaatagcaacgtgatgcggcgactctc
 TATAAGGTGGACCGTT--------CCTCGAGAGGTTCTTCCGGCAATGGCCACGAGAGCAAAAGCCACGT
 TATGAGGTCGACCGTTTCAGCGTGACTATAGACGTCATTGAAGCAATATACAGG------AACACCACCT
     \end{BVerbatim}
-    \caption[Local alignment]{Two sequences and their local alignment. The red uppercase letters denote the aligned parts of the sequences. There are matches, mismatches and gaps in the alignment.}\label{fig:alignment_example}
+    \caption[Local alignment]{Two sequences and their local alignment. The red uppercase letters denote the aligned parts of the sequences. There are matches, mismatches and gaps in the alignment~\cite{dipl}.}\label{fig:alignment_example}
 \end{figure}
 
 Therefore heuristic algorithms have been developed, which find alignments much faster, but may miss the best alignment in some circumstances. One of such algorithm is BLAST~\cite{blast}.
 BLAST firstly looks for exact matches of length $T$, called seeds. The lower the $T$ is, the lower is the probability of missing best alignment, but also the time of the computation increases.
 Each seed is then extended to maximize the score.
-
 
 \paragraph{Searching by profile HMM.}
 A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, and three probability distributions: the distribution of starting states, the transition distribution and emission distribution.
@@ -113,16 +112,15 @@ ACCTGCTTACTGGAATTTAACATGCTTACGGG-----
 ACTTGCTTACGGGTAT-TCACCTGG---CTGGTTTCT
 ACGTGCTGCCGCTTATTTCACCAGGCCACTGGTTAAT
 \end{BVerbatim}
-\caption[Multiple alignment]{Example of a multiple alignment of ten sequences. Note that in a single column, most nucleotides are the same.}
+\caption[Multiple alignment]{Example of a multiple alignment of ten sequences. Note that in a single column, most of the nucleotides are the same.}
 \label{fig:multiple-alignment}
 \end{figure}
-
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=.7\textwidth]{../figures/profile_hmm}
     \caption[Profile HMM]{Example of a profile HMM of length 6. The green states are match states, the yellow are insert states, the red are delete states, the leftmost state is a start state, and the rightmost state is an end state.
-     The start, end, and delete states start are silent.}\label{fig:profile-hmm}
+     The start, end, and delete states start are silent \cite{nanasi2014probabilistic}.}\label{fig:profile-hmm}
 \end{figure}
 
 Once a model is built, it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
