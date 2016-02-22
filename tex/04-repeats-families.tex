@@ -229,7 +229,12 @@ where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall n
 
 We can find the clustering with maximal modularity using a greedy algorithm. In the beginning every vertex has its own community.
 At each iteration, for every pair of communities, the expected gain to the modularity if they are merged, $\Delta Q$, is computed. The communities with the greatest $\Delta Q$ are then merged. This is repeated until only one community is left. Finally, the iteration with maximal overall $Q$ is selected as final clustering.
-\todo{figures}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.5\textwidth]{../figures/repeat-clustering}
+  \caption[Hierarchical organization of sequence reads.]{Hierarchical organization of sequence reads. Plot of modularity and dendrogram for the graph derived from 136,265 sequence reads of P. sativum. Each leaf of the tree represents a single sequence read (due to their high number it is not possible to distinguish individual reads). This tree corresponds to the largest connected component, which makes up 42\% of all sequencing data. For each division of the hierarchical tree, the resulting modularity is shown above the dendrogram. The vertical red line represents the best division with maximal modularity, producing 230 subclusters. Repeats identified by the similarity search are shown on the colored vertical side bar, reads with no hits are left blank~\cite{novak2010graph}.}\label{fig:repeat-clustering}
+\end{figure}
 
 In this section, we presented three methods for the de novo repeat finding in the sequencing reads. The first method is quick, but works only on higher coverage. The second and the last methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives a clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into same cluster.
 
