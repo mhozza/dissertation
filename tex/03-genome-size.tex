@@ -4,26 +4,26 @@
 
 The genome size is one of the fundamental questions related to the sequenced genome. The knowledge of the genome size allow a systematic analysis of many organisms.
 
-The NGS produces sequencing data very quickly and for low cost. Computational methods for analysis of NGS data are useful tool for DNA analytics. The computational methods for genome size analysis provide cheaper and faster replacement for the biological genome size estimation i.e.\ Real-time PCR-based method~\cite{wilhelm2003real}.
+The NGS produces sequencing data very quickly and for a low cost.
+The computational methods for genome size analysis provide cheaper and faster replacement for the biological genome size estimation i.e.\ Real-time PCR-based method~\cite{wilhelm2003real}.
 
-The \emph{coverage} of genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage $c$ is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data $L\cdot N$, where $L$ is the read length and $N$ is the number of reads) and the genome size $G$.
+The \emph{coverage} of a genome by the sequencing data is the average number of sequencing reads covering a single position of the genome. The coverage $c$ is closely related to the genome size and can be computed as a ratio of sequencing data size (the sum of lengths of all reads in sequencing data $L\cdot N$, where $L$ is the read length and $N$ is the number of reads) and the genome size $G$.
 $$c = \frac{NL}{G}$$
-The estimate of a coverage can be used in various sequencing data analyses, e.g.\ repeat analysis and analyses of gene families (see chapter~\ref{chap:repeatsfamilies}). \todo{ked bude 4 kapitola, tak toto prepisat podla topho ako to tam pouzijeme}
+The estimate of a coverage can be used in various sequencing data analyses, e.g.\ repeat analysis and analyses of gene families. In particular, we will use it in Chapter~\ref{chap:repeatsfamilies} to find an unusually abundant $k$-mers, which are expected to occur in repetitive sequences.
 
 Ideally the result of sequencing would be a complete sequence of each chromosome and we could compute the size of the genome directly.
 However, in most cases we cannot assemble the genome only from the short reads provided by the new generation sequencing machines.
-Even if we are able to build a draft (partial) assembly, there are usually some missing parts and assembly errors around repetitive sequences. This errors can have significant influence on the genome size estimates. In addition, to do a genome assembly, we need to have high coverage data, which is expensive for very large genomes. For example, the panda genome was the first mammalian genome sequenced
+Even if we are able to build a draft (partial) assembly, there are usually some missing parts and assembly errors around repetitive sequences (see Section~\ref{sect:dna-assembly}). This errors can have significant influence on the genome size estimates. In addition, to do a genome assembly, we need to have high coverage data, which is expensive for very large genomes. For example, the panda genome was the first mammalian genome sequenced
 by the next-generation sequencing technologies~\cite{li2010panda}. The authors have assembled around $2.3$Gb of sequence to contigs and scaffolds, but using
 several methods, they estimate the genome size to be around $2.4$Gb.
 
-In this chapter, we will present several methods based on on direct estimation from sequencing data. This approach has several advantages: it is possible to compute the estimate faster because it avoids the assembly process and it also avoids any biases introduced by genome assemblers. Moreover, these methods need much lower coverage than is needed for genome assembly.
+In this chapter, we will present several methods based on a direct estimation from sequencing data. This approach has several advantages: it is possible to compute the estimate faster because it avoids the assembly process and it also avoids any biases introduced by genome assemblers. Moreover, these methods need much lower coverage than is needed for genome assembly.
 
 \section[K-mer Histograms]{Using K-mer Histograms for Genome Size Computation}\label{sec:kmerhist}
 
-% This can be done statistically by looking at sequence overlaps.
-Ideally we would like to compute for each base in the original genome how many times it is covered by reads. Since genome assembly is not available, we will approximate this process using reads only. We will consider the context of each base, so that we can tell which bases in different reads corresponds to the same position in the original genome. We can do this by using $k$-mers (with $k$ such that the probability of two identical $k$-mers corresponding to different positions in the genome is very low). In particular, we will describe several approaches for computing the genome size and coverage from $k$-mer histograms.
+Ideally we would like to compute for each base in the original genome how many times it is covered by reads. Since the genome assembly is not available, we will approximate this process using reads only. We will consider the context of each base, so that we can tell which bases in different reads corresponds to the same position in the original genome. We can do this by using $k$-mers (with $k$ such that the probability of two identical $k$-mers corresponding to different positions in the genome is very low). In particular, we will describe several approaches for computing the genome size and coverage from $k$-mer histograms.
 
-\todo{nejaka historia clankov na tuto temu}
+In this section we present three papers which address the problem of genome size estimation using $k$-mer histograms. The first is~\cite{waterman}, the second is~\cite{williams}, and the last is our paper~\cite{covest}. The first two are focused on repeat modeling, whereas our paper is focused on gene size estimation from low coverage data.
 
 \subsection{Simplified Scenario}
 
@@ -53,26 +53,16 @@ $$G = \frac{NL}{c}.$$
 
 \subsection{Modeling Repeats}\label{subsec:repeatmodles}
 
-Real genomes often contain a lot of repeats (e.g.\ transposable elements forms more than 45\% of human genome~\cite{biemont2006genetics}) and the sequencing machines produce a lot of errors (\todo{priklad, mozno ten isty co bude v predoslej kapitole}). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
+Real genomes often contain a lot of repeats (e.g.\ transposable elements forms more than 45\% of human genome~\cite{biemont2006genetics}) and the sequencing machines produce a lot of errors (e.g.\ Illumina produces 1--5\% errors). To provide a good genome size estimate for real data, the estimators have to consider these issues. Let us deal with handling repeats first.
 
 The repetitive sequences can be modeled similarly to the single copy sequences. Let $f(j; c)$ be the probability that a particular $k$-mer occurs $j$ times in the data given the coverage $c$. The probability that a $k$-mer from sequence repeated $o$ times occurs $j$ times in the reads is then $p_{o,j} = f(j; o\cdot c)$.
 
 \paragraph{}
 The first method~\cite{waterman} introduces several parameters to model the repeats.
 Suppose there are $n_f$ repeat families in the data. The number of occurrences of any $k$-mer in $i$-th family, $F_i$, in the reads, is a Poisson random variable with parameter $a_i c_k$. Moreover, we assume that proportion of $k$-mers in $F_i$ among all unique $k$-mers in the original sequence is $\beta_i$.
-We then need to solve following problem: we have set of samples from a mixed Poisson distribution, and we want to estimate $a_i,\,\beta_i$ for $i = 1\dots n_f$, and $c_k$.
+We then need to solve following problem: we have a set of samples from a mixed Poisson distribution, and we want to estimate $a_i,\,\beta_i$ for $i = 1\dots n_f$, and $c_k$.
 
-% We can use following formulas to estimate the parameters~\cite{waterman}:
-% \begin{align*}
-% a_i c_k & = \frac{\displaystyle\sum_w n(w) \Pr(w \in F_i | n(w))}{\displaystyle\sum_w \Pr(w \in F_i | n(w))},\\[1.5ex]
-% \beta_i & = \frac{\displaystyle\sum_w \Pr(w \in F_i | n(w))}{\displaystyle\sum_{j=1}^{n_f}\sum_w \Pr(w \in F_j | n(w))},\\[1.5ex]
-% \Pr(w \in F_i | n(w)) & = \frac{\beta_i}{\displaystyle\sum_{j=1}^{n_f} \alpha_j {\left(\frac{a_j}{a_i}\right)}^{n(w)} e^{(\beta_i-a_j)c_k}}.
-% \end{align*}
-%
-% Note that this method uses standard Poisson distribution for their estimates. Thus we need to calculate the number of $k$-mers which are not present in the data. We can use following formula to estimate it~\cite{waterman}:
-% $$H_k[0] = \frac{\displaystyle\sum_{i=1}^{n_f}\beta_i e^{-a_i c_k} \sum_{i=1}^{|H_k|}H_k[i]}{\displaystyle\sum_{i=1}^{n_f}\beta_i\left(1 - e^{-a_i c_k}\right)}$$
-
-In~\cite{waterman}, authors presented recurrent formulas for computing the parameters $a_i,\, \beta_i$ and $c_k$, and used EM algorithm to obtain their values. The EM algorithm iteratively computes the parameters based on values of the parameters from previous step and stops when they converge or change very little. Finally they select the minimal $a_i \cdot c_k$ as the single-copy coverage to estimate the genome size.
+In~\cite{waterman}, authors present recurrent formulas for computing the parameters $a_i,\, \beta_i$ and $c_k$, and used EM algorithm to obtain their values. The EM algorithm iteratively computes the parameters based on values of the parameters from previous step and stops when they converge or change very little. Finally they select the minimal $a_i \cdot c_k$ as the single-copy coverage to estimate the genome size.
 
 \paragraph{}The second method, KSA~\cite{williams}, exploits the fact that if the single-copy coverage is $c$, then coverage of repetitive region would be an integer multiple of $c$.
 
@@ -82,7 +72,6 @@ Hence, if we put all repetitive sequences together, we sum up the distribution f
 $$p_j = \sum_o \beta_o p_{o,j}.$$
 This can be generalized to over-dispersed Poisson shapes by introducing a single over-dispersion shape parameter $s$ to allow distributions with excess variance~\cite{williams}:
 $$P(j; c_k, \{\beta_o\}, s) = \sum_o \beta_o NegBinomial(j; \mu=c_k\cdot o;\sigma^2=s/o).$$
-%treba spomenut dovod?? ze im poisson mixture tak dobre nefitoval akp toto?
 The parameters can be inferred by maximizing the likelihood for the observed histogram $H_k$:
 $$L(c_k, \{\beta_o\}, s | H_k) = \sum_j Poisson(H_k[j]; P(j; c_k, \{\beta_o\}, s)).$$
 
@@ -90,9 +79,9 @@ $$L(c_k, \{\beta_o\}, s | H_k) = \sum_j Poisson(H_k[j]; P(j; c_k, \{\beta_o\}, s
 
 Similarly to the KSA, we can model the overall probability distribution as a mixture distribution:
 $$p_j = \sum_{o=1}^\infty \beta_o p_{o,j},$$
-where $p_o,j$ is the probability that a $k$-mer from sequence repeated $o$ times occurs $j$ times in the reads.
+where $p_{o,j}$ is the probability that a $k$-mer from sequence repeated $o$ times occurs $j$ times in the reads.
 
-We assumed that the probability that a $k$-mer repeats $n$ times decreases with increasing $n$. We decided to model repeats by the geometric distribution. We also decided to model the single-copy sequences and sequences which repeats exactly twice in the genome separately. We introduced three parameters --- $q_1$, $q_2$, and $q$ --- for the single-copy, two-copy and the parameter for geometric distribution for higher abundance sequences.
+We assumed that the probability that a $k$-mer repeats $n$ times decreases with increasing $n$. We decided to model repeats by the geometric distribution. We also decided to model the single-copy sequences and sequences which repeats exactly twice in the genome separately. We introduced three parameters --- $q_1$, $q_2$, and $q$ --- for the single-copy, two-copy, and the parameter for geometric distribution for higher abundance sequences.
 
 We can then use these parameters to define a mixture of distributions to express the $\beta_o$ parameters as follows:
 $\beta_1 = q_1$, $\beta_2 = (1-q_1) q_2$, and $\beta_o =
@@ -104,13 +93,13 @@ where $\theta = \{c_k, q_1, q_2, q\}$ is the parameter vector.
 
 \subsection{Modeling Errors}
 
-In~\cite{waterman} and KSA~\cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In KSA they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
+In~\cite{waterman} and KSA~\cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all, and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In KSA they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
 
-In CovEst~\cite{covest}, we focused on modeling errors directly. We provided several probabilistic models graded by complexity.
-The simplest model considered errors contributing only to abundance of one in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats.
+In CovEst~\cite{covest}, we focused on modeling errors directly. We provided several probabilistic models graded by their complexity.
+The simplest model considered errors contributing only to the abundance of one in the histogram (i.e.\ every error creates a unique $k$-mer) and does not consider any repeats.
 The model is a mixture of two distributions --- the distribution for erroneous $k$-mers and the distribution for error free $k$-mers. The abundances of the error free $k$-mers are generated from the truncated Poisson distribution with mean $c'$.
-Let $\epsilon$ be the error rate of the sequencing machine (i.e.\ a single base is read correctly with probability $(1-\epsilon)$), we can compute $c_k$ from $c'$ by dividing it by the probability that $k$-mer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
-We introduced a mixture coefficient $\alpha$, which denotes a proportion of erroneous $k$-mers among all unique $k$-mers in the sequencing data. The $\alpha$ is related to probability that a particular $k$-mer contains error, which is $\gamma = {(1-\epsilon)}^k$.
+Let $\epsilon$ be the error rate of the sequencing machine (i.e.\ a single base is read correctly with the probability $(1-\epsilon)$), we can compute $c_k$ from $c'$ by dividing it by the probability that $k$-mer contains no error: $c_k = c'/{(1-\epsilon)}^k$.
+We introduced a mixture coefficient $\alpha$, which denotes a proportion of erroneous $k$-mers among all unique $k$-mers in the sequencing data. The $\alpha$ is related to the probability that a particular $k$-mer contains error, which is $\gamma = {(1-\epsilon)}^k$.
 We can use a simple formula to relate $\alpha$ to $\gamma$: $\alpha = (1-\gamma)/(1-\gamma+\gamma/c')$~\cite{covest}.
 
 Using the alpha we can express the formulas for the probability that a $k$-mer appears $j$ times in the data:
@@ -138,10 +127,10 @@ where $f$ is the probability mass function of the truncated Poisson
 distribution and $\alpha_s$ are the mixing coefficients.
 
 We can again relate the coefficients $\alpha_s$ to the basic parameters $c$ and $\epsilon$. To do that, we need to estimate the expected number of observed unique $k$-mers with Hamming distance $s$ from their source $k$-mers~\cite{covest}:
-$$n_s = n {k \choose s} 3^s (1- e^{-\lambda_s}).$$
-The coefficients $\alpha_s$ can be then computed by renormalizing $n_s$ by their sum.
+$$N_s = N {k \choose s} 3^s (1- e^{-\lambda_s}).$$
+The coefficients $\alpha_s$ can be then computed by renormalizing $N_s$ by their sum.
 
-This model still does not consider any repeats in the original sequence, but can be easily combined with our repeat model described in section~\ref{subsec:repeatmodles}. We can use $p_j$ from this model as single-copy probability distribution in the repeat model.
+This model still does not consider any repeats in the original sequence, but can be easily combined with our repeat model described in Section~\ref{subsec:repeatmodles}. We can use $p_j$ from this model as a single-copy probability distribution in the repeat model.
 
 \subsection{Testing the Models}
 The methods described in previous subsections were in their respective publications evaluated on both simulated and real datasets. The problem with testing on real data is that we need to know the correct answer, so we need to either take a sequence for which the size is known or obtain the sequence length by biological methods.
@@ -155,7 +144,7 @@ The genome size was 103,432 bp and the coverage was $3.018\times$.
 They had 1674 error-corrected reads with median length 553 bp.
 The estimated genome size and coverage was 103,696 bp and $2.945\times$ respectively.
 
-\paragraph{}The KSA method~\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validate by experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}.
+\paragraph{}The KSA method~\cite{williams} was tested only on real data --- multiple strains of \emph{E. coli}. The genome size results were validated by an experimental evaluation (pulsed-field gel electrophoresis, PFGE). The coverage ranged from $55\times$ (strain B) to $85\times$ (strain A). The comparison of the genome sizes obtained by PFGE and by $21$-mer analysis is in table~\ref{tab:williams}.
 
 \begin{table}[htbp]
 \centering
@@ -167,14 +156,14 @@ PFGE & 4.869 & 5.047 & 5.149 & 5.423 & 5.268\\
 $21$-mer analysis & 4.776 & 4.935 & 5.181 & 5.219 & 5.502\\
 \bottomrule
 \end{tabular}
-\caption[Estimations of the genome size of 5 E. coli strains]{Estimations of the genome size of 5 E. coli strains in bp~\cite{williams}.}\label{tab:williams}
+\caption[Estimations of the genome size of five E. coli strains]{Estimations of the genome size of five \textit{E. coli} strains in bp~\cite{williams}.}\label{tab:williams}
 \end{table}
 
-\paragraph{}Our method, CovEst~\cite{covest}, was tested on several simulated datasets with various error rates and coverage as well as on real data --- E. coli (strain MG1655) --- subsampled for various coverage.
-We also compared our method to KSA~\cite{williams} on both simulated (Fig.~\ref{fig:covest-ksa-sim}) and real data (Table~\ref{tab:covest-ksa-ecoli}).
+\paragraph{}Our method, CovEst~\cite{covest}, was tested on several simulated datasets with various error rates and coverage as well as on real data --- E. coli (strain MG1655) --- subsampled for various coverages.
+We also compared our method to the KSA~\cite{williams} on both simulated (Figure~\ref{fig:covest-ksa-sim}) and real data (Table~\ref{tab:covest-ksa-ecoli}).
 The simulated reads did not contain any repeats.
 We can see that our method is able to return usable results at much lower coverage than KSA.\@
-\begin{figure}[t]
+\begin{figure}[phtb]
 \def\xx{\hphantom{.}}
 \xx\hfill Error 0\% \hfill\hfill\hfill Error 1\% \hfill\xx \\
 \xx\includegraphics[width=0.45\textwidth]{../figures/graph0.pdf}
@@ -220,6 +209,6 @@ In this chapter we dealt with a problem of estimating the genome size and the co
 The first approach found in~\cite{waterman} and KSA~\cite{williams} was based on precise modeling of repeat content and omitted the error modeling, whereas the second approach was based on precise error modeling and simple repeat modeling~\cite{covest}.
 The first approach works well on high coverage data and is more suitable for genomes, where the repeat content is very different from the simple model in the second approach.
 
-The second approach, which we presented in CovEst~\cite{covest}, works well even in very low coverage data ($0.5\times$) or with highly erroneous data ($10\%$ error rate). Our approach is also very universal and easily extensible to more complex models.
+The second approach, which we have presented in CovEst~\cite{covest}, works well even in very low coverage data ($0.5\times$) or with highly erroneous data ($10\%$ error rate). Our approach is also very universal and easily extensible to more complex models.
 
-The possibility of estimating the genome size and the coverage from low coverage data is very useful, because obtaining low coverage data is  cheaper than high coverage. Also it is more suitable in large genomes, such as plant genomes where the sizes are in tens of gigabases, where in addition to expensive cost of high coverage sequencing, it would be very time consuming to analyze such amount of data.
+The possibility of estimating the genome size and the coverage from low coverage data is very useful, because obtaining low coverage data is  cheaper than high coverage. Also it is more suitable for large genomes, such as plant genomes, where the sizes are in tens of gigabases, where in addition to the expensive cost of high coverage sequencing, it would be very time consuming to analyze such amount of data.
