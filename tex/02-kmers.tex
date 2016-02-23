@@ -7,13 +7,13 @@ Counting of the $k$-mer occurrences is one of the key problem in many applicatio
 For example, it was used to separate several individual
 genomes when sequencing a metagenomic mixture of different microbes isolated from a certain environment~\cite{Wu2011, Wang2012}.
 It is also used in error correction algorithms e.g.\ for correcting errors prior the DNA assembly~\cite{Pevzner2001}, sequence aligners~\cite{edgar2004muscle} and repeat detectors~\cite{caponnetto2013efficiency}.
-It is also suitable for various sequence read analyses and genome size estimation~\cite{covest, williams, waterman}.
+Moreover, it is suitable for various sequence read analyses and genome size estimation~\cite{covest, williams, waterman}.
 For some of these applications, computation of the $k$-mer abundance histogram is sufficient.
 In particular, we will use the $k$-mer histograms in~Chapter~\ref{chap:genomesize} for estimating the coverage and the size of a genome.
 
 A typical NGS data set, consists of many reads. Although these reads typically cover the target genome multiple times, sequencing errors in the reads result in many unique $k$-mers.
 This causes a high memory usage of naive approaches to the problem of $k$-mer counting or $k$-mer histogram computation.
-For example the 100Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $4\cdot 10^9$ unique 21-mers. To just store a counter for each of them, we need approximately $40$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
+For example the 100Mb long genome with no repeats, sequenced with $50\times$ coverage, read length 100, and error rate $1\%$ contains approximately $4\cdot 10^9$ unique 21-mers. Just to store a counter for each of them, we need approximately $40$ GB of memory. For larger genomes (e.g.\ 3.2Gb long human genome, or 16Gb onion (Allium cepa) genome), much more memory would be needed.
 
 There are several existing tools addressing this issue, for example Tallymer~\cite{tallymer}, JELLYFISH~\cite{jellyfish}, BFCounter~\cite{bfcounter}, DSK~\cite{dsk} and Khmer~\cite{khmer}. Each tool must handle the trade-off between speed, memory usage, disk usage, precision and random access capability. Most approaches to the $k$-mer counting problem use hash tables, Bloom filters or suffix arrays.
 The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
@@ -32,15 +32,14 @@ For small genomes with very low sequencing error rate, this approach is sufficie
 
 \section[Filtering Unique K-mers]{Filtering Unique K-mers Using Bloom Filters}
 
-Error rate in Illumina sequencing machines is usually about 1--5\%. However even at $1\%$, the probability that a 20-mer contains an error is $1 - 0.99^{20} \approxeq 0.18$; i.e.\ about 18\% of $k$-mers from a given position in DNA will differ from the correct $k$-mer.
-The correct $k$-mers abundances are distributed according to the Poisson distribution with mean $c$, where $c$ is an average number of reads covering a single position in a genome (see Chapter~\ref{chap:genomesize} for more details). Thus they provide only $N_{cor}/c$ different $k$-mers.
-Since both, the probability of $k$-mers from different location be the same and the probability that errors cause $k$-mers from different positions to be same are negligible. We can compute a proportion of the erroneous $k$-mers among all different $k$-mers as $$\alpha = \frac{N_{err}}{N_{err} + N_{cor}},$$
-where $N_{cor}$ and $N_{err}$ is number of correct $k$-mers and erroneous $k$-mers respectively.
+Error rate in Illumina sequencing machines is usually about 1--5\%. However, even at $1\%$, the probability that a 20-mer contains an error is $1 - 0.99^{20} \approxeq 0.18$; i.e.\ about 18\% of $k$-mers from a given position in DNA will differ from the correct $k$-mer. It means that if we read a particular $k$-mer for example $20\times$ and two of them are erroneous, we would get three different $k$-mers, from which two of them would have abundance one and one would have abundance 18.
 
-The higher the coverage, the higher the proportion of erroneous $k$-mers among all different $k$-mers. But at the same time the probability, that multiple errors lead to the same resulting $k$-mer increases. The lower the coverage, the higher the proportion of unique $k$-mers among all correct $k$-mers. Therefore, we get most $k$-mers unique in low to middle coverage data.
+In general, the correct $k$-mers abundances are distributed according to the Poisson distribution with mean $c'$, where $c'$ is an average number of correct $k$-mers covering a single position in a genome (see Chapter~\ref{chap:genomesize} for more details). In low to middle coverage, the most erroneous $k$-mers contribute to the abundance of one.
+Therefore, we get most $k$-mers unique in low to middle coverage data.
+
 If we do not store these unique $k$-mers in the hash table, we can save a lot of memory. We can use a more memory efficient, probabilistic data structure called \emph{Bloom filter}~\cite{bloomfilter} to store the unique $k$-mers.
 
-The Bloom filter stores a set of elements (in our case $k$-mers), and it supports two operations --- \method{add} for adding an element to the set and \method{test} for testing whether an element is in the set. The following property holds for the \method{test} operation:
+The Bloom filter stores a set of elements (in our case $k$-mers), and it supports two operations: \method{add} for adding an element to the set and \method{test} for testing whether an element is in the set. The following property holds for the \method{test} operation:
 \begin{itemize}
   \item If the element is in the set, test returns \emph{true}.
   \item If the element is not in the set, test returns \emph{false} with a high probability.
@@ -51,7 +50,7 @@ A Bloom filter consists of a bit vector of length $n$ and $m$ hashing functions,
 The \method{add} operation computes $m$ positions from $m$ hashing functions applied to the element and sets all corresponding bits in the vector to one.
 The \method{test} operation computes $m$ positions from the element and checks whether each of them is set to one. If any of them is zero, it returns false, otherwise it returns true. Further details are described in~\cite{bloomfilter}.
 
-We can use a Bloom filter to store all $k$-mers we have seen at some point of computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means that we have probably seen this $k$-mer before, and we also add it to the hash table with the starting count 2. In this way we get approximate counts for each $k$-mer.
+We can use a Bloom filter to store all $k$-mers we have seen at some point of the computation. We just add every $k$-mer to the Bloom filter during the computation. Before adding the $k$-mer, we first check if the $k$-mer is already in the Bloom filter. If yes, it means that we have probably seen this $k$-mer before, and we also add it to the hash table with the starting count 2. In this way we get approximate counts for each $k$-mer.
 With one more pass through the input data we can get exact counts.
 Any input $k$-mer, which is not in the hash table is certainly unique, and the counts of $k$-mers in the hash table can be also recomputed. This approach was used in BFCounter~\cite{bfcounter}.
 
@@ -64,7 +63,7 @@ The Count-Min sketch~\cite{countminsketch} data structure enables counting objec
 \end{itemize}
 
 The data structure consists of $m$ hash tables with different hash functions.
-The \method{incrementcount(x)} operation computes hash of $x$ using each hash function and increments corresponding counters in all hash tables. The \method{getcount} operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result. %chktex 36
+The \method{incrementcount(x)} operation computes a hash of $x$ using each hash function and increments the corresponding counters in all hash tables. The \method{getcount} operation computes hash of $x$ using each hash function and takes the minimum of all corresponding values in hash tables as the result. %chktex 36
 
 If there is a collision in each table for a particular object, the \method{getcount} operation may return greater value for such object. This false positive rate depends on the collision probability, which decreases with increasing number of hash tables and their sizes.
 
@@ -75,9 +74,9 @@ More details about false positive rate estimation and comparison to other approa
 
 The basic hashing approach to $k$-mer counting can be further improved in various ways; here we describe two such improvements.
 
-\paragraph{} The first is memory usage improvement using explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm~\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned, and each partition can be loaded to the memory separately.
+\paragraph{} The first is a memory usage improvement using an explicit disk-memory trade-off. The \emph{Disk Streaming of K-mers (DSK)} algorithm~\cite{dsk} exploits the fact that the multi-set of $k$-mers can be partitioned, and each partition can be loaded to the memory separately.
 
-The algorithm has two parameters: the memory size $M$ and disk space $D$ expressed in bits. During the computation, the algorithm does not exceed the memory and disk space constraints given by the parameters.
+The algorithm has two parameters: the memory size $M$, and the disk space $D$ expressed in bits. During the computation, the algorithm does not exceed the memory and disk space constraints given by the parameters.
 
 The algorithm works in several iterations, which number is proportional to the memory needed to store all the $k$-mers, and inversely proportional to the $D$, and maintains a multiple $k$-mer lists on the disk.
 Each $k$-mer is written to the disk only once, at the iteration determined by the hashing function.
@@ -99,24 +98,24 @@ It can retry the CAS operation until it is successful.
 The algorithm for $k$-mer counting hash table works in two steps:
 First it computes the location of the $k$-mer in the hash table and then it increments the value. Both of the operations can be done in a thread-safe way without locks using the CAS instruction.
 
-\section[Enhanced Suffix Arrays]{Computing K-mer Histogram Using Enhanced Suffix Arrays}
+\section[Enhanced Suffix Arrays]{Computing the K-mer Histogram Using the Enhanced Suffix Arrays}
 
 A \emph{suffix tree}~\cite{suffixtree} is a data structure widely used in string processing. It is a compressed trie build from all suffixes of a string. To index a string $S$ over an alphabet $\Sigma$, we usually append a special end marker `$\$ $', and construct a suffix tree for string $S\$ $.
 This allows easier construction and manipulation.
 The suffix tree can be constructed in $O(|S|)$ time and space complexity, and can be queried for the existence of a suffix $s$ in $O(|s|)$ time.
 
-\emph{Suffix arrays}~\cite{suffixarray} were developed as a more space-efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in the worst case to index a string of length $n$~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$ $. Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster because the suffix trees suffer from poor locality of memory reference, causing efficiency loss on cached processor architectures.
+\emph{Suffix arrays}~\cite{suffixarray} were developed as a more space-efficient replacement of suffix trees. The suffix array requires only $4n$ bytes\footnote{We suppose, that we can use 32bit integer values to store the data.} in its basic form, whereas a suffix tree require $20n$ bytes in the worst case to index a string of length $n$~\cite{kurtz1999reducing}. The suffix array is an array containing indices of lexicographically sorted suffixes of $S\$ $. Similarly to the suffix tree, a suffix array can be constructed in linear time~\cite{karkkainen2003simple, kim2003linear, ko2003space}. The suffix arrays are also faster, because the suffix trees suffer from poor locality of memory reference, causing efficiency loss on cached processor architectures.
 
 In typical string processing problems, basic suffix arrays cannot directly replace the suffix tree and maintain the same time complexity. For example, using only the basic suffix array, it takes $O(m \log n)$ time in the worst case to answer decision queries of the type ``Is P a substring of S?'', where $m = |P|$, whereas suffix trees can do it in $O(m)$ time.
 
 \emph{Enhanced suffix arrays} are suffix arrays enhanced with some additional information.
 In particular, we will consider addition of the \emph{lcp (longest common prefix)} table.
-In contrast to the suffix trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes) and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
+In contrast to the suffix trees, enhanced suffix arrays use less memory (the lcp table can be stored in additional $4n$ bytes), and they can replace suffix trees in every algorithm maintaining the same time complexity~\cite{enhancedsuffixarrays}.
 
-We can represent Enhanced Suffix Array of string $S$ as two tables:
+We can represent enhanced suffix array of a string $S$ as two tables:
 \begin{enumerate}
-  \item \emph{suftab} --- basic suffix array, i.e.\ array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of string $S\$ $.
-  \item \emph{lcptab} --- array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$ and $S_{subtab[i-1]}$, for $1 \leq i \leq n$ and $lcptab[0] = 0$.
+  \item \emph{suftab} --- a basic suffix array, i.e.\ array of integers in the range $0\dots n$, where $n = |S|$, specifying the lexicographic ordering of the $n + 1$ suffixes of string $S\$ $.
+  \item \emph{lcptab} --- an array of integers in the range $0\dots n$, where lcp-value $lcptab[i]$ is the length of the longest common prefix of $S_{subtab[i]}$, and $S_{subtab[i-1]}$, for $1 \leq i \leq n$, and $lcptab[0] = 0$.
 \end{enumerate}
 
 We also need to introduce the concept of the \emph{lcp-intervals} and \emph{lcp-interval trees}. The notion of lcp-intervals was first used in~\cite{enhancedsuffixarrays}.
@@ -134,11 +133,11 @@ An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\e
 Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree~\cite{enhancedsuffixarrays}.
 
 \begin{definition}
-  An $m$-interval $[b..e]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = b$ and $e = j$ because $m > \ell$.}
-  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[b..e]$. If $[i..j]$ encloses $[b..e]$ and there is no interval embedded in $[i..j]$ that also encloses $[b..e]$, then $[b..e]$ is called a child interval of $[i..j]$.
+  An $m$-interval $[a..b]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = a$ and $b = j$ because $m > \ell$.}
+  The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[a..b]$. If $[i..j]$ encloses $[a..b]$ and there is no interval embedded in $[i..j]$ that also encloses $[a..b]$, then $[a..b]$ is called a child interval of $[i..j]$.
 \end{definition}
 
-The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of tree is defined by the parent-child relationship from the definition (see Figure~\ref{fig:enhancedsuffixarray}).
+The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it explicitly in any of the algorithms. The root of the tree is the $0$-interval $[0..n]$ and the rest of the tree is defined by the parent-child relationship from the definition (see Figure~\ref{fig:enhancedsuffixarray}).
 
 \begin{figure}[htp]
 \centering
@@ -168,13 +167,13 @@ The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it
 ~\begin{subfigure}[m]{0.47\textwidth}
    \centering
    \includegraphics[width=\textwidth]{../figures/lcpintervaltree}
-   \caption{LCP interval tree (top) and suffix tree (bottom).}
+   \caption{LCP interval tree (top) and suffix tree (bottom).}\label{fig:enhancedsuffixarraytree}
 \end{subfigure}
-\caption[The suffix array, suffix tree, and lcp interval tree]{The suffix array, suffix tree, and lcp interval tree of string ACCTCGCCTCATCG\$. Note that internal nodes (black) in suffix tree correspond to the nodes in lcp interval tree. The singleton nodes than correspond to the leaf nodes (grey) in the suffix tree.}\label{fig:enhancedsuffixarray}
+\caption[The suffix array, suffix tree, and lcp interval tree]{The suffix array, suffix tree, and lcp interval tree of a string ACCTCGCCTCATCG\$. Note that internal nodes (black) in suffix tree correspond to the nodes in lcp interval tree (Figure~\ref{fig:enhancedsuffixarraytree}). The singleton nodes (not shown in the image) than correspond to the leaf nodes (grey) in the suffix tree.}\label{fig:enhancedsuffixarray}
 \end{figure}
 The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in $S$~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 
-We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. The algorithm~\cite{enhancedsuffixarrays} traverses the tree in bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
+We can compute the $k$-mer histogram $H_k$ using the algorithm for enumeration lcp-interval tree nodes. The algorithm~\cite{enhancedsuffixarrays} traverses the tree in the bottom up order, i.e\ a node is enumerated only after all nodes in its subtree have been enumerated.
 
 We start with processing the singleton intervals $[i..i]$. The singleton interval $[i..i]$ corresponds to the suffix $S_{suftab[i]}$. Let $d$ be the lcp-value of the parent node of the interval $[i..i]$, $S[suftab[i]..suftab[i]+k-1]$ is a $k$-mer occurring exactly once in $S$ if and only if $d < k$ and $suftab[i]+k < n$. We increment $H_k[1]$ by one for each interval satisfying these conditions.
 
@@ -183,13 +182,3 @@ Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Aga
 One of the advantages of this approach is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in Tallymer~\cite{tallymer}, but the suffix arrays are used also in other tools~\cite{jellyfish}.
 
 \todo{ked bude cas, spomenut compressed suffix arrays}
-
-% \section{Conclusion}
-%
-% We briefly summarized the most important approaches to the $k$-mer counting problem. We also described the key data structures and optimizations for the $k$-mer counting --- namely enhanced suffix arrays, lock free hash tables, bloom filters and count-min sketch.
-%
-% There are a lot of available tools for $k$-mer counting varying in their approach to the problem and in their functionality. Tallymer uses suffix arrays, Jellyfish uses parallel approach, BFCounter uses bloom filter to filter out the unique $k$-mers from the hash table, Khmer uses count-min sketch as it's data structure and DSK uses the partitioning approach.
-%
-% The tools have various limitations --- for example DSK does not provide random access to the counts and Khmer does not count $k$-mers exactly.
-% The comparison of the tools can be found in~\cite{khmer}.
-% cosi o pouziti a pod
