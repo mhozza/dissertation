@@ -1,7 +1,7 @@
 \chapter[Rep.\ and Gene Fam.]{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
 Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
-A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to common evolutionary. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
+A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to a common evolutionary \todo{??? bud evolution, alebo tu nieco pridat}. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
 
 Repeats usually do not have any function and are often represented by several thousands of copies in a genome~\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
 \emph{Simple sequence repeats} consist of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
@@ -16,7 +16,7 @@ Duplication by reverse transcription usually yields an inactive gene copy (\emph
 As the repeats and gene families consist of multiple very similar sequences, they cause problems in DNA assembly and sequencing data analysis. NGS provides a large amount of short reads. Repetitive sequences are usually longer than reads, and therefore reads from different copies of the same repetitive DNA are very hard to distinguish, which makes it hard to determine the copy number of the repetitive sequence.
 
 Repetitive sequences forms a substantial part of DNA.\@ For example,
-transposable elements forms more a 70\% of the genome in some plants and amphibians, and 45\% in the human genome~\cite{biemont2006genetics}.
+transposable elements forms more than a 70\% of the genome in some plants and amphibians, and 45\% in the human genome~\cite{biemont2006genetics}.
 Therefore studying repetitive sequences is one of the essential tasks in DNA analysis.
 
 In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios. We start by finding known repeats and gene families in an assembled genome, and continue with de novo repeat finding in both assembled genome and reads. In the last section, we present a model of gene family evolution.
@@ -25,7 +25,7 @@ In this chapter we will present multiple approaches for detecting repetitive seq
 
 The known repeats and gene families are stored in several databases. Examples of repeat databases include Repbase~\cite{repbase}, Dfam~\cite{dfam}, and a well-known example of a gene family databases is Pfam~\cite{pfam}.
 
-In the database search, we are usually interested in all sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of regions in our sequence which are homologous to repeats from the database.
+In the database search, we are usually interested in all sequences from the database which have matching, homologous, subsequence in the query sequence. For example if we are querying the repeat database, we get a list of regions in our sequence which are homologous to the repeats from the database.
 There are two approaches for repeat finding. The first one is based on sequence similarity, which is computed by sequence alignment. The second one is based on profile hidden Markov models.
 
 \paragraph{Searching by sequence similarity.}
@@ -89,11 +89,11 @@ Each seed is then extended to maximize the score.
 
 \paragraph{Searching by profile HMM.}
 A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, and three probability distributions: the distribution of starting states, the transition distribution and emission distribution.
-For each state, the transition distribution defines a probability $P(s)$ that in the next step we move to the state $s$, and the emission distribution defines a probability $P(x)$ that the state emits a symbol $x$.
+\reformulate{For each state, the transition distribution defines a probability $P(s)$ that in the next step we move to the state $s$, and the emission distribution defines a probability $P(x)$ that the state emits a symbol $x$.}{dalej je to znovu}
 A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
 
 The profile HMM is a linear HMM for describing a similar sequences family. It has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
-Assume that we have a multiple alignment (Figure~\ref{fig:multiple-alignment} ) of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in a corresponding place in the sequence from the family.
+Assume that we have a multiple alignment (Figure~\ref{fig:multiple-alignment}) of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in a corresponding place in the sequence from the family.
 For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
 The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 
@@ -112,15 +112,15 @@ ACCTGCTTACTGGAATTTAACATGCTTACGGG-----
 ACTTGCTTACGGGTAT-TCACCTGG---CTGGTTTCT
 ACGTGCTGCCGCTTATTTCACCAGGCCACTGGTTAAT
 \end{BVerbatim}
-\caption[Multiple alignment]{Example of a multiple alignment of ten sequences. Note that in a single column, most of the nucleotides are the same.}
+\caption[Multiple alignment]{An example of a multiple alignment of ten sequences. Note that in a single column, most of the nucleotides are the same.}
 \label{fig:multiple-alignment}
 \end{figure}
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=.7\textwidth]{../figures/profile_hmm}
-    \caption[Profile HMM]{Example of a profile HMM of length 6. The green states are match states, the yellow are insert states, the red are delete states, the leftmost state is a start state, and the rightmost state is an end state.
-     The start, end, and delete states start are silent \cite{nanasi2014probabilistic}.}\label{fig:profile-hmm}
+    \caption[Profile HMM]{An example of a profile HMM of length 6. The green states are match states, the yellow are insert states, the red are delete states, the leftmost state is a start state, and the rightmost state is an end state.
+    The start, end, and delete states start are silent~\cite{nanasi2014probabilistic}.}\label{fig:profile-hmm}
 \end{figure}
 
 Once a model is built, it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
@@ -132,77 +132,78 @@ The profile HMMs enable probabilistic approach to the sequence similarity search
 
 \section{De Novo Repeat Finding}
 
-In practice not all repeats are known and contained in the databases and databases only for a few organisms was well constructed (e.g.\ RepeatMasker contains databases for human and mouse~\cite{repeatmasker}). Therefore algorithms for finding new repeats and gene families are needed.
+In practice not all repeats are known and contained in the databases, and databases only for a few organisms were well constructed. Therefore algorithms for finding new repeats and gene families are needed.
 
 \subsection{Finding de Novo Repeats in the Assembled Genome}
 
-With the beginning of NGS, sequencing become cheaper and genomes of more organisms were sequenced. The fully and correctly assembled genomes are best source for repeat analysis, thus the need for finding repeats in such sequences arised.
+With the beginning of NGS, sequencing become cheaper, and genomes of more organisms were sequenced. The fully and correctly assembled genomes are the best source for repeat analysis, thus the need for finding repeats in such sequences arised.
 
 \subsubsection{Finding Tandem Repeats}
 Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder~\cite{trf}, ATR~\cite{atr}, TANTAN~\cite{tantan} and Sunflower model~\cite{nanasi2014probabilistic}.
 
-In this section we will briefly present the main idea used in tandem repeats finder.
+In this section we will briefly present the main idea used in the Tandem repeats finder.
 
-The tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
+The Tandem repeats finder algorithm consists of two components: detection component, which detects possible tandem repeat candidates, and analysis component, which analyses the candidates to filter actual tandem repeats.
 
 The detection algorithm looks for exactly matching $k$-mers which are separated by $d$ nucleotides ($d$ is not specified in advance). It keeps a list of all possible $k$-mers (probes).
 For each probe $p$ it stores a history list $H_p$.
 When a particular position $i$ is added to the $H_p$, for all previous positions $j$ in $H_p$, $d = i - j$ becomes a possible pattern size.
-The algorithm also maintains a distance list $D_d$, which is basically a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The updates sets right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to analysis component of the algorithm.
+The algorithm also maintains a distance list $D_d$, which is a sliding window of length $d$ and tracks the positions of all matches and their total. The distance list is updated every time a match at distance $d$ is detected. The update sets the right end of the window to $i$ and matches before $j = i - d$ are dropped from $D_d$ and subtracted from the total. The information in $D_d$ is then tested using statistical tests and if it passes, it is passed to the analysis component of the algorithm.
 
 In analysis, the pattern consisting of positions $j+1\dots i$ is selected and aligned with the surrounding sequences using wraparound dynamic programming~\cite{fischetti1992apostolico, myers1989approximate}. If at least two copies are aligned, the tandem repeat is reported.
 
 The more details on the statistical criteria and indel handling can be found in~\cite{trf}. There are also other approaches to tandem repeat finding, e.g.\ based on Hidden Markov models (~\cite{tantan, nanasi2014probabilistic}).
 
-Next, we will focus mainly on general repeats, which copies in contrast to the tandem repeats appears on random positions in the genome.
-
 \subsubsection{Finding General Repeats}
 
-The first methods (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}) for finding repeats in assembled genome were based on computation of pairwise similarities. However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise repeats would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
-Also, local sequence alignments do not usually correspond to the biological boundaries.~\cite{recon}.
+Now, we will focus on general repeats, which in contrast to the tandem repeats have copies at random positions in the genome.
+The first methods for finding repeats in assembled genome were based on computation of pairwise similarities (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}). However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise alignments would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
+Also, boundaries of local sequence alignments do not usually correspond to the biological repeat boundaries~\cite{recon}.
 
-In~\cite{repscout}, they present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant $k$-mers and then extend it to the repeat family consensus.
+In~\cite{repscout}, authors present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant $k$-mers and then extend them to the repeat family consensus.
 
-If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends a seed one base at a time, adding a base which has a majority among all sequences. It discards a sequences which stop align to the consensus and stops when most sequences stops to align. More precisely, let $S1,\dots S_n$ be strings containing occurrences of a repeat family, which share a $k$-mer seed, the consensus sequence $Q$ is the sequence which maximizes
-$$A(Q; S_1 \dots S_n) = \left[\sum_k a(Q, S_k)\right] - c |Q|,$$
-where $a(Q, S_k)$ is a fit-preferred~\cite{repscout} alignment score and $c$ is a repeat frequency threshold.
-Algorithm then starts from $Q = \text{$k$-mer seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
+If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends the seed one base at a time, adding a base which has a majority among all sequences. It discards the sequences which stop align to the consensus and stops when most sequences stop to align.
+
+% More precisely, let $S_1,\dots S_n$ be the strings containing occurrences of a repeat family, which share a $k$-mer seed, the consensus sequence $Q$ is the sequence which maximizes
+% $$A(Q; S_1 \dots S_n) = \left[\sum_k a(Q, S_k)\right] - c |Q|,$$
+% where $a(Q, S_k)$ is a fit-preferred~\cite{repscout} alignment score and $c$ is a repeat frequency threshold.
+% Algorithm then starts from $Q = \text{$k$-mer seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
 
 Since many abundant $k$-mers may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed $k$-mers from the $k$-mer count table.
 
-Finding tandem repeats is easier task than general repeat finding and it can complement the general repeat finding methods, i.e.\ the tandem repeats may be masked first from the genome so the general method has to find less repeats, which may lead to improved performance.
+Finding tandem repeats is easier task than general repeat finding and it can complement the general repeat finding methods, i.e.\ the tandem repeats may be masked first from the genome so that the general method has to find fewer repeats, which may lead to improved performance.
 
 \subsection{Finding Repeats in Reads}\label{sect:repeats-reads}
 
-The methods described in previous subsection needed assembled genome, which is not always available. Next we will present several methods for de novo repeat finding in the sequencing reads. The key property of the sequencing data is that sequences in the genome with higher abundance, will have higher representation in the sequencing data. Thus these methods has to identify such sequences.
+The methods described in previous subsection needed assembled genome, which is not always available. Next we will present several methods for de novo repeat finding in the sequencing reads. The key property of the sequencing data is that sequences in the genome with higher abundance, will have higher representation in the sequencing data.
 
 \subsubsection{Finding Repeats by K-mer Abundance Histogram Analysis}
 
 Some of the algorithms for the genome size estimation described in Section~\ref{sec:kmerhist} can be also used for detecting repeats.
-In the basic form the algorithms tell us, the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provided an algorithm for finding the consensus for repeats.
+In the basic form, the algorithms tell us the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provided an algorithm for finding the consensus for repeats.
 
 The algorithm uses two basic observations:
-
+\begin{reformulate*}
 \begin{enumerate}
   \item The repeat family is expected to have multiple $k$-mers with  unusually high coverage.
-  \item The reads covering a different copies of a particular repeat family can be separated into different groups, starting from one read and extending it if there are more then a prespecified number of reads, which prefix matches the suffix of the currently considered read.
+  \item The reads covering different copies of a particular repeat family can be separated into different groups, starting from one read and extending it if there are more then a prespecified number of reads, which prefix matches the suffix of the currently considered read.
 \end{enumerate}
-
+\end{reformulate*}
 Using (1), we can find parts of repetitive sequences and using (2), we can extend them to obtain a consensus of a repeat family.
 
-We can also obtain a copy number of the repeat family. In~\cite{waterman}, they described two methods for finding the copy number of the family.
-The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated coverage.
+Moreover, we can estimate the copy number of the repeat family. In~\cite{waterman}, authors described two methods for finding the copy number of the family.
+The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated genome coverage.
 The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. Finally we find all paths from reads from category (a) to category (c).
 
 The major disadvantage of this method is that it needs error free reads and a higher coverage.
-Next we present two methods which works also in low coverage scenario.
+Next we present two methods which work also in low coverage scenario.
 
 \subsubsection{Partial Sequence Assembly}
 
-As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting that position, where $N$ is the length of a read. We do this many times depending on the target coverage.
-Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the other side the average coverage of repetitive sequences will be higher and thus the chance of overlapping repetitive sequences will be higher.
+As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting at that position, where $N$ is the length of a read. We do this many times depending on the target coverage.
+Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the other side the average coverage of repetitive sequences will be higher and thus the chance of overlapping reads from repetitive sequences will be higher.
 
-The \emph{partial sequence assembly} method works as follows: As an input we take low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consists of at least $m$ reads. The appropriate value of $m$ can be computed from the coverage. The number of contigs, $M$, expected containing a number of reads $j$ is given by equation~\cite{swaminathan2007global}:
+The \emph{partial sequence assembly} method~\cite{swaminathan2007global} works as follows: As an input we use low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consist of at least $m$ reads, \todo{preco?}. The appropriate value of $m$ can be computed from the coverage as follows. We consider M, the number of contigs containing\todo{presne alebo aspon?} $j$ reads. The expeced value and standard deviation of M are given by the following formulas~\cite{swaminathan2007global}:
 $$E(M) = Ne^{-2c\sigma}{(1-e^{c\sigma})}^{j-1}$$
 $$\sigma = 1 - \frac{T}{L},$$
 where $c$ is the coverage, $L$ is the read length, and $T$ the base pair overlap required for contig formation.
@@ -213,22 +214,24 @@ $$e = \frac{cw}{L},$$
 where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length.
 
 This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes. This method was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data~\cite{swaminathan2007global}.
-However, this method suffers from several drawbacks. The disadvantage of this method is that larger repeats can be split into multiple sequences. In addition, it depends on slow assembly process.
+However, the disadvantage of this method is that longer repeats can be split into multiple sequences. In addition, the method depends on the slow assembly process.
 
 \subsubsection{The Sequencing Data Clustering}
 
-The other approach to the de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
-The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. Such graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold~\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast~\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
+Another approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
+The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. This graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold~\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast~\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
 
-The basic method of clustering the graph, used in \emph{tclust}~\cite{pertea2003tigr}, is to split it by connected components. The granularity of such graph strongly depends on sequence coverage. The higher the coverage is, the smaller number and bigger clusters will be found in the graph. Additionally, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
+The basic method of clustering the graph, used in \emph{tclust}~\cite{pertea2003tigr}, is to split it to connected components. The granularity of the resulting clusters strongly depends on sequence coverage.
+With increasing coverage, the number of clusters decreases and their size increases.
+Unfortunately, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
-The issues of the basic method can be fixed by more clever clustering algorithm --- \emph{hierarchical aglomeration}. The aim of hierarchical aglomeration is to split the graph into clusters (communities) which are more connected inside as outside the component. The metrics used for evaluating of the property is \emph{modularity}.
+The issues of the basic method can be fixed by the use of more sophisticated clustering algorithms. In particular the tool \todo{???} uses \emph{hierarchical aglomeration}. The aim of hierarchical aglomeration is to split the graph into clusters (communities) which are more densely connected inside than outside the cluster. The metrics used for evaluating this property is \emph{modularity}.
 The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be masured as~\cite{novak2010graph}:
 $$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
-where $k_i,\, k_j$ are the degrees of the vertices $i,\,j$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if community $c_i = c_j$.
+where $k_i$ is the degree of the vertex $i$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if vertices $i$ and $j$ belong to the same community.
 
 We can find the clustering with maximal modularity using a greedy algorithm. In the beginning every vertex has its own community.
-At each iteration, for every pair of communities, the expected gain to the modularity if they are merged, $\Delta Q$, is computed. The communities with the greatest $\Delta Q$ are then merged. This is repeated until only one community is left. Finally, the iteration with maximal overall $Q$ is selected as final clustering.
+At each iteration, for every pair of communities, the expected gain to the modularity if they are merged, $\Delta Q$, is computed. The communities with the greatest $\Delta Q$ are then merged. This is repeated until only one community is left. Finally, the iteration with the maximal overall modularity $Q$ is selected as the final clustering.
 
 \begin{figure}[htbp]
   \centering
@@ -236,7 +239,7 @@ At each iteration, for every pair of communities, the expected gain to the modul
   \caption[Hierarchical organization of sequence reads.]{Hierarchical organization of sequence reads. Plot of modularity and dendrogram for the graph derived from 136,265 sequence reads of P. sativum. Each leaf of the tree represents a single sequence read (due to their high number it is not possible to distinguish individual reads). This tree corresponds to the largest connected component, which makes up 42\% of all sequencing data. For each division of the hierarchical tree, the resulting modularity is shown above the dendrogram. The vertical red line represents the best division with maximal modularity, producing 230 subclusters. Repeats identified by the similarity search are shown on the colored vertical side bar, reads with no hits are left blank~\cite{novak2010graph}.}\label{fig:repeat-clustering}
 \end{figure}
 
-In this section, we presented three methods for the de novo repeat finding in the sequencing reads. The first method is quick, but works only on higher coverage. The second and the last methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives a clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into same cluster.
+In this section, we presented three methods for de novo repeat finding in the sequencing reads. The first method based on \todo{???} is quick, but works only on higher coverage. The second and the third methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into the same cluster.
 
 \section{Evolution of Gene Families}
 
