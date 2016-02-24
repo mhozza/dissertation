@@ -92,6 +92,7 @@ $$L(\theta | H_k) = \sum_{j=1}^m H_k[j] \log p_j.$$
 where $\theta = \{c_k, q_1, q_2, q\}$ is the parameter vector.
 
 \subsection{Modeling Errors}
+\label{sect:modeling-errors}
 
 In~\cite{waterman} and KSA~\cite{williams} they handled the sequencing errors very simply. In~\cite{waterman} they did not consider the errors in the data at all, and run their program on error corrected data. This might add some biases from the error correcting program, cause loss of part of data and it also increases the time complexity of the process. In KSA they filtered errors simply by truncating the low abundance part of the histogram. This requires higher coverage.
 
