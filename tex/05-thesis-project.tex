@@ -42,8 +42,10 @@ In Chapter~\ref{chap:repeatsfamilies} we presented various methods for finding r
 In our dissertation thesis, we would like to blend these two concepts.
 
 Firstly we would like to adjust the methods for the de novo repeat finding in reads to develop a method for finding gene families from reads.
-\todo{preco je to tazsie, ako by sme to robili}
-We do not expect to be able to find exact gene family counts from the reads only, therefore we also want to adjust the birth death model to work with the probabilistic distributions of the family counts.\todo{jasnejsie}
+The copy number of typical gene family is much lower than in repeats, but if the gene family is known, or can be detected in the data, we can select related reads and compare the coverage of the gene family by the selected reeds with the overall coverage of the genome.
+We do not expect to be able to find exact gene family counts from the reads only.
+Instead of that we may obtain a probabilistic distribution of the occurrence number.
+Therefore we also want to adjust the birth death model to work with the probabilistic distributions of the family counts.
 
 Secondly, we would like to adjust the birth death model to work with large repeat counts, so we can estimate the evolution of the repeat families. The large counts of the repeats in contrast to the gene families may cause computational problems in the model. For example, we would need to select the root family size from wider range.
-However, with such high counts in the repeats we may \reformulate{decrease} the precision of the algorithm in order to overcome these issues.
+However, with such high counts in the repeats we may increase the step size for selecting the root family size (i.e.\ we take every 100th instead of every value from the range) in order to overcome these issues.
