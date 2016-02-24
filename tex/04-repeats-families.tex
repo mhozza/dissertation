@@ -1,7 +1,7 @@
 \chapter[Rep.\ and Gene Fam.]{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
 Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
-A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to a common evolutionary \todo{??? bud evolution, alebo tu nieco pridat}. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
+A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to a common evolutionary origin. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
 
 Repeats usually do not have any function and are often represented by several thousands of copies in a genome~\cite{cell}. They are classified into multiple classes depending on their size and how they replicate.
 \emph{Simple sequence repeats} consist of tandem arrays of up to thousands of copies of short sequences, ranging from 1 to 500 nucleotides.
@@ -89,13 +89,13 @@ Each seed is then extended to maximize the score.
 
 \paragraph{Searching by profile HMM.}
 A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, and three probability distributions: the distribution of starting states, the transition distribution and emission distribution.
-\reformulate{For each state, the transition distribution defines a probability $P(s)$ that in the next step we move to the state $s$, and the emission distribution defines a probability $P(x)$ that the state emits a symbol $x$.}{dalej je to znovu}
-A HMM generates a random sequence together with a sequence of states. In each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+A HMM generates a random sequence together with a sequence of states. It starts in one of the starting states, and in each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+In HMM, we can compute a probability that the HMM generates a given sequence, or compute the most probable state sequence.
 
 The profile HMM is a linear HMM for describing a similar sequences family. It has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
 Assume that we have a multiple alignment (Figure~\ref{fig:multiple-alignment}) of sequences from the family. The profile HMM~\cite{profile-hmm} contains a sequence of $M$ states (match states), corresponding to matching columns in the alignment. Each state $m_k,\, 1 \leq k \leq M$, has a distinct emission distribution representing the probabilities that a particular nucleotide is in a corresponding place in the sequence from the family.
-For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucelotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convinience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
-The architecture of the model can be seen in figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
+For each match state $m_k$ there is a delete state $d_k$, which does not produce any nucleotide, and thus allows to skip any column in the alignment. Finally there are $M+1$ insert states, which allows to insert any sequence before or after any nucleotide. For convenience, dummy starting state $m_0$ and ending state $m_{M+1}$ are added.
+The architecture of the model can be seen in Figure~\ref{fig:profile-hmm}. The probability distributions are trained from the training sequences. See~\cite{profile-hmm} for more details.
 
 \begin{figure}[htp]
 \centering
@@ -183,49 +183,58 @@ Some of the algorithms for the genome size estimation described in Section~\ref{
 In the basic form, the algorithms tell us the proportion of the repetitive sequences and their repeat count. In~\cite{waterman}, they also provided an algorithm for finding the consensus for repeats.
 
 The algorithm uses two basic observations:
-\begin{reformulate*}
 \begin{enumerate}
   \item The repeat family is expected to have multiple $k$-mers with  unusually high coverage.
-  \item The reads covering different copies of a particular repeat family can be separated into different groups, starting from one read and extending it if there are more then a prespecified number of reads, which prefix matches the suffix of the currently considered read.
+  \item The reads covering different copies of a particular repeat family can be separated into different groups.
+  We start from one read and extend it if there are more then $r$ reads (where $r$ is a prespecified constant), which prefix matches the suffix of the read we are currently considering.
 \end{enumerate}
-\end{reformulate*}
+
 Using (1), we can find parts of repetitive sequences and using (2), we can extend them to obtain a consensus of a repeat family.
 
 Moreover, we can estimate the copy number of the repeat family. In~\cite{waterman}, authors described two methods for finding the copy number of the family.
 The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated genome coverage.
-The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. Finally we find all paths from reads from category (a) to category (c).
+The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. We can use this graph to find all paths starting from reads from category (a) and ending in reads from category (c).
 
-The major disadvantage of this method is that it needs error free reads and a higher coverage.
+The major disadvantage of this method is that it needs a higher coverage, which is necessary to distinguish the repeats in the histogram, because the repetitive sequences need to be well covered to be found~\cite{waterman} .
 Next we present two methods which work also in low coverage scenario.
 
 \subsubsection{Partial Sequence Assembly}
 
-As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $N$ bases starting at that position, where $N$ is the length of a read. We do this many times depending on the target coverage.
+As we mentioned in Section~\ref{sec:kmerhist}, we can look at the NGS sequencing as a random sampling process. We select a random position in the genome and read $L$ bases starting at that position, where $L$ is the length of a read. We do this many times depending on the target coverage.
 Repetitive sequences have multiple copies in a genome, so we expect more occurrences of repetitive sequences than single-copy sequences in the sequencing data. If the coverage is low, there will be very few single copy sequences in the data and the chance that two of them are overlapping is very low. On the other side the average coverage of repetitive sequences will be higher and thus the chance of overlapping reads from repetitive sequences will be higher.
 
-The \emph{partial sequence assembly} method~\cite{swaminathan2007global} works as follows: As an input we use low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consist of at least $m$ reads, \todo{preco?}. The appropriate value of $m$ can be computed from the coverage as follows. We consider M, the number of contigs containing\todo{presne alebo aspon?} $j$ reads. The expeced value and standard deviation of M are given by the following formulas~\cite{swaminathan2007global}:
-$$E(M) = Ne^{-2c\sigma}{(1-e^{c\sigma})}^{j-1}$$
-$$\sigma = 1 - \frac{T}{L},$$
-where $c$ is the coverage, $L$ is the read length, and $T$ the base pair overlap required for contig formation.
+The \emph{partial sequence assembly} method~\cite{swaminathan2007global} works as follows: As an input we use low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consist of at least $m$ reads, to eliminate the possibility that the contig originated from the single-copy part of sequence. The authors selected the appropriate value of $m$ by trial and error.
 
-The estimated copy number, $C$, within any sequence window was then calculated by~\cite{swaminathan2007global}:
-$$C = \frac{o}{e}$$
-$$e = \frac{cw}{L},$$
-where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length.
+% Expected copy number, $C$, can be calculated
+% from the coverage of each sequence window across the
+% alignment~\cite{swaminathan2007global}:
+% $$C = \frac{o}{e}$$
+% $$e = \frac{cw}{L},$$
+% where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length (Figure~\ref{fig:survey-alignment}). This enables identifying the repetitive regions and their copy numbers from the data.
+%
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=\textwidth]{../figures/survey_alignment}
+%   \caption[Alignment of sequence survey reads to BAC clones]{Alignment of sequence survey reads to BAC clones. The figure shows a graphic of the alignment of survey reads using BLASTZ to genomic Bacterial Artificial Chromosome (BAC GM\_WBb0078A23 from
+%   a heterochromatic region) sequence of soybean DNA, and estimation of copy
+% number. Copy number was estimated according to the number of sequence survey reads aligning to each 1 kb window of the
+% BACs. The alignment represents the superposition of identical or closely related sequences on the BAC sequence, in order to
+% visualize the individual reads showing regions present in many copies per genome~\cite{swaminathan2007global}.}\label{fig:survey-alignment}
+% \end{figure}
 
-This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes. This method was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data~\cite{swaminathan2007global}.
+This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes, and was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data~\cite{swaminathan2007global}.
 However, the disadvantage of this method is that longer repeats can be split into multiple sequences. In addition, the method depends on the slow assembly process.
 
 \subsubsection{The Sequencing Data Clustering}
 
 Another approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
-The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. This graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified treshold~\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast~\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
+The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. This graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified threshold~\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast~\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
 
 The basic method of clustering the graph, used in \emph{tclust}~\cite{pertea2003tigr}, is to split it to connected components. The granularity of the resulting clusters strongly depends on sequence coverage.
 With increasing coverage, the number of clusters decreases and their size increases.
 Unfortunately, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
-The issues of the basic method can be fixed by the use of more sophisticated clustering algorithms. In particular the tool \todo{???} uses \emph{hierarchical aglomeration}. The aim of hierarchical aglomeration is to split the graph into clusters (communities) which are more densely connected inside than outside the cluster. The metrics used for evaluating this property is \emph{modularity}.
+The issues of the basic method can be fixed by the use of more sophisticated clustering algorithms. In particular the tool RepeatExplorer~\cite{novak2010graph} uses \emph{hierarchical agglomeration}. The aim of hierarchical agglomeration is to split the graph into clusters (communities) which are more densely connected inside than outside the cluster. The metrics used for evaluating this property is \emph{modularity}.
 The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be masured as~\cite{novak2010graph}:
 $$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
 where $k_i$ is the degree of the vertex $i$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if vertices $i$ and $j$ belong to the same community.
@@ -239,7 +248,7 @@ At each iteration, for every pair of communities, the expected gain to the modul
   \caption[Hierarchical organization of sequence reads]{Hierarchical organization of sequence reads. Plot of modularity and dendrogram for the graph derived from 136,265 sequence reads of P. sativum. Each leaf of the tree represents a single sequence read (due to their high number it is not possible to distinguish individual reads). This tree corresponds to the largest connected component, which makes up 42\% of all sequencing data. For each division of the hierarchical tree, the resulting modularity is shown above the dendrogram. The vertical red line represents the best division with maximal modularity, producing 230 subclusters. Repeats identified by the similarity search are shown on the colored vertical side bar, reads with no hits are left blank~\cite{novak2010graph}.}\label{fig:repeat-clustering}
 \end{figure}
 
-In this section, we presented three methods for de novo repeat finding in the sequencing reads. The first method based on \todo{???} is quick, but works only on higher coverage. The second and the third methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into the same cluster.
+In this section, we presented three methods for de novo repeat finding in the sequencing reads. The first method based on the histogram analysis is quick, but works only on higher coverage. The second and the third methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into the same cluster.
 
 \section{Evolution of Gene Families}
 
