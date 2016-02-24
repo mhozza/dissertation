@@ -164,11 +164,6 @@ In~\cite{repscout}, authors present an efficient method of similarity search whi
 
 If we have a seed for a particular family, we can use a simple greedy algorithm to first extend it to the right and then to the left. The algorithm extends the seed one base at a time, adding a base which has a majority among all sequences. It discards the sequences which stop align to the consensus and stops when most sequences stop to align.
 
-% More precisely, let $S_1,\dots S_n$ be the strings containing occurrences of a repeat family, which share a $k$-mer seed, the consensus sequence $Q$ is the sequence which maximizes
-% $$A(Q; S_1 \dots S_n) = \left[\sum_k a(Q, S_k)\right] - c |Q|,$$
-% where $a(Q, S_k)$ is a fit-preferred~\cite{repscout} alignment score and $c$ is a repeat frequency threshold.
-% Algorithm then starts from $Q = \text{$k$-mer seed}$ and greedily extends $Q$ with the nucleotide which maximizes the score, until it fails to improve the score in predefined number of consecutive iterations.
-
 Since many abundant $k$-mers may arise from a single repeat family, to avoid multiple processing of the same family we remove all processed $k$-mers from the $k$-mer count table.
 
 Finding tandem repeats is easier task than general repeat finding and it can complement the general repeat finding methods, i.e.\ the tandem repeats may be masked first from the genome so that the general method has to find fewer repeats, which may lead to improved performance.
@@ -195,7 +190,7 @@ Moreover, we can estimate the copy number of the repeat family. In~\cite{waterma
 The first is to calculate the sum of lengths of all reads similar to the consensus and dividing it by the estimated genome coverage.
 The second way is to firstly find the reads which (a) suffix matches the prefix of the consensus, (b) are similar to some substring in consensus, (c) prefix matches the suffix of the consensus, and then build a directed graph from those reads, in which reads are vertices and edges are from read $i$ to read $j$ if the suffix of $i$ matches prefix of $j$ and the overlap is greater than some threshold. We can use this graph to find all paths starting from reads from category (a) and ending in reads from category (c).
 
-The major disadvantage of this method is that it needs a higher coverage, which is necessary to distinguish the repeats in the histogram, because the repetitive sequences need to be well covered to be found~\cite{waterman} .
+The major disadvantage of this method is that it needs a higher coverage, which is necessary to distinguish the repeats in the histogram, because the repetitive sequences need to be well covered to be found~\cite{waterman}.
 Next we present two methods which work also in low coverage scenario.
 
 \subsubsection{Partial Sequence Assembly}
@@ -205,23 +200,6 @@ Repetitive sequences have multiple copies in a genome, so we expect more occurre
 
 The \emph{partial sequence assembly} method~\cite{swaminathan2007global} works as follows: As an input we use low coverage NGS sequencing data. Using assembly algorithms, we assemble the data into contigs. We take into account only contigs, which consist of at least $m$ reads, to eliminate the possibility that the contig originated from the single-copy part of sequence. The authors selected the appropriate value of $m$ by trial and error.
 
-% Expected copy number, $C$, can be calculated
-% from the coverage of each sequence window across the
-% alignment~\cite{swaminathan2007global}:
-% $$C = \frac{o}{e}$$
-% $$e = \frac{cw}{L},$$
-% where $o$ represents the observed number of reads matching in the sequence window, $e$ represents the expected number of reads matching a single copy sequence window of size $w$, $c$ is the coverage, and $L$ is the read length (Figure~\ref{fig:survey-alignment}). This enables identifying the repetitive regions and their copy numbers from the data.
-%
-% \begin{figure}[htbp]
-%   \centering
-%   \includegraphics[width=\textwidth]{../figures/survey_alignment}
-%   \caption[Alignment of sequence survey reads to BAC clones]{Alignment of sequence survey reads to BAC clones. The figure shows a graphic of the alignment of survey reads using BLASTZ to genomic Bacterial Artificial Chromosome (BAC GM\_WBb0078A23 from
-%   a heterochromatic region) sequence of soybean DNA, and estimation of copy
-% number. Copy number was estimated according to the number of sequence survey reads aligning to each 1 kb window of the
-% BACs. The alignment represents the superposition of identical or closely related sequences on the BAC sequence, in order to
-% visualize the individual reads showing regions present in many copies per genome~\cite{swaminathan2007global}.}\label{fig:survey-alignment}
-% \end{figure}
-
 This method allows simple repeat analysis of low coverage sequencing data, which is especially useful in analysis of large genomes e.g.\ plant genomes, and was successfully used for repeat analysis of soybean (\textit{Glycine max}) from $0.07\times$ coverage sequencing data~\cite{swaminathan2007global}.
 However, the disadvantage of this method is that longer repeats can be split into multiple sequences. In addition, the method depends on the slow assembly process.
 
@@ -230,13 +208,15 @@ However, the disadvantage of this method is that longer repeats can be split int
 Another approach to de novo repeat detection and analysis is \emph{sequencing data clustering}. The goal is to separate sequences into multiple groups, where each group consists of similar sequences.
 The key data structure for such clustering is a graph, where reads are vertices, and edges are between similar sequences. The edges can be labeled by the similarity score. This graph can be constructed by performing all-to-all pairwise comparisons and recording all read pairs with sequence overlaps exceeding a specified threshold~\cite{pertea2003tigr, novak2010graph}. The pairwise alignments can be effectively computed using mgblast~\cite{pertea2003tigr}, which can filter out alignments with similarity below some threshold.
 
-The basic method of clustering the graph, used in \emph{tclust}~\cite{pertea2003tigr}, is to split it to connected components. The granularity of the resulting clusters strongly depends on sequence coverage.
+The basic method of clustering the graph, used in \emph{tclust}~\cite{pertea2003tigr}, is to split it to connected components.
+In this method the low coverage is crucial, so the single-copy sequences form a singletons or very small clusters.
+The granularity of the resulting clusters strongly depends on sequence coverage.
 With increasing coverage, the number of clusters decreases and their size increases.
 Unfortunately, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
 The issues of the basic method can be fixed by the use of more sophisticated clustering algorithms. In particular the tool RepeatExplorer~\cite{novak2010graph} uses \emph{hierarchical agglomeration}. The aim of hierarchical agglomeration is to split the graph into clusters (communities) which are more densely connected inside than outside the cluster. The metrics used for evaluating this property is \emph{modularity}.
 The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be masured as~\cite{novak2010graph}:
-$$Q = \frac{1}{2m}\sum\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
+$$Q = \frac{1}{2m}\sum_{ij}\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
 where $k_i$ is the degree of the vertex $i$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if vertices $i$ and $j$ belong to the same community.
 
 We can find the clustering with maximal modularity using a greedy algorithm. In the beginning every vertex has its own community.
