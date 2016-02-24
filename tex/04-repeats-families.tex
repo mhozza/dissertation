@@ -236,23 +236,23 @@ At each iteration, for every pair of communities, the expected gain to the modul
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.5\textwidth]{../figures/repeat-clustering}
-  \caption[Hierarchical organization of sequence reads.]{Hierarchical organization of sequence reads. Plot of modularity and dendrogram for the graph derived from 136,265 sequence reads of P. sativum. Each leaf of the tree represents a single sequence read (due to their high number it is not possible to distinguish individual reads). This tree corresponds to the largest connected component, which makes up 42\% of all sequencing data. For each division of the hierarchical tree, the resulting modularity is shown above the dendrogram. The vertical red line represents the best division with maximal modularity, producing 230 subclusters. Repeats identified by the similarity search are shown on the colored vertical side bar, reads with no hits are left blank~\cite{novak2010graph}.}\label{fig:repeat-clustering}
+  \caption[Hierarchical organization of sequence reads]{Hierarchical organization of sequence reads. Plot of modularity and dendrogram for the graph derived from 136,265 sequence reads of P. sativum. Each leaf of the tree represents a single sequence read (due to their high number it is not possible to distinguish individual reads). This tree corresponds to the largest connected component, which makes up 42\% of all sequencing data. For each division of the hierarchical tree, the resulting modularity is shown above the dendrogram. The vertical red line represents the best division with maximal modularity, producing 230 subclusters. Repeats identified by the similarity search are shown on the colored vertical side bar, reads with no hits are left blank~\cite{novak2010graph}.}\label{fig:repeat-clustering}
 \end{figure}
 
 In this section, we presented three methods for de novo repeat finding in the sequencing reads. The first method based on \todo{???} is quick, but works only on higher coverage. The second and the third methods are focused on low coverage scenario. Using the hierarchical clustering algorithm gives clusters which are in size somewhere between the partial sequence method, which tends to separate the same repeat family into multiple clusters, and the basic tclust method, which often merges unrelated repeat families into the same cluster.
 
 \section{Evolution of Gene Families}
 
-Prior the wide availability of whole genome assemblies, allowed by newer sequencing technologies, evolution studies focused on small numbers of nucleotide differences between orthologous genes. Nowadays, it is possible to focus on large-scale genome differences, e.g.\ changes in the sizes of gene families.
+Prior to the wide availability of whole genome sequences, allowed by newer sequencing technologies, evolution studies focused on nucleotide differences in groups of related genes. Nowadays, it is possible to focus on large-scale genome differences, e.g.\ changes in the sizes of gene families.
 
-The gene families may very among different organisms. In the evolutionary biology, we would like to distinguish which changes are due to evolutionary forces and which are just by chance. To do this, we need some null model, which models ``normal'' (random) evolution of the gene families. One such model is a birth-death based model presented in~\cite{hahn2005estimating}.
+The gene family may vary among different organisms. In the evolutionary biology, we would like to distinguish which changes are due to selection forces and which happened just by chance. To do this, we need some null model, which models ``normal'' (random) evolution of gene families. One such model is the birth-death  model presented in~\cite{hahn2005estimating}.
 
-Suppose, that in a gene family the number of genes is given by discrete random variable $X(t)$. The probability that $X(t) = c$, given that $X(0) = s$ is $P(X(t) = c | X(0) = s)$.
-In \emph{birth-death model}, we define two parameters: birth rate $\lambda$ and death rate $\mu$, where the probability that any gene being duplicated (and fixed) is $\lambda \Delta t$ or being lost is $\mu \Delta t$. In family of size $X(t)$ the possible transitions are~\cite{hahn2005estimating}:
+Suppose that in a gene family the number of genes at time $t$ is given by a discrete random variable $X(t)$. The probability that $X(t) = c$, given that $X(0) = s$ is denoted $P(X(t) = c | X(0) = s)$.
+In \emph{the birth-death model}, we define two parameters: birth rate $\lambda$ and death rate $\mu$. The probability that a given gene is duplicated (and fixed) within a short time $\Delta t$ is $\lambda \Delta t$, and conversely the probability of a gene loss is $\mu \Delta t$. In a family of size $X(t)$ the possible transitions are~\cite{hahn2005estimating}:
 \begin{itemize}
   \item probability of one gain: $\lambda X(t) \Delta t + o(\Delta t)$
   \item probability of one loss: $\mu X(t) \Delta t + o(\Delta t)$
-  \item probability of more then one event: $o(\Delta t)$
+  \item probability of more than one event: $o(\Delta t)$
   \item probability of no change: $1 - (\lambda + \mu) X(t) \Delta t + o(\Delta t)$
 \end{itemize}
 If a gene family contains zero genes, it is not possible to gain or lose any genes, therefore it is considered as absorbing state.
@@ -261,35 +261,42 @@ We often set $\lambda = \mu$. In that case, the transition probabilities are~\ci
 $$P(X(t) = c | X(0) = s) = \sum_{j=0}^{\min(s, c)} {s \choose j}{s+x-j-1 \choose s-1}\alpha^{s+c-2j}{(1-2\alpha)}^j,$$
 where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and variance are~\cite{hahn2005estimating}:
 \begin{align*}
-  \operatorname{Mean}(X(t) = c | X(0) = s) &= s\\
-  \operatorname{Var}(X(t) = c | X(0) = s) &= 2s\lambda t
+  \operatorname{Mean}(X(t) | X(0) = s) &= s\\
+  \operatorname{Var}(X(t) | X(0) = s) &= 2s\lambda t
 \end{align*}
 
-Based on the birth-death model and the structure of \emph{phylogenetic tree}, we can construct \emph{probabilistic graph model}, which parametrizes the probability distributions of the gene family sizes in the tree.
+Based on the birth-death model and the structure of \emph{a phylogenetic tree}, we can construct \emph{probabilistic graph model}, which parametrizes the probability distributions of the gene family sizes in the nodes of the tree.
 
-Phylogenetic trees are heavily used in the study of the evolution. The leaves of a phylogenetic tree are the studied species and internal nodes are their common ancestors. In our case we will be using rooted binary phylogenetic tree (Figure~\ref{}\todo{obrazok}), where root is the common ancestor of all studied species and at every speciation event (internal node) only two species arise. The length of edges corresponds to the evolution time between a node and its parent. Usually only information about leaves is available and we need to estimate the information about ancestral organisms.
+Phylogenetic trees are heavily used in the study of evolution. The leaves of a phylogenetic tree are the studied species and internal nodes are their common ancestors. We will be using rooted binary phylogenetic trees (Figure~\ref{fig:phylogenetic-tree}), where the root is the common ancestor of all studied species and at every speciation event (internal node) only two species arise. The length of edges corresponds to the evolution time between a node and its parent. Usually only information about leaves is available and we need to estimate the information about ancestral organisms.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.5\textwidth]{../figures/phylogenetic_tree}
+  \caption[Phylogenetic tree]{Phylogenetic tree of eight species~\cite{durbin}.}\label{fig:phylogenetic-tree}
+\end{figure}
 
 The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
 
-To test the hypothesis against null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
+To test a hypothesis against a null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
 
 In order to compute the likelihood and its corresponding value, we need to specify a prior distribution for the root node. The prior should be noninformative and a natural choice is a uniform distribution~\cite{felsenstein1981evolutionary}. However, this prior introduces an undesirable bias --- it attributes a larger likelihoods to smaller gene families~\cite{hahn2005estimating}. Other priors also showed to be unsuitable~\cite{hahn2005estimating}.
 
-Since the root family size is not known, we need to use conditional $P$-values conditioned of specific value of the root family size.
-The conditional $P$-value is computed as the probability that a random gene family with the same root size has smaller conditional likelihood.
-To perform a statistic test, we can use supremum $P$-value, which is the maximal conditional $P$-value computed from reasonable range of root family size.
-If such supremum $P$-value is small, it means that it is unlikely explainable by the birth-death model.
+Since the root family size is not known, we need to use conditional $P$-values conditioned on a specific value of the root family size.
+The conditional $P$-value is computed as the probability that a random gene family with the same root size has a smaller conditional likelihood.
+To perform a statistic test, we can use supremum $P$-value, which is the maximum conditional $P$-value over a reasonable range of root family sizes.
+If such a supremum $P$-value is small, it means that the hypothesis is unlikely explainable by the birth-death model.
 
 If we detect unlikely gene family evolution, we might want to know, which branch of the phylogenetic tree is responsible for the violation of the model.
 One method of identification is to try to delete every branch (one at a time) and recompute the $P$-values. If the $P$-value increases largely, it means that the other branches followed the birth-dead model and thus this branch is responsible for the low $P$-value.
 The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximisation algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
 
-The approach presented in this section has several limitations. It assumes that rates in the whole phylogenetic tree is the same, which might not be true in some organisms. Moreover the unlikely branch detection assumes that only one branch is responsible for the different behavior of family sizes evolution.
+The approach presented in this section has several limitations. It assumes that rates in the whole phylogenetic tree are the same, which might not be true in some organisms. Moreover the unlikely branch detection assumes that only one branch is responsible for the different behavior of family size evolution.
+\todo{spomenut ten clanok o evolucii transpozonov}
 
 \section{Conclusion}
 
 In this chapter we presented several methods for repeat finding in various scenarios.
-Some of this methods, mostly those which find repeats from reads (Section~\ref{sect:repeats-reads}) are developed for the reads which has significantly higher abundance than the gene families, and may need to be adjusted to be used for gene family discovery.
+Some of these methods, mostly those which find repeats from reads (Section~\ref{sect:repeats-reads}), are developed for repeats which have significantly higher abundance than typical gene families, and may need to be adjusted to be used for gene family discovery.
 
-In last section we presented one model for gene family evolution. The presented method worked with exact counts of the gene families. If we have counted the gene family sizes from reads, only approximate counts (e.g.\ given by some probability distributions) would be available. The model needs to be modified to work with probabilities instead of exact counts in order to work with such counts.
-We will address this issues in our dissertation thesis, see Section~\ref{sect:repeats-families}.
+In the last section we presented a model for gene family evolution. The presented method worked with exact counts of gene families. If we have counted the gene family sizes from reads, only approximate counts (e.g.\ given by some probability distributions) would be available. The model needs to be modified to work with probabilities instead of exact counts in order to work with such counts.
+We plan to address these issues in our dissertation thesis, as discussed in Section~\ref{sect:repeats-families}.
