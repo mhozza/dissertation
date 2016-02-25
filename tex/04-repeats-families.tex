@@ -181,7 +181,7 @@ The algorithm uses two basic observations:
 \begin{enumerate}
   \item The repeat family is expected to have multiple $k$-mers with  unusually high coverage.
   \item The reads covering different copies of a particular repeat family can be separated into different groups.
-  We start from one read and extend it if there are more then $r$ reads (where $r$ is a prespecified constant), which prefix matches the suffix of the read we are currently considering.
+  We start from one read and extend it if there are more than $r$ reads (where $r$ is a prespecified constant), which prefix matches the suffix of the read we are currently considering.
 \end{enumerate}
 
 Using (1), we can find parts of repetitive sequences and using (2), we can extend them to obtain a consensus of a repeat family.

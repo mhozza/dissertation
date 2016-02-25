@@ -39,7 +39,7 @@ The probability, $p_j$, that a particular $k$-mer is covered by $j$ reads can be
 $$ p_j =  \frac{c_k e^{-c_k}}{j!}.$$
 The $c_k$ is the average coverage and thus we can set the mean in the Poisson distribution to $c_k$.
 However, the abundance of some $k$-mers under this distribution may be zero and we will not observe them in the spectrum. Hence, the probability that a given observed $k$-mer from the genome occurs in the sequencing data exactly $j$ times is $$p_j = \frac{c_k^j e^{-c_k}}{j! (1-e^{-c_k})}.$$
-This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value greater then zero in Poisson distribution, which is $1-e^{-c_k}$.
+This distribution is called \emph{truncated Poisson distribution} and it renormalizes the probabilities of the Poisson distribution with mean $c_k$ by the probability of obtaining a value greater than zero in Poisson distribution, which is $1-e^{-c_k}$.
 
 Given the abundance histogram, we can compute the log-likelihood of $c_k$, with respect to the histogram:
 $$L(\theta | H_k) = \sum_{j=1}^m H_k[j] \log p_j,$$
