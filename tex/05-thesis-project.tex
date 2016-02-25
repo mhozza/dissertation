@@ -1,8 +1,8 @@
 \chapter{Thesis Project}
 
-In this chapter we present our plans for the dissertation thesis.
+In this chapter, we present our plans for the dissertation thesis.
 The thesis will consist of two main topics.
-The first goal is to estimate the coverage and genome size from NGS data. The second part is to use this data to find repeats and gene families and to model their evolution.
+The first goal is to estimate the coverage and genome size from NGS data. The second part is to use this data to find repeats and gene families, and to model their evolution.
 We will now summarize the current status and problems.
 
 \section{Estimating the Coverage and Size of the Genome}
@@ -10,17 +10,17 @@ We will now summarize the current status and problems.
 We developed a tool for estimating the genome size from low coverage erroneous sequencing data, called CovEst, which we have described in Section~\ref{sect:modeling-errors}. We published and presented CovEst on SPIRE 2015 conference~\cite{covest}.
 
 The tool is currently a prototype, and various issues need to be fixed prior to the final version.
-Most importantly speed of the algorithm for finding the model parameters has to be improved. Also more complex models can be added. Finally, we can make the algorithm more robust by increasing the independence of the data, or using multiple $k$-mer histograms.
+Most importantly, the speed of the algorithm for finding the model parameters has to be improved. Also more complex models can be added. Finally, we can make the algorithm more robust by increasing the independence of the data, or by using multiple $k$-mer histograms.
 We will now describe these planned improvements in more detail.
 
 \paragraph{Parameter estimation algorithm improvements.}
 In the current version, we use the L-BFGS-B~\cite{l-bfgs-b} algorithm for parameter estimation, with fine-tuning using the grid search.
-The L-BFGS-B algorithm often fails to find the locally maximal likelihood, therefore a fine tuning is needed.
+The L-BFGS-B algorithm often fails to find the locally maximal likelihood; therefore a fine tuning is needed.
 
-The grid search algorithm, is a local search algorithm, which searches the parameter grid of depth $G$, with step $S$ around the current parameter vector, i.e.\ if we have 5 parameters $P = p_1\dots p_5$ and $G = 3$, the grid of parameters would be $\{p_1 S^{-3}, p_1 S^{-2}, \dots, p_1 S^3\} \times \cdots \times \{p_5 S^{-3}, \dots, p_5 S^3\}$. We can omit the current parameter vector from the grid. The size of the grid is ${(2G + 1)}^P - 1$ and increases exponentially with increasing parameter count. The algorithm is iterative and the step decreases if the previous iteration was unable to sufficiently improve the parameters. Once the step size is too small, the algorithm stops.
+The grid search algorithm is a local search algorithm, which searches the parameter grid of depth $G$, with step $S$ around the current parameter vector, i.e.\ if we have 5 parameters $P = p_1\dots p_5$ and $G = 3$, the grid of parameters would be $\{p_1 S^{-3}, p_1 S^{-2}, \dots, p_1 S^3\} \times \cdots \times \{p_5 S^{-3}, \dots, p_5 S^3\}$. We can omit the current parameter vector from the grid. The size of the grid is ${(2G + 1)}^P - 1$ and increases exponentially with an increasing parameter count. The algorithm is iterative and the step decreases if the previous iteration was unable to sufficiently improve the parameters. Once the step size is too small, the algorithm stops.
 
 In our test, the algorithm needed several thousand iterations and the large grid size made the algorithm very slow.
-If we would add some more parameters to the model, the algorithm would soon become unusable. Therefore we would like avoid the fine-tuning.
+If we would add some more parameters to the model, the algorithm would soon become unusable. Therefore we would like to avoid the fine-tuning.
 
 This can be done in several ways. We can either try to improve settings of the L-BFGS-B algorithm, or replace it by a more suitable optimization algorithm. Another option is to use the expectation maximization algorithm instead of directly optimizing the likelihood, similarly to the~\cite{waterman}.
 
@@ -33,7 +33,7 @@ We can add more complex repeat modeling, similarly to the~\cite{williams}. We ca
 
 We estimate the parameters from a single $k$-mer histogram. It is also possible to build several $k$-mer histograms for different values of $k$. Estimating parameters from multiple histograms can avoid some artifacts or biases that may be introduced by a particular value of $k$ and improve the precision of the algorithm by providing more data.
 
-Moreover the $k$-mers in a histogram are not completely independent. Each $k$-mer shares some sequence with $k-1$ other consecutive $k$-mers. We may decrease this dependence using spaced $k$-mers, i.e\ we omit some positions in the $k$-mer.
+Moreover, the $k$-mers in a histogram are not completely independent. Each $k$-mer shares some sequence with $k-1$ other consecutive $k$-mers. We may decrease this dependence using spaced $k$-mers, i.e\ we omit some positions in the $k$-mer.
 The mask for the spaced $k$-mers can by chosen randomly for a single run of the $k$-mer counting algorithm. We can also build multiple histograms using multiple $k$-mer masks~\cite{keich2004spaced}.
 
 \section{Repeats and Gene Families}\label{sect:repeats-families}
@@ -41,11 +41,11 @@ The mask for the spaced $k$-mers can by chosen randomly for a single run of the 
 In Chapter~\ref{chap:repeatsfamilies}, we have presented various methods for finding repeats. We have also presented a model for gene family evolution.
 In our dissertation thesis, we would like to blend these two concepts.
 
-Firstly we would like to adjust the methods for the de novo repeat finding in reads to develop a method for finding gene families from reads.
+Firstly, we would like to adjust the methods for the de novo repeat finding in reads to develop a method for finding gene families from reads.
 The copy number of typical gene family is much lower than in repeats, but if the gene family is known, or can be detected in the data, we can select related reads and compare the coverage of the gene family by the selected reeds with the overall coverage of the genome.
 We do not expect to be able to find exact gene family counts from the reads only.
-Instead of that we may obtain a probabilistic distribution of the occurrence number.
-Therefore we also want to adjust the birth death model to work with the probabilistic distributions of the family counts.
+Instead, we may obtain a probabilistic distribution of the occurrence number.
+Therefore, we also want to adjust the birth death model to work with the probabilistic distributions of the family counts.
 
 Secondly, we would like to adjust the birth death model to work with large repeat counts, so we can estimate the evolution of the repeat families. The large counts of the repeats in contrast to the gene families may cause computational problems in the model. For example, we would need to select the root family size from wider range.
 However, with such high counts in the repeats we may increase the step size for selecting the root family size (i.e.\ we take every 100th instead of every value from the range) in order to overcome these issues.
