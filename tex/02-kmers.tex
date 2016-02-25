@@ -1,4 +1,4 @@
-\chapter[K-mer Counting]{K-mer Counting and K-mer Abundance Histograms}
+\chapter{K-mer Counting and K-mer Abundance Histograms}
 
 A $K$-mer is a substring of length exactly~$k$. In \emph{$k$-mer counting} we take sequencing reads as an input and we want to know for each $k$-mer occurring in the reads, how many occurrences does it have. We can summarize the counts of all $k$-mers, in a $k$-mer histogram.
 The \emph{$k$-mer abundance histogram $H_k$ (shortly the $k$-mer histogram)} is an array, where the $i$-th element (denoted by $H_k[i]$) is the number of unique $k$-mers occurring in the data exactly $i$ times. The size of the histogram denoted by $|H_k|$ is maximal $i$ such that $H_k[i] > 0$.
@@ -181,4 +181,4 @@ Then we process the other $\ell$-intervals $[i..j]$, (except the root node). Aga
 
 One of the advantages of this approach is that we can compute $H_k$ for different $k$ at once --- at each step we increment specific positions in all corresponding histograms $H_k$ for each $k$ we are interested. This approach is a core of method used in Tallymer~\cite{tallymer}, but the suffix arrays are used also in other tools~\cite{jellyfish}.
 
-\todo{ked bude cas, spomenut compressed suffix arrays}
+%todo: {ked bude cas, spomenut compressed suffix arrays}

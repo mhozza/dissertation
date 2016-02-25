@@ -1,32 +1,32 @@
 \newtheorem{definition}{Definition}
 \newtheorem*{definition*}{Definition}
-\newtheorem{example}{Example}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{invariant}{Invariant}
+% \newtheorem{example}{Example}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{invariant}{Invariant}
 
-\def\QED{QED}
+% \def\QED{QED}
 
-\definecolor{darkgreen}{RGB}{0,50,0}
-\newcommand\colornote[2]{\mbox{}\marginpar{\footnotesize\raggedright\hspace{0pt}\color{#1}{#2}}}
-\newcounter{correctioncolor}[page]
-\newcommand\correction[2]{%
-	\uline{#1}
-	\mbox{}%
-	\marginpar{%
-		\footnotesize%
-		\raggedright%
-		\hspace{0pt}%
-		\ifthenelse%
-			{\isodd{\value{correctioncolor}}}%
-			{\color{green}}%
-			{\color{darkgreen}}%
-		\addtocounter{correctioncolor}{1}%
-		{\bf #2}%
-}}
-\renewcommand\correction[2]{%
-\pdfmarkupcomment[color=pink]{#1}{#2}%
-}
+% \definecolor{darkgreen}{RGB}{0,50,0}
+% \newcommand\colornote[2]{\mbox{}\marginpar{\footnotesize\raggedright\hspace{0pt}\color{#1}{#2}}}
+% \newcounter{correctioncolor}[page]
+% \newcommand\correction[2]{%
+% 	\uline{#1}
+% 	\mbox{}%
+% 	\marginpar{%
+% 		\footnotesize%
+% 		\raggedright%
+% 		\hspace{0pt}%
+% 		\ifthenelse%
+% 			{\isodd{\value{correctioncolor}}}%
+% 			{\color{green}}%
+% 			{\color{darkgreen}}%
+% 		\addtocounter{correctioncolor}{1}%
+% 		{\bf #2}%
+% }}
+% \renewcommand\correction[2]{%
+% \pdfmarkupcomment[color=pink]{#1}{#2}%
+% }
 
 % \newcounter{todocolor}[page]
 % \newcommand\todo[1]{%
@@ -45,46 +45,46 @@
 % }
 % \renewcommand\todo[1]{\pdfcomment{#1}}
 
-\newcommand\todo[1]{{\color{red}ToDo: #1}}
+% \newcommand\todo[1]{{\color{red}ToDo: #1}}
 
-\newcommand\firstUseOf[1]{%
-	{\emph{#1}}%
-%	\mbox{}
-%	\marginpar{
-%		\footnotesize
-%		\raggedright
-%		\hspace{0pt}
-%		{\bf #1}
-%	}
-}
+% \newcommand\firstUseOf[1]{%
+% 	{\emph{#1}}%
+% %	\mbox{}
+% %	\marginpar{
+% %		\footnotesize
+% %		\raggedright
+% %		\hspace{0pt}
+% %		{\bf #1}
+% %	}
+% }
 
-\newcommand\abbreviation[2]{#1 (#2)}
+% \newcommand\abbreviation[2]{#1 (#2)}
 
-\newcommand\prob[1]{\Pr\left(#1\right)}
-\newcommand\hatprob[1]{\widehat{\Pr}\left(#1\right)}
+% \newcommand\prob[1]{\Pr\left(#1\right)}
+% \newcommand\hatprob[1]{\widehat{\Pr}\left(#1\right)}
 
-\definecolor{shadecolor}{RGB}{180,180,180}
-\definecolor{bluecolor}{RGB}{180, 180, 255}
-\definecolor{redcolor}{RGB}{255, 180, 180}
-\definecolor{redcolor}{RGB}{255, 180, 180}
-\definecolor{greencolor}{RGB}{180, 255, 180}
-\definecolor{yellowcolor}{RGB}{255, 255, 180}
-\newcommand\notmytext[1]{\colorbox{redcolor}{#1}}
-\newcommand\reformulate[2]{\pdfmarkupcomment[color=pink]{#1}{#2}}
-\newcommand\shadedtext[1]{\colorbox{shadecolor}{#1}}
+% \definecolor{shadecolor}{RGB}{180,180,180}
+% \definecolor{bluecolor}{RGB}{180, 180, 255}
+% \definecolor{redcolor}{RGB}{255, 180, 180}
+% \definecolor{redcolor}{RGB}{255, 180, 180}
+% \definecolor{greencolor}{RGB}{180, 255, 180}
+% \definecolor{yellowcolor}{RGB}{255, 255, 180}
+% \newcommand\notmytext[1]{\colorbox{redcolor}{#1}}
+% \newcommand\reformulate[2]{\pdfmarkupcomment[color=pink]{#1}{#2}}
+% \newcommand\shadedtext[1]{\colorbox{shadecolor}{#1}}
 
 %\newcommand\qed[0]{$\square$}
-
-\newenvironment{reformulate*}{%
-  \def\FrameCommand{\fboxsep=\FrameSep \colorbox{bluecolor}}%
-  \MakeFramed {\advance\hsize-\width \FrameRestore}}%
- {\endMakeFramed}
-
-\newenvironment{notmytext*}{%
-  \def\FrameCommand{\fboxsep=\FrameSep \colorbox{redcolor}}%
-  \MakeFramed {\advance\hsize-\width \FrameRestore}}%
- {\endMakeFramed}
-%\def\draft{}
+%
+% \newenvironment{reformulate*}{%
+%   \def\FrameCommand{\fboxsep=\FrameSep \colorbox{bluecolor}}%
+%   \MakeFramed {\advance\hsize-\width \FrameRestore}}%
+%  {\endMakeFramed}
+%
+% \newenvironment{notmytext*}{%
+%   \def\FrameCommand{\fboxsep=\FrameSep \colorbox{redcolor}}%
+%   \MakeFramed {\advance\hsize-\width \FrameRestore}}%
+%  {\endMakeFramed}
+% %\def\draft{}
 
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}

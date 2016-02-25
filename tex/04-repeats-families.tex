@@ -1,4 +1,4 @@
-\chapter[Rep.\ and Gene Fam.]{Repeats and Gene Families}\label{chap:repeatsfamilies}
+\chapter{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
 Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
 A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to a common evolutionary origin. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
@@ -269,7 +269,7 @@ Phylogenetic trees are heavily used in the study of evolution. The leaves of a p
 In the probabilistic graph model, the birth-death model represents the distributions on the edges of the phylogenetic tree.
 To compute a conditional likelihood (conditioned on root species family size $R = r$) of the assignment of the family sizes of all species in the tree, we can use a following equation:
 $$P(\Sigma = \sigma | R = r) = \prod_{S} \left[\prod_{C} P(C = c|S = s)\right],$$
-where $P(C = c|S = s)$ is given by the BD model, with $t$ the time elapsed between $C$ and $S$, $\Sigma$ is a set of random variables for all species in the phylogeny, $S \in \Sigma$ is a random variable for an internal node of the tree, and $C \in \Sigma$ is a child node of $S$.
+where $P(C = c|S = s)$ is given by the BD model, with $t$ the time elapsed between $C$ and $S$, $\Sigma$ is a set of random variables for all species in the phylogeny, $S \in \Sigma$ is a random variable for an internal node of the tree, and $C \in \Sigma$ is a random variable for a child node of $S$.
 
 Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes, rather than in the probability of all nodes in the tree. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
 
@@ -288,7 +288,7 @@ One method of identification is to try to delete every branch (one at a time) an
 The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximisation algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
 
 The approach presented in this section has several limitations. It assumes that rates in the whole phylogenetic tree are the same, which might not be true in some organisms. Moreover the unlikely branch detection assumes that only one branch is responsible for the different behavior of family size evolution.
-\todo{spomenut ten clanok o evolucii transpozonov}
+%ToDo: {spomenut ten clanok o evolucii transpozonov}
 
 \section{Conclusion}
 
