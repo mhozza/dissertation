@@ -248,11 +248,13 @@ If a gene family contains zero genes, it is not possible to gain or lose any gen
 
 We often set $\lambda = \mu$. In that case, the transition probabilities are~\cite{hahn2005estimating}:
 $$P(X(t) = c | X(0) = s) = \sum_{j=0}^{\min(s, c)} {s \choose j}{s+x-j-1 \choose s-1}\alpha^{s+c-2j}{(1-2\alpha)}^j,$$
-where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. The mean and variance are~\cite{hahn2005estimating}:
-\begin{align*}
-  \operatorname{Mean}(X(t) | X(0) = s) &= s\\
-  \operatorname{Var}(X(t) | X(0) = s) &= 2s\lambda t
-\end{align*}
+where $\alpha = \frac{\lambda t}{1+ \lambda t}$ and $s \geq 1$. Note that the expected size of the gene family is equal to~$s$.
+
+% The mean and variance are~\cite{hahn2005estimating}:
+% \begin{align*}
+%   \operatorname{Mean}(X(t) | X(0) = s) &= s\\
+%   \operatorname{Var}(X(t) | X(0) = s) &= 2s\lambda t
+% \end{align*}
 
 Based on the birth-death model and the structure of \emph{a phylogenetic tree}, we can construct \emph{probabilistic graph model}, which parametrizes the probability distributions of the gene family sizes in the nodes of the tree.
 
@@ -264,8 +266,14 @@ Phylogenetic trees are heavily used in the study of evolution. The leaves of a p
   \caption[Phylogenetic tree]{Phylogenetic tree of eight species~\cite{durbin}.}\label{fig:phylogenetic-tree}
 \end{figure}
 
-The birth-death model represents the distributions on the edges of the phylogenetic tree. Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
+In the probabilistic graph model, the birth-death model represents the distributions on the edges of the phylogenetic tree.
+To compute a conditional likelihood (conditioned on root species family size $R = r$) of the assignment of the family sizes of all species in the tree, we can use a following equation:
+$$P(\Sigma = \sigma | R = r) = \prod_{S} \left[\prod_{C} P(C = c|S = s)\right],$$
+where $P(C = c|S = s)$ is given by the BD model, with $t$ the time elapsed between $C$ and $S$, $\Sigma$ is a set of random variables for all species in the phylogeny, $S \in \Sigma$ is a random variable for an internal node of the tree, and $C \in \Sigma$ is a child node of $S$.
 
+Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes, rather than in the probability of all nodes in the tree. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
+
+This null model can be used to test a hypothesis about gene family evolution.
 To test a hypothesis against a null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
 
 In order to compute the likelihood and its corresponding value, we need to specify a prior distribution for the root node. The prior should be noninformative and a natural choice is a uniform distribution~\cite{felsenstein1981evolutionary}. However, this prior introduces an undesirable bias --- it attributes a larger likelihoods to smaller gene families~\cite{hahn2005estimating}. Other priors also showed to be unsuitable~\cite{hahn2005estimating}.
