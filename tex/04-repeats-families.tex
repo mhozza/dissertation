@@ -1,4 +1,4 @@
-\chapter[Rep.\ and Gene Fam.]{Repeats and Gene Families}\label{chap:repeatsfamilies}
+\chapter{Repeats and Gene Families}\label{chap:repeatsfamilies}
 
 Although, repeats and gene families are both DNA sequences which appears multiple times in the genome, they differ in copy number, function and origin.
 A repeat or gene family consists of a set of sequences sharing a certain degree of similarity due to a common evolutionary origin. The particular sequences may differ due to mutations acquired during the evolution. These may be substitutions, insertions, or deletions of one or more nucleotides.
@@ -21,7 +21,7 @@ Therefore studying repetitive sequences is one of the essential tasks in DNA ana
 
 In this chapter we will present multiple approaches for detecting repetitive sequences and their copy numbers in several scenarios. We start by finding known repeats and gene families in an assembled genome, and continue with de novo repeat finding in both assembled genome and reads. In the last section, we present a model of gene family evolution.
 
-\section[Known Repeats in Assem\dots]{Finding the Known Repeats and Gene Families in the Assembled Genome}
+\section{Finding the Known Repeats and Gene Families in the Assembled Genome}
 
 The known repeats and gene families are stored in several databases. Examples of repeat databases include Repbase~\cite{repbase}, Dfam~\cite{dfam}, and a well-known example of a gene family databases is Pfam~\cite{pfam}.
 
@@ -89,7 +89,7 @@ Each seed is then extended to maximize the score.
 
 \paragraph{Searching by profile HMM.}
 A \emph{hidden Markov model (HMM)}, is a generative probabilistic model, which is similar to the finite automaton. It has a finite number of states, and three probability distributions: the distribution of starting states, the transition distribution and emission distribution.
-A HMM generates a random sequence together with a sequence of states. It starts in one of the starting states, and in each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the curent state.
+A HMM generates a random sequence together with a sequence of states. It starts in one of the starting states, and in each step the HMM moves to the next state (which might be the same as the current) according to the transition probabilities, and emits a symbol (or nothing if it is a dummy state) according to the emission probabilities for the current state.
 In HMM, we can compute a probability that the HMM generates a given sequence, or compute the most probable state sequence.
 
 The profile HMM is a linear HMM for describing a similar sequences family. It has to take into account all mutations (substitutions, insertions and deletions) and return a higher probability for the sequences belonging to the family, than for other sequences.
@@ -124,7 +124,7 @@ ACGTGCTGCCGCTTATTTCACCAGGCCACTGGTTAAT
 \end{figure}
 
 Once a model is built, it can be used for search. The search involves a local alignment of the profile HMM to the sequence.
-There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inferrence in HMMs is the Viterbi algorithm, which is very slow compared to the sequnece alignment method~\cite{eddy2011accelerated}. In a HMMER3~\cite{eddy2011accelerated}, authors present a heuristic preprocessing method, which firstly finds ungapped seeds and use them to constrain the search space of the Viterbi algorithm.
+There are various dynamic programming algorithms for performing the alignment. The standard algorithm for inference in HMMs is the Viterbi algorithm, which is very slow compared to the sequence alignment method~\cite{eddy2011accelerated}. In a HMMER3~\cite{eddy2011accelerated}, authors present a heuristic preprocessing method, which firstly finds ungapped seeds and use them to constrain the search space of the Viterbi algorithm.
 
 There are various tools for finding repeats and gene families, implementing these methods.
 The most used ones are RepeatMasker~\cite{repeatmasker}, InterProScan~\cite{mitchell2015interpro}, HMMER~\cite{eddy2011accelerated}.
@@ -136,7 +136,7 @@ In practice not all repeats are known and contained in the databases, and databa
 
 \subsection{Finding de Novo Repeats in the Assembled Genome}
 
-With the beginning of NGS, sequencing become cheaper, and genomes of more organisms were sequenced. The fully and correctly assembled genomes are the best source for repeat analysis, thus the need for finding repeats in such sequences arised.
+With the beginning of NGS, sequencing become cheaper, and genomes of more organisms were sequenced. The fully and correctly assembled genomes are the best source for repeat analysis, thus the need for finding repeats in such sequences arose.
 
 \subsubsection{Finding Tandem Repeats}
 Tandem repeats are repeats which occurs consequently one after another. There are many tools for finding tandem repeats in the assembled genome, e.g.\ Tandem repeats finder~\cite{trf}, ATR~\cite{atr}, TANTAN~\cite{tantan} and Sunflower model~\cite{nanasi2014probabilistic}.
@@ -157,7 +157,7 @@ The more details on the statistical criteria and indel handling can be found in~
 \subsubsection{Finding General Repeats}
 
 Now, we will focus on general repeats, which in contrast to the tandem repeats have copies at random positions in the genome.
-The first methods for finding repeats in assembled genome were based on computation of pairwise similarities (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}). However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise alignments would be very slow. For example the \textit{Alu} repeat family has over 1 million occurences in human genome which leads to $~10^{12}$ pairwise alignments.
+The first methods for finding repeats in assembled genome were based on computation of pairwise similarities (e.g.~\cite{reputer, repeatfinder, recon, repeatgluer, piler}). However, this approach has several disadvantages. In large genomes, which contain big repeat families, the computation of pairwise alignments would be very slow. For example the \textit{Alu} repeat family has over 1 million occurrences in human genome which leads to $~10^{12}$ pairwise alignments.
 Also, boundaries of local sequence alignments do not usually correspond to the biological repeat boundaries~\cite{recon}.
 
 In~\cite{repscout}, authors present an efficient method of similarity search which enables a rigorous definition of repeat boundaries. The main idea is to firstly find seeds formed from highly abundant $k$-mers and then extend them to the repeat family consensus.
@@ -215,7 +215,7 @@ With increasing coverage, the number of clusters decreases and their size increa
 Unfortunately, this methods may merge multiple independent repeats into one cluster. This is caused by so called bridge reads, which are similar to multiple repetitive sequences.
 
 The issues of the basic method can be fixed by the use of more sophisticated clustering algorithms. In particular the tool RepeatExplorer~\cite{novak2010graph} uses \emph{hierarchical agglomeration}. The aim of hierarchical agglomeration is to split the graph into clusters (communities) which are more densely connected inside than outside the cluster. The metrics used for evaluating this property is \emph{modularity}.
-The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be masured as~\cite{novak2010graph}:
+The modularity $Q$ denotes the frequency of edges within a community in respect to the expected number of edges in a random graph. It can be measured as~\cite{novak2010graph}:
 $$Q = \frac{1}{2m}\sum_{ij}\left[A_{ij}-\frac{k_i k_j}{2m}\right] \delta(c_i c_j),$$
 where $k_i$ is the degree of the vertex $i$, $m$ is the overall number of edges in the graph, $A_{ij}$ is one if $i$ and $j$ are neighbors and zero otherwise, and $\delta(c_i, c_j)$ is one if vertices $i$ and $j$ belong to the same community.
 
@@ -271,7 +271,7 @@ To compute a conditional likelihood (conditioned on root species family size $R 
 $$P(\Sigma = \sigma | R = r) = \prod_{S} \left[\prod_{C} P(C = c|S = s)\right],$$
 where $P(C = c|S = s)$ is given by the BD model, with $t$ the time elapsed between $C$ and $S$, $\Sigma$ is a set of random variables for all species in the phylogeny, $S \in \Sigma$ is a random variable for an internal node of the tree, and $C \in \Sigma$ is a random variable for a child node of $S$.
 
-Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes, rather than in the probability of all nodes in the tree. The marginal probabilities can be computed by averaging over all posible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
+Since only family sizes in the leaves are known, we are interested only in marginal probabilities of leaf nodes, rather than in the probability of all nodes in the tree. The marginal probabilities can be computed by averaging over all possible assignments of the internal nodes (except the root). This can be done efficiently using dynamic programing algorithms~\cite{felsenstein1981evolutionary}. In this case, we will use a common $\lambda$ for all branches in the tree.
 
 This null model can be used to test a hypothesis about gene family evolution.
 To test a hypothesis against a null model, the $P$-value is usually used. The $P$-value is defined as the probability of obtaining a result with equal to or lower likelihood than what was actually observed.
@@ -285,10 +285,11 @@ If such a supremum $P$-value is small, it means that the hypothesis is unlikely 
 
 If we detect unlikely gene family evolution, we might want to know, which branch of the phylogenetic tree is responsible for the violation of the model.
 One method of identification is to try to delete every branch (one at a time) and recompute the $P$-values. If the $P$-value increases largely, it means that the other branches followed the birth-dead model and thus this branch is responsible for the low $P$-value.
-The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximisation algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
+The other method is to enable each branch to have an independent $\lambda$. The parameters can be computed by expectation maximization algorithm and the likelihood is then compared with the likelihood of model constrained to have a common $\lambda$ for all branches.
 
 The approach presented in this section has several limitations. It assumes that rates in the whole phylogenetic tree are the same, which might not be true in some organisms. Moreover the unlikely branch detection assumes that only one branch is responsible for the different behavior of family size evolution.
-%ToDo: {spomenut ten clanok o evolucii transpozonov}
+
+There are also other models for repetitive sequence evolution. For example in~\cite{venner2009dynamics} authors model the interaction between transposable elements and their contribution to the structure of transposable element communities within their genomic ecosystem, using the ecological concepts on species diversity.
 
 \section{Conclusion}
 

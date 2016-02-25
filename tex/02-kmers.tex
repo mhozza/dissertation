@@ -26,7 +26,7 @@ Suppose we want to count occurrences of $k$-mers in sequence $S$.
 We create a hash table $T$, in which $k$-mers will be keys and their counts stored as values, and then scan the sequence $S$.
 At each position $i$, we take the $k$-mer $K_i$ corresponding to that  position, compute $hash(K_i)$ and increase the corresponding item in the table, after handling possible collisions.
 
-We can then query the hash table for the number of occurrences of a~particular $k$-mer, or iterate through the whole table to compute the histogram.
+We can then query the hash table for the number of occurrences of a particular $k$-mer, or iterate through the whole table to compute the histogram.
 
 For small genomes with very low sequencing error rate, this approach is sufficient. However, higher error rate produces more unique $k$-mers and together with large genomes makes the hash table so big it does not fit in computer's memory. In addition, the general hash table is not parallelizable, which makes this approach slow.
 
@@ -133,7 +133,7 @@ An interval $[i..j]$, $0 \leq i < j \leq n$, is an lcp-interval of lcp-value $\e
 Next we define parent-child relationships between lcp-intervals and thus an lcp-interval tree~\cite{enhancedsuffixarrays}.
 
 \begin{definition}
-  An $m$-interval $[a..b]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a~subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = a$ and $b = j$ because $m > \ell$.}
+  An $m$-interval $[a..b]$ is said to be \emph{embedded} in an $\ell$-interval $[i..j]$ if it is a subinterval of $[i..j]$ (i.e., $i \leq l < r \leq j $) and $m > \ell$.\footnote{Note that we cannot have both $i = a$ and $b = j$ because $m > \ell$.}
   The $\ell$-interval $[i..j ]$ is then called the interval \emph{enclosing} $[a..b]$. If $[i..j]$ encloses $[a..b]$ and there is no interval embedded in $[i..j]$ that also encloses $[a..b]$, then $[a..b]$ is called a child interval of $[i..j]$.
 \end{definition}
 
@@ -169,7 +169,7 @@ The lcp-interval tree is a conceptual tree, i.e.\ we do not need to construct it
    \includegraphics[width=\textwidth]{../figures/lcpintervaltree}
    \caption{LCP interval tree (top) and suffix tree (bottom).}\label{fig:enhancedsuffixarraytree}
 \end{subfigure}
-\caption[The suffix array, suffix tree, and lcp interval tree]{The suffix array, suffix tree, and lcp interval tree of a string ACCTCGCCTCATCG\$. Note that internal nodes (black) in suffix tree correspond to the nodes in lcp interval tree (Figure~\ref{fig:enhancedsuffixarraytree}). The singleton nodes (not shown in the image) than correspond to the leaf nodes (grey) in the suffix tree.}\label{fig:enhancedsuffixarray}
+\caption[The suffix array, suffix tree, and lcp interval tree]{The suffix array, suffix tree, and lcp interval tree of a string ACCTCGCCTCATCG\$. Note that internal nodes (black) in suffix tree correspond to the nodes in lcp interval tree (Figure~\ref{fig:enhancedsuffixarraytree}). The singleton nodes (not shown in the image) than correspond to the leaf nodes (gray) in the suffix tree.}\label{fig:enhancedsuffixarray}
 \end{figure}
 The lcp-interval has an important property to the $k$-mer counting problem. An $\ell$-interval $[i..j]$ represents a string of length $\ell$ occurring $j - i + 1$ times in $S$~\cite{tallymer}. To count the $k$-mer occurrence counts, we need to read the occurrence counts from the lcp-interval tree.
 
