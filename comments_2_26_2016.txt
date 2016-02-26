@@ -1,0 +1,31 @@
+tvoja oponentka ma clanok o paralelnom pocitani k-merov, mozno ho chces zacitovat: http://link.springer.com/chapter/10.1007/978-3-662-49192-8_38
+
+ch1: "along with that increases the need for efficient processing of such data". zly slovosled: "along with that the need for efficient processing increases" alebo "this increases the need for..."
+
+ch1: v 2. odstavci by som spojila prve dve vety, napr. "random substrings of the original sequence with some errors introduced in the sequencing process"
+
+ch1: "In the first chapter, we introduce necessary biological background. We define a genome, briefly explain a DNA sequencing and a sequence assembly process." mozno prepis na "In the first chapter, we introduce necessary biological terminology and briefly explain processes of DNA sequencing and sequence assembly"
+
+sec1.2: stale tvrdis, ze vsetky NGS technologie maju kratke ready, co nie je pravda - aspon zmen all na many.
+
+sec 1.3: chybaju ciarky: "contain errors, and the final sequence", "covered with very few reads, it may happen" (ciarka za happen tam zase nam byt)
+
+sec 1.3: toto je stale velmi nejasne: "The vertices in a string graph are all unambiguous sequences, and the edges are between those which are overlapping."
+
+sec 1.3, caption "The like repetitive sequences" -> "Similar repetitive sequences"
+
+ch2: ciarky navyse: "summarize the counts of all k-mers, in", "A typical NGS data set, consists"
+
+ch2: "For example the 100Mb long genome" ma byt "a" namiesto "the"
+
+ch2: odstran vnorene zatvorky (Allium cepa), latinske nazvy sa davaju italikom, moze byt aj bez zatvoriek
+
+ch2: chyba ciarka "so big, it does not"
+
+sec2.5: "can be queried for the existence of a suffix s" asi nie len existencia sufixu, ale aj hladanie vyskytov podslova (find occurrences of pattern P in S) - pouzi rovnake oznacenie P ako neskor
+
+sec 3.1.2: "transposable elements forms" ma byt "form"
+
+sec 3.1.2. "The probability that a k-mer from sequence repeated o times" co tak jasnejsie "The probability that a k-mer with o occurrences in the genome"
+
+sec. 4.1: " describing a similar sequences family."  ma byt "describing a family of similar sequences"
